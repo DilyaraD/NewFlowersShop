@@ -1,0 +1,193 @@
+﻿@{
+    var categories = ViewBag.Categories as List<NewFlowersShop.FlowerCategories>;
+    var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
+    var packages = ViewBag.Packages as List<string>;
+    var flowerTypes = ViewBag.FlowerTypes as List<string>;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Каталог - NewFlowersShop</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="catalog">
+        <h1>Каталог</h1>
+        <div class="catalogContent">
+            <div class="sidebar">
+                <h5>Цена, ₽</h5>
+                <div class="PriceCatalog">
+                    <p>от</p>
+                    <input id="minPrice" placeholder="1"
+                           type="number"
+                           min="0"
+                           max="100000"
+                           oninput="validateInput(this)" />
+                    <p>до</p>
+                    <input id="maxPrice" placeholder="100000"
+                           type="number"
+                           min="0"
+                           max="100000"
+                           oninput="validateInput(this)" />
+                </div>
+
+                <h5>Категория</h5>
+                <select id="category">
+                    <option value="">Все</option>
+                    @if (categories != null)
+                    {
+                        foreach (var category in categories)
+                        {
+                            <option value="@category.CategoryID">@category.CategoryName</option>
+                        }
+                    }
+                </select>
+
+                <h5>Состав</h5>
+                <div id="flowerTypes">
+                    @if (flowerTypes != null)
+                    {
+                        foreach (var flowerType in flowerTypes)
+                        {
+                            <label><input type="checkbox" name="selectedTypes" value="@flowerType" /> @flowerType</label>
+                        }
+                    }
+                </div>
+
+                <h5>Размер</h5>
+                <div id="sizes" class="size-options">
+                    <label><input type="checkbox" name="selectedSizes" value="Маленький" /> Маленький</label>
+                    <label><input type="checkbox" name="selectedSizes" value="Средний" /> Средний</label>
+                    <label><input type="checkbox" name="selectedSizes" value="Большой" /> Большой</label>
+                </div>
+
+                <h5>Упаковка</h5>
+                <div id="packages">
+                    @if (packages != null)
+                    {
+                        foreach (var package in packages)
+                        {
+                            <label><input type="checkbox" name="selectedPackages" value="@package" /> @package</label>
+                        }
+                    }
+                </div>
+
+                <h5>Магазин</h5>
+                <select id="store">
+                    <option value="">Все</option>
+                    @if (stores != null)
+                    {
+                        foreach (var store in stores)
+                        {
+                            <option value="@store.StoreID">@store.Address</option>
+                        }
+                    }
+                </select>
+                <button class="resetFiltersButton" id="resetFiltersButton">Сбросить фильтры</button>
+            </div>
+            <div class="content">
+                <div class="divSort">
+                    <input placeholder="поиск" id="search">
+                    <select id="sort">
+                        <option value="new">сортировка по новинкам</option>
+                        <option value="desc">сортировка по убыванию</option>
+                        <option value="asc">сортировка по возрастанию</option>
+                    </select>
+                </div>
+                <div id="products" class="divProducts"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function validateInput(inputElement) {
+            inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
+            let value = parseInt(inputElement.value, 10);
+            if (isNaN(value)) {
+                value = 0
+            }
+            if (value > 100000) {
+                inputElement.value = 100000;
+            }
+        }
+
+        function loadProducts() {
+            var selectedTypes = $('#flowerTypes input[type="checkbox"]:checked').map(function () {
+                return $(this).val();
+            }).get();
+
+            var selectedSizes = $('input[name="selectedSizes"]:checked').map(function () {
+                return this.value;
+            }).get();
+
+            var selectedPackages = $('input[name="selectedPackages"]:checked').map(function () {
+                return this.value;
+            }).get();
+
+            $.ajax({
+                url: '/Home/GetProducts',
+                type: 'POST',
+                data: {
+                    search: $('#search').val(),
+                    categoryId: $('#category').val(),
+                    minPrice: $('#minPrice').val(),
+                    maxPrice: $('#maxPrice').val(),
+                    storeId: $('#store').val(),
+                    sort: $('#sort').val(),
+                    selectedSizes: selectedSizes,
+                    selectedPackages: selectedPackages,
+                    selectedTypes: selectedTypes
+                },
+                success: function (data) {
+                    $('#products').html('');
+                    if (data.message) {
+                        $('#products').html('<h3>' + data.message + '</h3>');
+                    } else {
+                        data.forEach(product => {
+                            $('#products').append(`
+                                <div class="product">
+                                    <img src="${product.photo}" class="imageProduct" />
+                                    <h4 class="nameProduct">${product.productName}</h4>
+                                    <h5 class="priceProduct">${product.price} ₽</h5>
+                                    <button>В корзину</button>
+                                </div>
+                            `);
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.error("Ошибка получения продуктов", error);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            loadProducts();
+            $('input[name="selectedSizes"], input[name="selectedPackages"], #flowerTypes input[type="checkbox"]').change(loadProducts);
+        });
+
+        $('#search,#category, #minPrice, #maxPrice, #store, #sort')
+            .on('input change', loadProducts);
+
+        $('#resetFiltersButton').on('click', function () {
+            $('#category').val('');
+            $('#minPrice').val('');
+            $('#maxPrice').val('');
+            $('#store').val('');
+
+            $('input[name="selectedSizes"]').prop('checked', false);
+            $('input[name="selectedPackages"]').prop('checked', false);
+            $('#flowerTypes input[type="checkbox"]').prop('checked', false);
+
+            loadProducts();
+        });
+
+    </script>
+</body>
+</html>

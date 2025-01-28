@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using NewFlowersShop.Models;
+//using Microsoft.Extensions.Options;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<NewFlowersShopContext>(options =>
+options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=NewFlowersShop;MultipleActiveResultSets=True;TrustServerCertificate=True;"));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+
 
 var app = builder.Build();
 

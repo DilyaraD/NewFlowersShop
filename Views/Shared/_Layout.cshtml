@@ -3,44 +3,83 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - NewFlowersShop</title>
+    <title>@ViewData["Title"] Новые цветы</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+          rel="stylesheet" />
     <link rel="stylesheet" href="~/NewFlowersShop.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NewFlowersShop</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    <footer>
+        <div class="logoA">
+            <a href="@Url.Action("Index", "Home")">
+            <img src="~/img_s/logo.svg" />
+            <h1 id="logoText">
+                Новые<br />
+                цветы
+            </h1>
+            </a>
+        </div>
+        <div class="City">
+            <img src="~/img_s/map.svg" />
+            <h1>г.Казань</h1>
+        </div>
+        <div id="footer_center">
+            <h1><a href="@Url.Action("CatalogPage", "Home")">Каталог</a></h1>
+            <h1><a href="@Url.Action("DeliveryPage", "Home")">Доставка</a></h1>
+            <h1><a href="@Url.Action("ContactPage", "Home")">Контакты</a></h1>
+        </div>
+        <div>
+            <button class="footerBtn">
+                <div><img src="~/img_s/search.svg" /></div>
+            </button>
+            <button class="footerBtn">
+                <div><img src="~/img_s/profil.svg" /></div>
+            </button>
+            <button class="footerBtn">
+                <div>
+                    <img src="~/img_s/shopping-cart.svg" />
                 </div>
-            </div>
-        </nav>
-    </header>
+            </button>
+            <button class="footerBtn">
+                <div class="menu"></div>
+                <div class="menu"></div>
+                <div class="menu"></div>
+            </button>
+        </div>
+    </footer>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - NewFlowersShop - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+
+
+
+    
+            <div class="bottom">
+                <div class="bA">
+                    <a>Cвадебная флористика</a>
+                    <a>Букеты на любые мероприятия</a>
+                    <a>Букеты невесты</a>
+                    <a>Композиции</a>
+                </div>
+                <div class="bLink">
+                    <a href="https://www.instagram.com/">
+                        <img src="~/img_s/inst.svg" alt="Instagram" />
+                    </a>
+                    <a href="https://web.telegram.org/">
+                        <img src="~/img_s/tg.svg" alt="Telegram" />
+                    </a>
+                </div>
         </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
