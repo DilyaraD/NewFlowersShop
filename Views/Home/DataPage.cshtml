@@ -1,0 +1,88 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Профиль - NewFlowersShop</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="infoProfil">
+        <h1>Мои данные</h1>
+            <div class="infoProfil1">
+                <div class="info-row">
+                    <span>Логин:</span>
+                    <span class="value">@ViewBag.Login</span>
+                </div>
+                <div class="info-row">
+                    <span>Имя Фамилия:</span>
+                    <span class="value">@ViewBag.FullName</span>
+                </div>
+                <div class="info-row">
+                    <span>Номер телефона:</span>
+                    <span class="value">@ViewBag.PhoneNumber</span>
+                </div>
+                <div class="info-row">
+                    <span>Пароль:</span>
+                    <span class="value password-value">********</span>
+                    <button class="show-password-button2">
+                        <img src="~/img_s/eye.svg" alt="показать пароль" />
+                    </button>
+                </div>
+            </div>
+        <div class="button-container">
+            <button type="button" class="btn btn-warning" onclick="location.href = '@Url.Action("EditDataPage", "Home")'">
+                Редактировать аккаунт
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                Удалить аккаунт
+            </button>
+            <button type="button" onclick="location.href = '/Home/Logout';" class="btn btn-secondary">
+                Выйти из аккаунта
+            </button>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить свой аккаунт? Это действие невозможно отменить.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form method="post" action="/Home/DeleteAccount">
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+            document.querySelectorAll(".show-password-button2").forEach((button) => {
+                button.onmousedown = () => {
+                    button.previousElementSibling.textContent = "@ViewBag.Password";
+                };
+                button.onmouseup = button.onmouseleave = () => {
+                    button.previousElementSibling.textContent = "********";
+                };
+            });
+        </script>
+</body>
+</html>

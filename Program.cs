@@ -1,25 +1,38 @@
 using Microsoft.EntityFrameworkCore;
 using NewFlowersShop.Models;
+using System.Text;
 //using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<NewFlowersShopContext>(options =>
-options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=NewFlowersShop;MultipleActiveResultSets=True;TrustServerCertificate=True;"));
+options.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=NewFlowersShop;MultipleActiveResultSets=True;TrustServerCertificate=True;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;Application Name=NewFlowersShop;"));
 
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+Console.OutputEncoding = Encoding.UTF8;
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Добавьте сервис для сессий
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(100);
+    options.Cookie.HttpOnly = true; 
+    options.Cookie.IsEssential = true;
+});
 
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseSession();
+
+app.UseRouting();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 

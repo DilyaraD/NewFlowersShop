@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -36,17 +40,17 @@
         </div>
         <div>
             <button class="footerBtn">
-                <div><img src="~/img_s/search.svg" /></div>
+                <div><a href="@Url.Action("CatalogPage", "Home")"><img src="~/img_s/search.svg" /></a></div>
             </button>
-            <button class="footerBtn">
-                <div><img src="~/img_s/profil.svg" /></div>
+            <button class="footerBtn" id="profileButton">
+                <div><a href="@Url.Action("DataPage", "Home")"><img src="~/img_s/profil.svg" /></a></div>
             </button>
             <button class="footerBtn">
                 <div>
                     <img src="~/img_s/shopping-cart.svg" />
                 </div>
             </button>
-            <button class="footerBtn">
+            <button class="footerBtn" id="menuButton">
                 <div class="menu"></div>
                 <div class="menu"></div>
                 <div class="menu"></div>
@@ -59,8 +63,76 @@
         </main>
     </div>
 
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Авторизация</h5>
+                <span class="close-button" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input class="input-field" id="loginUser" placeholder="Логин">
+                <input class="input-field" id="passwordUser" type="password" placeholder="Пароль">
+                <div class="button-group">
+                    <button class="custom-btn">Войти</button>
+                    <button class="custom2-btn" id="registration">Регистрация</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Регистрация</h5>
+                <span class="close-button" id="closeModal2">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <input class="input-field" name="login" placeholder="Логин"> 
+                    <input class="input-field" name="lastName" placeholder="Фамилия">
+                    <input class="input-field" name="firstName" placeholder="Имя"> 
+                    <input class="input-field" name="phoneNumber" type="tel" placeholder="Номер телефона">
+                    <input class="input-field" name="password" type="password" placeholder="Пароль">
+                    <div class="button-group">
+                        <button type="submit" class="custom2-btn" id="registration2">Зарегистрироваться</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
+    <div class="modalM" id="menuModal">
+        <div class="modal-contentM">
+            <div class="modal-headerM">
+                <span class="close-buttonM" id="closeMenuModal">&times;</span>
+            </div>
+            <div class="button-group">
+                <button class="custom-btn">мои данные</button>
+                <button class="custom-btn">история заказов</button>
+                <button class="custom-btn">выйти</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Ошибка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="messageBox" class="message" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     
@@ -84,5 +156,195 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+   <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let authModal = document.getElementById("authModal");
+            let registerModal = document.getElementById("registerModal");
+            let menuModal = document.getElementById("menuModal");
+
+            let profileButton = document.getElementById("profileButton");
+            let menuButton = document.getElementById("menuButton");
+            let closeModal = document.getElementById("closeModal");
+            let closeModal2 = document.getElementById("closeModal2");
+            let closeMenuModal = document.getElementById("closeMenuModal");
+            let registrationBtn = document.getElementById("registration");
+
+            async function checkAuthAndProceed(action) {
+                try {
+                    let response = await fetch("/Home/IsAuthenticated");
+                    let data = await response.json();
+
+                    if (data.isAuthenticated) {
+                        action(true);
+                    } else {
+                        action(false);
+                    }
+                } catch (error) {
+                    console.error("Ошибка:", error);
+                }
+            }
+
+
+
+
+            // Проверяем авторизацию перед открытием профиля
+            profileButton.addEventListener("click", function (event) {
+                event.preventDefault(); // Предотвращаем переход по ссылке
+                checkAuthAndProceed((isAuthenticated) => {
+                    if (isAuthenticated) {
+                        window.location.href = "/Home/DataPage";
+                    } else {
+                        authModal.style.display = "flex";
+                    }
+                });
+            });
+
+            // Проверяем авторизацию перед открытием меню
+            menuButton.addEventListener("click", function () {
+                checkAuthAndProceed((isAuthenticated) => {
+                    if (isAuthenticated) {
+                        menuModal.style.display = "flex";
+                    } else {
+                        authModal.style.display = "flex";
+                    }
+                });
+            });
+
+            // Закрытие окон
+            closeModal.addEventListener("click", function () {
+                authModal.style.display = "none";
+            });
+
+            closeModal2.addEventListener("click", function () {
+                registerModal.style.display = "none";
+            });
+
+            closeMenuModal.addEventListener("click", function () {
+                menuModal.style.display = "none";
+            });
+
+            // Переключение на регистрацию
+            registrationBtn.addEventListener("click", function () {
+                authModal.style.display = "none";
+                registerModal.style.display = "flex";
+            });
+
+            // Авторизация пользователя
+            document.querySelectorAll(".custom-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let login = document.getElementById("loginUser").value;
+                    let password = document.getElementById("passwordUser").value;
+
+                    fetch("/Home/Login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`
+                    })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url; // если перенаправление, переходим
+                            } else {
+                                return response.json(); // получаем json и передаем дальше
+                            }
+                        })
+                        .then(data => {
+                            if (data && !data.success) {
+                                showMessage(data.message, "error"); // отображаем сообщение об ошибке
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Ошибка:", error);
+                            showMessage("Произошла ошибка при авторизации.", "error"); //отображаем сообщение об ошибке
+                        });
+                });
+            });
+
+        });
+
+
+        function showMessage(message, type) {
+            const messageBox = document.getElementById("messageBox");
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+            if (messageBox && deleteModal) {
+                messageBox.textContent = message;
+                messageBox.style.display = "block";
+                if (type === "error") {
+                    messageBox.classList.add("error-message");
+                    messageBox.classList.remove("success-message");
+                } else if (type === "success") {
+                    messageBox.classList.add("success-message");
+                    messageBox.classList.remove("error-message");
+                }
+                deleteModal.show();
+                const okButton = deleteModalElement.querySelector('[data-bs-dismiss="modal"]');
+
+                if (okButton)
+                    okButton.addEventListener("click", function () {
+                        deleteModal.hide();
+                    });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const registerForm = document.getElementById("registerForm");
+
+            if (registerForm) {
+                registerForm.addEventListener("submit", function (event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(registerForm);
+
+                    const login = formData.get("login");
+                    const password = formData.get("password");
+                    const firstName = formData.get("firstName");
+                    const lastName = formData.get("lastName");
+                    const phoneNumber = formData.get("phoneNumber");
+
+                    if (login === "" || lastName === "" || firstName === "" || phoneNumber === "" || password === "") {
+                        showMessage("Все поля должны быть заполнены!", "error");
+                        return false;
+                    }
+
+                    let phonePattern = /^(\8)9\d{9}$/;
+                    if (!phonePattern.test(phoneNumber)) {
+                        showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX", "error");
+                        return false;
+                    }
+
+                    if (password.length > 0 && password.length < 6) {
+                        showMessage("Пароль должен содержать минимум 6 символов!", "error");
+                        return false;
+                    }
+
+                    fetch("/Home/Register", {
+                        method: "POST",
+                        body: new URLSearchParams({
+                            login, password, firstName, lastName, phoneNumber
+                        }),
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = data.redirectUrl;
+                            } else {
+                                showMessage(data.message, "error");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Ошибка при регистрации:", error);
+                            showMessage("Произошла ошибка. Попробуйте снова.", "error");
+                        });
+                });
+            }
+        });
+
+   </script>
 </body>
 </html>

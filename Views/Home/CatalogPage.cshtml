@@ -3,6 +3,7 @@
     var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
     var packages = ViewBag.Packages as List<string>;
     var flowerTypes = ViewBag.FlowerTypes as List<string>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
 
 <!DOCTYPE html>
@@ -91,14 +92,14 @@
                 <button class="resetFiltersButton" id="resetFiltersButton">Сбросить фильтры</button>
             </div>
             <div class="content">
-                <div class="divSort">
-                    <input placeholder="поиск" id="search">
+                <form autocomplete="off" class="divSort">
+                    <input placeholder="поиск" id="search" autocomplete="off" list="null">
                     <select id="sort">
                         <option value="new">сортировка по новинкам</option>
                         <option value="desc">сортировка по убыванию</option>
                         <option value="asc">сортировка по возрастанию</option>
                     </select>
-                </div>
+                </form>
                 <div id="products" class="divProducts"></div>
             </div>
         </div>

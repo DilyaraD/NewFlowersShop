@@ -2,7 +2,7 @@
     List<Products> newProducts = ViewBag.NewProducts;
     List<Products> discountProducts = ViewBag.DiscountProducts;
     List<Products> giftProducts = ViewBag.GiftProducts;
-
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
 
 <!DOCTYPE html>
