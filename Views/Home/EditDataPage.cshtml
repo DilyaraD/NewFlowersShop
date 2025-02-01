@@ -55,7 +55,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Сообщение</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Ошибка</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
@@ -99,10 +99,10 @@
 
         function showMessage(message, type) {
             const messageBox = document.getElementById("messageBox");
-            const modalElement = document.getElementById('deleteModal');
-            const deleteModal = new bootstrap.Modal(modalElement);
+            const deleteModalElement = document.getElementById("deleteModal");
+            const deleteModal = new bootstrap.Modal(deleteModalElement);
 
-            if (messageBox && deleteModal) {
+            if (messageBox) {
                 messageBox.textContent = message;
                 messageBox.style.display = "block";
 
@@ -116,45 +116,41 @@
 
                 deleteModal.show();
 
-
-                modalElement.addEventListener('hidden.bs.modal', function () {
-
-                })
+                // Обработчик закрытия модального окна
+                deleteModalElement.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open'); // Убираем класс, который оставляет затемнение
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); // Удаляем все затемняющие слои
+                });
             }
-
-
         }
 
 
+
+
         document.querySelector('form').addEventListener('submit', function (event) {
-            event.preventDefault();
+            event.preventDefault(); // Отменяем стандартное действие формы
 
-            if (validateForm()) {
-                const formData = new FormData(event.target);
+            const formData = new FormData(event.target);
 
-                fetch('/Home/SaveEdit', {
-                    method: 'POST',
-                    body: formData,
+            fetch('/Home/SaveEdit', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json()) // Всегда парсим JSON
+                .then(data => {
+                    console.log(data); // Выводим ответ в консоль для отладки
+
+                    if (data.success) {
+                        window.location.href = data.redirectUrl; // Перенаправляем, если успех
+                    } else {
+                        showMessage(data.message, "error"); // Показываем ошибку
+                    }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showMessage(data.message, 'success');
-                            setTimeout(() => {
-                                window.location.href = data.redirectUrl;
-                            }, 1500);
-                        } else {
-                            showMessage(data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        showMessage('Произошла ошибка при сохранении данных.', 'error');
-                    });
-            }
+                .catch(error => {
+                    console.error("Ошибка:", error);
+                    showMessage("Произошла ошибка при сохранении данных.", "error");
+                });
         });
-
-
 
         document.querySelectorAll(".show-password-button").forEach((button) => {
             button.onmousedown = () => {

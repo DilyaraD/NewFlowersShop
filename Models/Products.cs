@@ -7,7 +7,6 @@ namespace NewFlowersShop
     {
         public Products()
         {
-            //ProductContents = new HashSet<ProductContents>();
         }
     
         public int ProductID { get; set; }
@@ -20,6 +19,5 @@ namespace NewFlowersShop
         public string Package { get; set; }
         public int StatusID { get; set; }
         public string Photo { get; set; }
-        //public virtual ICollection<ProductContents> ProductContents { get; set; }
     }
 }

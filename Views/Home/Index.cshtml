@@ -38,7 +38,7 @@
             {
                 foreach (var product in newProducts)
                 {
-                    <div class="product">
+                    <div class="product" data-id="@product.ProductID">
                         <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" />
                         <h4 class="nameProduct">@product.ProductName</h4>
                         <h5 class="priceProduct">@product.Price</h5>
@@ -59,7 +59,7 @@
             {
                 foreach (var product in discountProducts)
                 {
-                    <div class="product">
+                    <div class="product" data-id="@product.ProductID">
                         <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" />
                         <h4 class="nameProduct">@product.ProductName</h4>
                         <h5 class="priceProduct">@product.Price</h5>
@@ -80,8 +80,8 @@
             {
                 foreach (var product in giftProducts)
                 {
-                    <div class="product">
-                        <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" />
+                    <div class="product" data-id="@product.ProductID">
+                        <img src="@product.Photo" class="imageProduct" />
                         <h4 class="nameProduct">@product.ProductName</h4>
                         <h5 class="priceProduct">@product.Price</h5>
                         <button>в корзину</button>
@@ -96,3 +96,18 @@
     </div>
 </body>
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function redirectToProduct(productID) {
+        window.location.href = '/Home/ProductPage/' + productID;
+    }
+
+    $(document).ready(function () {
+        $('.product').on('click', function () {
+            const productID = $(this).data('id');
+            if (productID) {
+                window.location.href = '/Home/ProductPage/' + productID;
+            }
+        });
+    });
+</script>

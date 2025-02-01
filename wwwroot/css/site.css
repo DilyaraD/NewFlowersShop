@@ -637,8 +637,6 @@ input[type="checkbox"] {
 
 /*/////////////////////////////////авторизация//////////////////////////////////////////////////////*/
 
-
-/* Затемнение фона */
 .modal {
     display: none;
     position: fixed;
@@ -761,14 +759,6 @@ input[type="checkbox"] {
         height: 20px;
     }
 
-
-
-
-
-
-
-
-
 .modalM {
     display: none;
     position: fixed;
@@ -805,11 +795,9 @@ input[type="checkbox"] {
 }
 
 
-
-
-
-
-
+.modal-backdrop{
+    display:none;
+}
 
 .message {
     padding: 10px;
@@ -828,3 +816,362 @@ input[type="checkbox"] {
         background-color: #f44336;
         color: white;
     }
+
+
+/* ///////////////////////////////страница товара\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+.productPage button {
+    margin: 5px 0 0 0;
+    border-radius: 10px;
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 18px;
+    padding: 5px 20px 5px 20px;
+}
+
+.infoProduct {
+    margin-top: 2%;
+    display: flex;
+    width: 100%;
+}
+
+.sidebar2 {
+    flex: 0 0 50%;
+    border-radius: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.content2 {
+    flex: 1;
+    padding: 10px;
+}
+
+.imageProductMain {
+    height: auto;
+    max-height: 100%;
+    max-width: 100%;
+    display: block;
+    border: 1px solid black;
+    width: auto;
+    height: 130%;
+    margin-left: 10%;
+}
+
+.info-row-Product {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: "Marmelad", serif;
+    padding-bottom: 5px;
+    font-size: 20px;
+    width: 70%;
+}
+
+
+.info-row-Product2 {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-family: "Marmelad", serif;
+    padding-bottom: 5px;
+    font-size: 20px;
+    width: 70%;
+}
+
+    .info-row-Product2 span {
+        font-family: "Marmelad", serif;
+        font-size: 18px;
+    }
+
+.info-row-Product span {
+    font-family: "Marmelad", serif;
+    font-size: 18px;
+}
+
+.productNameMain {
+    font-family: "Marmelad", serif;
+    font-size: 30px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.quantity-controls,
+.quantity-controls2 {
+    display: flex;
+    align-items: center;
+    background-color: #8A226F;
+}
+
+    .quantity-controls button,
+    .quantity-controls2 button {
+        padding: 5px;
+        margin: 0;
+        border-radius: 0;
+        font-size: 20px;
+        background-color: #57184A;
+        color: white;
+        width: 50px;
+    }
+
+    .quantity-controls span {
+        margin: 0 10px;
+        font-size: 20px;
+        color: white;
+        width: 40px;
+        text-align: center;
+    }
+
+.selectProduct {
+    width: 100%;
+    display: flex;
+    margin-left: 10%;
+    justify-content: flex-start;
+}
+
+    .selectProduct .tab-button {
+        background: none;
+        border: none;
+        color: #000000;
+        padding: 10px 20px;
+        font-family: "Marmelad", serif;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+    }
+
+        .selectProduct .tab-button.active .arrow {
+            transform: rotate(180deg) translateY(-25px);
+        }
+
+        .selectProduct .tab-button .arrow {
+            height: 6px;
+        }
+
+        .selectProduct .tab-button .arrow {
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+            position: relative;
+            top: -10px;
+        }
+
+.tab-content {
+    margin-top: 10px;
+    padding: 20px;
+    font-family: "Marmelad", serif;
+    margin-left: 8%;
+}
+
+
+/* ////////////////////////////////////////////BasketPage.html/////////////////////////////////// */
+
+
+.infoBasket {
+    flex: 0 0 80%;
+    display: flex;
+    justify-content: left;
+}
+
+.productBasket {
+    width: 70%;
+    justify-content: left;
+    margin-left: 2%;
+}
+
+.totalBasket {
+    flex: 1;
+    padding: 10px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+.info-row-Product {
+    margin: 5% 10% 5% 10%;
+    width: 200px;
+}
+
+    .info-row-Product h5 {
+        font-size: 20px;
+        margin: 6% 0 6% 0;
+    }
+
+.total {
+    border: 1px solid black;
+    font-family: "Marmelad", serif;
+    max-width: 300px;
+    min-width: 250px;
+    text-align: center;
+    margin-left: 10%;
+    justify-content: center;
+}
+
+    .total button {
+        padding: 5px;
+        margin: 0 20px 20px 20px;
+        border-radius: 0;
+        font-size: 20px;
+        background-color: #57184A;
+        font-family: "Marmelad", serif;
+        color: white;
+        width: auto;
+        text-align: center;
+    }
+
+    .total h3 {
+        font-size: 30px;
+    }
+
+    .total span {
+        font-size: 18px;
+    }
+
+.quantity-controls2 span {
+    margin: 0 10px;
+    font-size: 20px;
+    color: white;
+    width: 20px;
+    text-align: center;
+}
+
+.quantity-controls2 {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    background-color: #8A226F;
+    width: 100px;
+}
+
+.table-container {
+    width: 100%;
+    font-family: "Marmelad", serif;
+    margin-top: 20px;
+}
+
+.table-header,
+.table-row {
+    display: flex;
+    gap: 15px;
+}
+
+.table-header {
+    margin-bottom: 15px;
+}
+
+.table-body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.table-row {
+    border: 1px solid #000;
+    background-color: transparent;
+    padding: 10px;
+}
+
+.table-header-cell,
+.table-cell {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.products-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.product-item {
+    margin-bottom: 10px;
+}
+
+.table-header-cell:first-child,
+.table-cell:first-child {
+    flex: 0 0 140px;
+}
+
+.imageProductBasket {
+    height: 100px;
+    width: 100px;
+}
+
+.quantity-controls2 {
+    display: flex;
+    align-items: center;
+}
+
+    .quantity-controls2 button {
+        padding: 5px;
+        font-size: 20px;
+    }
+
+    .quantity-controls2 span {
+        margin: 0 10px;
+        font-size: 25px;
+    }
+
+
+.buttonTresh {
+    background: none;
+    border: none;
+}
+
+/* ///////////////////////////////////OrderHistoryPage.html////////////////////////////////////////////////// */
+
+
+.buttonAllow {
+    background: none;
+    border: none;
+}
+
+.info-row-Product2 ul{
+    text-align:right;
+}
+
+/*.......................отзывы...................*/
+.review {
+    border: 1px solid black;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: 90%; 
+    box-sizing: border-box; 
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.review-date {
+    font-size: 12px;
+    color: gray;
+}
+
+.stars {
+    font-size: 18px;
+}
+
+.star {
+    color: lightgray; /* Светло-серый цвет для пустых звезд */
+}
+
+    .star.filled {
+        color: yellow; /* Желтый цвет для заполненных звезд */
+    }
+
+
+.review-text {
+    font-size: 14px;
+}

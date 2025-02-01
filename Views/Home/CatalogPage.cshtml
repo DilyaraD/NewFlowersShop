@@ -105,7 +105,6 @@
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function validateInput(inputElement) {
             inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
@@ -152,13 +151,21 @@
                     } else {
                         data.forEach(product => {
                             $('#products').append(`
-                                <div class="product">
+                                <div class="product" data-id="${product.productID}">
                                     <img src="${product.photo}" class="imageProduct" />
                                     <h4 class="nameProduct">${product.productName}</h4>
                                     <h5 class="priceProduct">${product.price} ₽</h5>
                                     <button>В корзину</button>
                                 </div>
                             `);
+                        });
+
+                        // Обработчик клика для товара
+                        $('.product').on('click', function () {
+                            const productID = $(this).data('id');
+                            if (productID) {
+                                window.location.href = '/Home/ProductPage/' + productID;
+                            }
                         });
                     }
                 },
@@ -188,6 +195,14 @@
 
             loadProducts();
         });
+
+
+
+
+        // Функция для перехода на страницу товара
+        function redirectToProduct(productID) {
+            window.location.href = '/Home/ProductPage/' + productID;
+        }
 
     </script>
 </body>

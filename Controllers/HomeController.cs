@@ -404,6 +404,66 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = false, message = "Неверный логин или пароль" });
         }
 
+        [Route("Home/ProductPage/{productID:int}")]
+        public IActionResult ProductPage(int productID)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProductID == productID);
+            if (product == null)
+            {
+                return Content($"Продукт не найден.");
+            }
+
+            var categoryName = _context.FlowerCategories
+                .Where(c => c.CategoryID == product.CategoryID)
+                .Select(c => c.CategoryName)
+                .FirstOrDefault();
+
+            var flowerTypeNames = _context.FlowerType
+                .Where(ft => _context.ProductContents
+                    .Any(pc => pc.ProductID == productID && pc.FlowerTypeID == ft.FlowerTypeID && pc.Quantity > 0))
+                .Select(ft => ft.FlowerTypeName)
+                .ToList();
+
+            ViewData["FlowerTypes"] = string.Join(", ", flowerTypeNames);
+
+            var storeIds = _context.StoreFlowerStocks
+                .Where(sfs => _context.ProductContents
+                    .Any(pc => pc.ProductID == productID && pc.FlowerTypeID == sfs.FlowerTypeID))
+                .Select(sfs => sfs.StoreID)
+                .Distinct()
+                .ToList();
+
+            var storeAddresses = _context.Stores
+                .Where(store => storeIds.Contains(store.StoreID))
+                .Select(store => store.Address)
+                .ToList();
+
+            ViewData["Stores"] = storeAddresses;
+
+            ViewBag.FlowerCategories = categoryName;
+
+            var productContents = _context.ProductContents
+    .Where(pc => pc.ProductID == productID)
+    .ToList(); // Выполняем запрос в память
+
+int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity) : 0;
+
+            var reviews = _context.Reviews
+        .Where(r => r.ProductID == productID)
+        .OrderByDescending(r => r.ReviewDate)
+        .ToList();
+
+            ViewBag.Reviews = reviews;
+
+            ViewData["MaxQuantity"] = maxQuantity;
+
+            return View(product);
+        }
+
+
+
+
+
 
 
 
