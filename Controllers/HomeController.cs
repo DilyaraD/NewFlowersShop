@@ -578,7 +578,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
         }
 
         [HttpPost]
-        public IActionResult Checkout()
+        public IActionResult Checkout()////////////////////////////////////////////////////////////////////////&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&????????????????????????????????7
         {
             var cartJson = HttpContext.Session.GetString("Cart");
             List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
@@ -591,11 +591,78 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
             return Json(new { success = true, items = cart });
         }
 
+        public IActionResult OrderHistoryPage()
+        {
+            var login = HttpContext.Session.GetString("Login");
+            if (string.IsNullOrEmpty(login))
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
+            var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
+            var orders = _context.Orders
+                .Where(o => o.CustomerID == user.CustomerID)
+                .OrderByDescending(o => o.OrderDate)
+                .Select(o => new OrderViewModel
+                {
+                    OrderID = o.OrderID,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    StatusID = o.StatusID,
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Join(_context.Products, oc => oc.ProductID, p => p.ProductID,
+                            (oc, p) => new ProductViewModel
+                            {
+                                ProductName = p.ProductName,
+                                Photo = p.Photo,
+                                Quantity = oc.Quantity,
+                                Price = oc.Price
+                            })
+                        .ToList()
+                })
+                .ToList();
 
+            return View(orders);
+        }
 
+        public IActionResult DetailedOrderHistoryPage(int orderId)
+        {
+            var order = _context.Orders
+                .Where(o => o.OrderID == orderId)
+                .Select(o => new OrderViewModel
+                {
+                    OrderID = o.OrderID,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    StatusID = o.StatusID,
+                    Delivery = _context.Deliveries.FirstOrDefault(d => d.DeliveryID == o.DeliveryID),
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Join(_context.Products, oc => oc.ProductID, p => p.ProductID,
+                            (oc, p) => new ProductViewModel
+                            {
+                                ProductName = p.ProductName,
+                                Photo = p.Photo,
+                                Quantity = oc.Quantity,
+                                Price = oc.Price
+                            })
+                        .ToList()
+                })
+                .FirstOrDefault();
 
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
 
 
 

@@ -1,59 +1,22 @@
-﻿<!DOCTYPE html>
+﻿@model List<OrderViewModel>
+
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NewFlowersShop</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
-      rel="stylesheet"
-    />
-    <title>Новые цветы</title>
-  </head>
+    <link href="http<!DOCTYPE html>
+s://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+          rel="stylesheet" />
+    <link rel="stylesheet" href="~/NewFlowersShop.styles.css" asp-append-version="true" />
+</head>
   <body>
-    <footer>
-      <div>
-        <img src="./img_s/logo.svg" />
-        <h1 id="logoText">
-          Новые<br />
-          цветы
-        </h1>
-      </div>
-      <div class="City">
-        <img src="./img_s/map.svg" />
-        <h1>г.Казань</h1>
-      </div>
-      <div id="footer_center">
-        <h1>Каталог</h1>
-        <h1>Доставка</h1>
-        <h1>Контакты</h1>
-      </div>
-      <div>
-        <button class="footerBtn">
-          <div><img src="./img_s/search.svg" /></div>
-        </button>
-        <button class="footerBtn">
-          <div><img src="./img_s/profil.svg" /></div>
-        </button>
-        <button class="footerBtn">
-          <div>
-            <img src="./img_s/shopping-cart.svg" />
-          </div>
-        </button>
-        <button class="footerBtn">
-          <div class="menu"></div>
-          <div class="menu"></div>
-          <div class="menu"></div>
-        </button>
-      </div>
-    </footer>
     <div class="basket">
       <h1>История заказов</h1>
       <div class="infoHistory">
@@ -68,25 +31,35 @@
             <div class="table-header-cell"></div>
           </div>
           <div class="table-body">
-            <div class="table-row">
-              <div class="table-cell">36789</div>
-              <div class="table-cell products-cell">
-                <div class="product-item">
-                  <img src="./img_s/logo.svg" class="imageProductBasket" />
-                </div>
-                <div class="product-item">
-                  <img src="./img_s/logo.svg" class="imageProductBasket" />
-                </div>
-              </div>
-              <div class="table-cell products-cell">
-                <div class="product-item">25 желтых тюльпанов</div>
-                <div class="product-item">25 желтых тюльпанов</div>
-              </div>
-              <div class="table-cell">Доставлен</div>
-              <div class="table-cell">2</div>
-              <div class="table-cell">2500₽</div>
-              <div class="table-cell">
-                <button class="buttonAllow">
+           @foreach (var order in Model)
+                    {
+                        <div class="table-row">
+                            <div class="table-cell">@order.OrderID</div>
+                            <div class="table-cell products-cell">
+                                @foreach (var product in order.Products)
+                                {
+                                    <div class="product-item">
+                                        <img src="@product.Photo" class="imageProductBasket">
+                                    </div>
+                                }
+                            </div>
+                            <div class="table-cell products-cell">
+                                @foreach (var product in order.Products)
+                                {
+                                    <div class="table-cell products-cell" style="margin:0;">
+                                        <div class="product-item" style="margin:0;">@product.ProductName</div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="table-cell">
+                                @(order.StatusID == 1 ? "В обработке" : order.StatusID == 2 ? "Доставлен" : "Отменен")
+                            </div>
+                            <div class="table-cell">
+                                @order.Products.Sum(p => p.Quantity)
+                            </div>
+                            <div class="table-cell">@order.TotalAmount ₽</div>
+                            <div class="table-cell">
+                <button class="buttonAllow" type="button" onclick="goToOrderDetails(@order.OrderID)">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -102,29 +75,17 @@
                   </svg>
                 </button>
               </div>
-            </div>
+                        </div>
+                    }
           </div>
         </div>
       </div>
     </div>
-
-    <script></script>
-
-    <div id="bottom">
-      <div class="bA">
-        <a>Cвадебная флористика</a>
-        <a>Букеты на любые мероприятия</a>
-        <a>Букеты невесты</a>
-        <a>Композиции</a>
-      </div>
-      <div class="bLink">
-        <a href="https://www.instagram.com/">
-          <img src="./img_s/inst.svg" alt="Instagram" />
-        </a>
-        <a href="https://web.telegram.org/">
-          <img src="./img_s/tg.svg" alt="Telegram" />
-        </a>
-      </div>
-    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+             function goToOrderDetails(orderId) {
+            window.location.href = `/Home/DetailedOrderHistoryPage?orderId=` + orderId;
+        }
+    </script>
   </body>
 </html>

@@ -1,5 +1,72 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model NewFlowersShop.Models.OrderViewModel
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Заказ №@Model.OrderID</title>
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+<body>
+    <div class="basket">
+        <h1>Заказ №@Model.OrderID</h1>
+        <div class="infoHistory">
+            <div class="statusWay">
+                <div class="progressLine"></div>
+                <div class="statusStep">
+                    <div class="statusCircle @(Model.StatusID >= 1 ? "active" : "")">1</div>
+                    <span>Принят</span>
+                </div>
+                <div class="statusStep">
+                    <div class="statusCircle @(Model.StatusID >= 2 ? "active" : "")">2</div>
+                    <span>В сборке</span>
+                </div>
+                <div class="statusStep">
+                    <div class="statusCircle @(Model.StatusID >= 3 ? "active" : "")">3</div>
+                    <span>В пути</span>
+                </div>
+                <div class="statusStep">
+                    <div class="statusCircle @(Model.StatusID == 4 ? "active" : "")">4</div>
+                    <span>Доставлен</span>
+                </div>
+            </div>
+            <div class="table-container" style="margin-top:20px;">
+                <div class="table-header">
+                    <div class="table-header-cell" style="color: white">Товар</div>
+                    <div class="table-header-cell">Название</div>
+                    <div class="table-header-cell">Количество</div>
+                    <div class="table-header-cell">Цена за шт.</div>
+                    <div class="table-header-cell">Сумма</div>
+                </div>
+                <div class="table-body">
+                    @foreach (var product in Model.Products)
+                    {
+                        <div class="table-row">
+                            <div class="table-cell products-cell">
+                                <div class="product-item">
+                                    <img src="@product.Photo" class="imageProductBasket" />
+                                </div>
+                            </div>
+                            <div class="table-cell">@product.ProductName</div>
+                            <div class="table-cell">@product.Quantity</div>
+                            <div class="table-cell">@product.Price ₽</div>
+                            <div class="table-cell">@(product.Quantity * product.Price) ₽</div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="infoOrder">
+                <button type="button" class="custom-btn" style="position: absolute; top: 10px; right: 10px">
+                    Написать отзыв
+                </button>
+                <p><strong>Адрес доставки:</strong> @Model.Delivery.DeliveryAddress</p>
+                <p><strong>Имя получателя:</strong> @Model.Delivery.DeliveryName</p>
+                <p><strong>Телефон получателя:</strong> @Model.Delivery.DeliveryPhone</p>
+                <p><strong>Дата доставки:</strong> @Model.Delivery.DeliveryDate.ToString("dd.MM.yyyy") к @Model.Delivery.DeliveryTime</p>
+                <p><strong>Способ оплаты:</strong> @Model.Delivery.DeliveryPayment</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

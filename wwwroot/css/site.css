@@ -770,6 +770,7 @@ input[type="checkbox"] {
     background-color: rgba(0, 0, 0, 0.5);
     justify-content: center;
     align-items: center;
+    pointer-events: auto;
 }
 
 .modal-contentM {
@@ -1093,7 +1094,7 @@ input[type="checkbox"] {
 }
 
 .product-item {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .table-header-cell:first-child,
@@ -1189,3 +1190,88 @@ input[type="checkbox"] {
     color:black;
 }
 
+
+/* |||||||||||||||||||||||||||||||||DetailedOrderHistoryPage|||||||||||||||||||||||||||||||||||| */
+
+.statusWay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 20px;
+    font-family: "Marmelad", serif;
+    font-size: 14px;
+}
+
+.progressLine {
+    content: "";
+    position: absolute;
+    top: 35%;
+    left: 3%;
+    width: 93%;
+    height: 4px;
+    background: green;
+    z-index: 1;
+    transform: translateY(-50%);
+    transition: width 0.5s ease;
+}
+
+    .progressLine::before {
+        content: "";
+        position: absolute;
+        top: 35%;
+        left: 3%;
+        width: 98%;
+        height: 4px;
+        background: lightgray;
+        z-index: 1;
+        transform: translateY(-50%);
+        transition: width 0.5s ease;
+    }
+
+.statusStep {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: lightgray;
+}
+
+    .statusStep span {
+        color: #000;
+    }
+
+.statusCircle {
+    width: 50px;
+    height: 50px;
+    background: lightgray;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.active {
+    background: green;
+    color: green;
+}
+
+.infoOrder {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 97%;
+    position: relative;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: "Marmelad", serif;
+    font-size: 20px;
+}
+
+    .infoOrder p {
+        margin: 1%;
+    }
