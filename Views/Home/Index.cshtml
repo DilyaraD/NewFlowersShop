@@ -39,10 +39,11 @@
                 foreach (var product in newProducts)
                 {
                     <div class="product" data-id="@product.ProductID">
+                        <a href="Home/ProductPage/@product.ProductID">
                         <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" />
-                        <h4 class="nameProduct">@product.ProductName</h4>
+                        <h4 class="nameProduct">@product.ProductName</h4></a>
                         <h5 class="priceProduct">@product.Price</h5>
-                        <button>в корзину</button>
+                        <button class="add-to-cart" data-id="@product.ProductID" data-name="@product.ProductName" data-price="@product.Price" data-photo="@product.Photo">в корзину</button>
                     </div>
                 }
             }
@@ -60,10 +61,11 @@
                 foreach (var product in discountProducts)
                 {
                     <div class="product" data-id="@product.ProductID">
+                        <a href="Home/ProductPage/@product.ProductID">
                         <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" />
-                        <h4 class="nameProduct">@product.ProductName</h4>
+                        <h4 class="nameProduct">@product.ProductName</h4></a>
                         <h5 class="priceProduct">@product.Price</h5>
-                        <button>в корзину</button>
+                        <button class="add-to-cart" data-id="@product.ProductID" data-name="@product.ProductName" data-price="@product.Price" data-photo="@product.Photo">в корзину</button>
                     </div>
                 }
             }
@@ -81,10 +83,11 @@
                 foreach (var product in giftProducts)
                 {
                     <div class="product" data-id="@product.ProductID">
+                        <a href="Home/ProductPage/@product.ProductID">
                         <img src="@product.Photo" class="imageProduct" />
-                        <h4 class="nameProduct">@product.ProductName</h4>
+                        <h4 class="nameProduct">@product.ProductName</h4></a>
                         <h5 class="priceProduct">@product.Price</h5>
-                        <button>в корзину</button>
+                        <button class="add-to-cart" data-id="@product.ProductID" data-name="@product.ProductName" data-price="@product.Price" data-photo="@product.Photo">в корзину</button>
                     </div>
                 }
             }
@@ -94,20 +97,84 @@
             }
         </div>
     </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    function redirectToProduct(productID) {
-        window.location.href = '/Home/ProductPage/' + productID;
-    }
 
-    $(document).ready(function () {
-        $('.product').on('click', function () {
-            const productID = $(this).data('id');
-            if (productID) {
-                window.location.href = '/Home/ProductPage/' + productID;
+     $(document).ready(function () {
+    $('.add-to-cart').on('click', function (event) {
+        event.stopPropagation();
+        console.log("Клик по кнопке 'В корзину'");
+
+        const $button = $(this);
+
+         function showModalMessage(message) {
+            $('#deleteModal .modal-body').text(message); // Меняем текст в модальном окне
+            $('#deleteModal').modal('show'); // Показываем окно
+        }
+
+        $.get('/Home/IsAuthenticated', function (data) {
+            console.log("Ответ от /Home/IsAuthenticated:", data);
+            if (!data.isAuthenticated) {
+                showModalMessage('Вам нужно авторизоваться, чтобы добавить товар в корзину.');
+                console.log("Пользователь не авторизован. Показываем модальное окно.");
+                $('#deleteModal').modal('show');
+                return;
             }
+            console.log("Пользователь авторизован. Добавляем товар в корзину.");
+
+            let productId = $button.data('id');
+            let name = $button.data('name');
+            let price = $button.data('price');
+            let photo = $button.data('photo');
+
+            console.log("Данные товара:", { productId, name, price, photo });
+
+            $.post('/Home/AddToCart', { id: productId, name: name, price: price, photo: photo }, function (response) {
+               showModalMessage('Товар успешно добавлен в корзину!');
+
+            })
+            .fail(function(error) {
+                console.error("Ошибка AJAX:", error);
+                showModalMessage('Произошла ошибка при добавлении товара в корзину.');
+            });
+        })
+        .fail(function(error) {
+            console.error("Ошибка AJAX при проверке авторизации:", error);
+            showModalMessage("Произошла ошибка при проверке авторизации. Попробуйте позже.");
         });
     });
+
+        function updateTotalBasket() {
+            $.get('/Cart/GetCartItems', function (cartItems) {
+                let total = 0;
+                if (cartItems && cartItems.length > 0) {
+                    for (let item of cartItems) {
+                        total += item.price * item.quantity;
+                    }
+                }
+                $('#totalBasket .value:last-child').text(total.toFixed(2) + ' ₽');
+                $('#totalBasket .value:first-child').text(total.toFixed(2) + ' ₽');
+            });
+        }
+        updateTotalBasket();
+    });
+
 </script>

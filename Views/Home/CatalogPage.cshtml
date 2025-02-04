@@ -7,14 +7,13 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Каталог - NewFlowersShop</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div class="catalog">
@@ -24,17 +23,9 @@
                 <h5>Цена, ₽</h5>
                 <div class="PriceCatalog">
                     <p>от</p>
-                    <input id="minPrice" placeholder="1"
-                           type="number"
-                           min="0"
-                           max="100000"
-                           oninput="validateInput(this)" />
+                    <input id="minPrice" type="number" min="0" max="100000" />
                     <p>до</p>
-                    <input id="maxPrice" placeholder="100000"
-                           type="number"
-                           min="0"
-                           max="100000"
-                           oninput="validateInput(this)" />
+                    <input id="maxPrice" type="number" min="0" max="100000" />
                 </div>
 
                 <h5>Категория</h5>
@@ -59,7 +50,7 @@
                         }
                     }
                 </div>
-
+                
                 <h5>Размер</h5>
                 <div id="sizes" class="size-options">
                     <label><input type="checkbox" name="selectedSizes" value="Маленький" /> Маленький</label>
@@ -89,39 +80,44 @@
                         }
                     }
                 </select>
-                <button class="resetFiltersButton" id="resetFiltersButton">Сбросить фильтры</button>
+                <button id="resetFiltersButton">Сбросить фильтры</button>
             </div>
             <div class="content">
-                <form autocomplete="off" class="divSort">
-                    <input placeholder="поиск" id="search" autocomplete="off" list="null">
+                <form class="divSort">
+                    <input placeholder="поиск" id="search">
                     <select id="sort">
-                        <option value="new">сортировка по новинкам</option>
-                        <option value="desc">сортировка по убыванию</option>
-                        <option value="asc">сортировка по возрастанию</option>
+                        <option value="new">по новинкам</option>
+                        <option value="desc">по убыванию</option>
+                        <option value="asc">по возрастанию</option>
                     </select>
                 </form>
                 <div id="products" class="divProducts"></div>
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function validateInput(inputElement) {
-            inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
-            let value = parseInt(inputElement.value, 10);
-            if (isNaN(value)) {
-                value = 0
-            }
-            if (value > 100000) {
-                inputElement.value = 100000;
-            }
-        }
 
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Сообщение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
         function loadProducts() {
-            var selectedTypes = $('#flowerTypes input[type="checkbox"]:checked').map(function () {
+            var selectedTypes = $('#flowerTypes input:checked').map(function () {
                 return $(this).val();
             }).get();
-
             var selectedSizes = $('input[name="selectedSizes"]:checked').map(function () {
                 return this.value;
             }).get();
@@ -129,6 +125,7 @@
             var selectedPackages = $('input[name="selectedPackages"]:checked').map(function () {
                 return this.value;
             }).get();
+
 
             $.ajax({
                 url: '/Home/GetProducts',
@@ -150,22 +147,20 @@
                         $('#products').html('<h3>' + data.message + '</h3>');
                     } else {
                         data.forEach(product => {
+                            let buttonHtml = product.inStock
+                                ? `<button class="add-to-cart" data-id='${product.productID}'' data-name='${product.productName}' data-price='${product.price}' data-photo='${product.photo}'>в корзину</button>`
+                                : `<span class="out-of-stock">Нет в наличии</span>`;
+
                             $('#products').append(`
-                                <div class="product" data-id="${product.productID}">
+                            <div class="product" data-id="${product.productID}">
+                                <a href="ProductPage/${product.productID}">
                                     <img src="${product.photo}" class="imageProduct" />
                                     <h4 class="nameProduct">${product.productName}</h4>
-                                    <h5 class="priceProduct">${product.price} ₽</h5>
-                                    <button>В корзину</button>
-                                </div>
-                            `);
-                        });
-
-                        // Обработчик клика для товара
-                        $('.product').on('click', function () {
-                            const productID = $(this).data('id');
-                            if (productID) {
-                                window.location.href = '/Home/ProductPage/' + productID;
-                            }
+                                </a>
+                                <h5 class="priceProduct">${product.price} ₽</h5>
+                                ${buttonHtml}
+                            </div>
+                        `);
                         });
                     }
                 },
@@ -175,6 +170,40 @@
             });
         }
 
+        $(document).ready(function () {
+            loadProducts();
+            $(document).on('click', '.add-to-cart', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const $button = $(this);
+
+                function showModalMessage(message) {
+                    $('#notificationModalBody').text(message);
+                    $('#deleteModal').modal('show');
+                }
+
+                $.get('/Home/IsAuthenticated', function (data) {
+                    if (!data.isAuthenticated) {
+                        showModalMessage('Вам нужно авторизоваться, чтобы добавить товар в корзину.');
+                        return;
+                    }
+
+                    let productId = $button.data('id');
+                    let name = $button.data('name');
+                    let price = $button.data('price');
+                    let photo = $button.data('photo');
+                     console.log("Данные товара:", { productId, name, price, photo });
+                    $.post('/Home/AddToCart', { id: productId, name: name, price: price, photo: photo }, function () {
+                        showModalMessage('Товар успешно добавлен в корзину!');
+                    }).fail(function () {
+                        showModalMessage('Ошибка при добавлении товара в корзину.');
+                    });
+                }).fail(function () {
+                    showModalMessage('Ошибка проверки авторизации.');
+                });
+            });
+        });
         $(document).ready(function () {
             loadProducts();
             $('input[name="selectedSizes"], input[name="selectedPackages"], #flowerTypes input[type="checkbox"]').change(loadProducts);
@@ -195,14 +224,6 @@
 
             loadProducts();
         });
-
-
-
-
-        // Функция для перехода на страницу товара
-        function redirectToProduct(productID) {
-            window.location.href = '/Home/ProductPage/' + productID;
-        }
 
     </script>
 </body>

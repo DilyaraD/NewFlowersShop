@@ -300,7 +300,7 @@ a {
 
 
 /* !!!!!!!!! */
-.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1 {
+.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1, .basket h1 {
     color: black;
     font-family: "Marmelad", serif;
     font-size: 46px;
@@ -877,7 +877,7 @@ input[type="checkbox"] {
     font-family: "Marmelad", serif;
     padding-bottom: 5px;
     font-size: 20px;
-    width: 70%;
+    width: 80%;
 }
 
     .info-row-Product2 span {
@@ -902,6 +902,7 @@ input[type="checkbox"] {
     display: flex;
     align-items: center;
     background-color: #8A226F;
+    height: 40px;
 }
 
     .quantity-controls button,
@@ -913,6 +914,7 @@ input[type="checkbox"] {
         background-color: #57184A;
         color: white;
         width: 50px;
+        height:40px;
     }
 
     .quantity-controls span {
@@ -1133,8 +1135,9 @@ input[type="checkbox"] {
     border: none;
 }
 
-.info-row-Product2 ul{
-    text-align:right;
+.info-row-Product2 ul {
+    text-align: right;
+    font-size: 16px;
 }
 
 /*.......................отзывы...................*/
@@ -1164,14 +1167,25 @@ input[type="checkbox"] {
 }
 
 .star {
-    color: lightgray; /* Светло-серый цвет для пустых звезд */
+    color: lightgray;
 }
 
     .star.filled {
-        color: yellow; /* Желтый цвет для заполненных звезд */
+        color: yellow;
     }
 
 
 .review-text {
     font-size: 14px;
 }
+
+.productPage  button a{
+    color:white;
+}
+
+/*.......................корзина...................*/
+
+.product a{
+    color:black;
+}
+

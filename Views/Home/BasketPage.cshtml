@@ -1,5 +1,9 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,161 +11,211 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
+          rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
           rel="stylesheet" />
     <title>Новые цветы</title>
 </head>
 <body>
-    <footer>
-        <div>
-            <img src="./img_s/logo.svg" />
-            <h1 id="logoText">
-                Новые<br />
-                цветы
-            </h1>
-        </div>
-        <div class="City">
-            <img src="./img_s/map.svg" />
-            <h1>г.Казань</h1>
-        </div>
-        <div id="footer_center">
-            <h1>Каталог</h1>
-            <h1>Доставка</h1>
-            <h1>Контакты</h1>
-        </div>
-        <div>
-            <button class="footerBtn">
-                <div><img src="./img_s/search.svg" /></div>
-            </button>
-            <button class="footerBtn">
-                <div><img src="./img_s/profil.svg" /></div>
-            </button>
-            <button class="footerBtn">
-                <div>
-                    <img src="./img_s/shopping-cart.svg" />
-                </div>
-            </button>
-            <button class="footerBtn">
-                <div class="menu"></div>
-                <div class="menu"></div>
-                <div class="menu"></div>
-            </button>
-        </div>
-    </footer>
     <div class="basket">
         <h1>Моя корзина</h1>
         <div class="infoBasket">
-            <div class="productBasket">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-header-cell" style="flex: 0 0 150px;"></div>
-                        <div class="table-header-cell">Название</div>
-                        <div class="table-header-cell" style="padding-left: 30px;">Количество</div>
-                        <div class="table-header-cell" style="flex: 0 0 120px;">Цена</div>
-                        <div class="table-header-cell" style="flex: 0 0 100px;"></div>
+            @if (Model.Count == 0)
+            {
+                <div class="productBasket">
+                    <div class="table-container">
+                        <p>Корзина пуста</p>
                     </div>
-                    <div class="table-body">
-                        <div class="table-row">
-                            <div class="table-cell"><img src="./img_s/logo.svg" class="imageProductBasket" /></div>
-                            <div class="table-cell">25 желтых тюльпанов</div>
-                            <div class="table-cell">
-                                <div class="quantity-controls2">
-                                    <button>+</button><span>1</span><button>-</button>
-                                </div>
+                </div>
+            }
+            else
+            {
+                <div class="productBasket">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div class="table-header-cell" style="flex: 0 0 150px"></div>
+                            <div class="table-header-cell">Название</div>
+                            <div class="table-header-cell" style="padding-left: 30px">
+                                Количество
                             </div>
-                            <div class="table-cell" style="flex: 0 0 100px;">2500₽</div>
-                            <div class="table-cell" style="flex: 0 0 100px;">
-                                <button class="buttonTresh">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <div class="table-header-cell" style="flex: 0 0 120px">Цена</div>
+                            <div class="table-header-cell" style="flex: 0 0 100px"></div>
                         </div>
-                        <div class="table-row">
-                            <div class="table-cell"><img src="./img_s/logo.svg" class="imageProductBasket" /></div>
-                            <div class="table-cell">25 желтых тюльпанов</div>
-                            <div class="table-cell">
-                                <div class="quantity-controls2">
-                                    <button>+</button><span>1</span><button>-</button>
+                        <div class="table-body">
+                            @foreach (var item in Model)
+                            {
+                                <div class="table-row" data-id="@item.Id" data-unit-price="@item.Price">
+                                    <a href="ProductPage/@item.Id">
+                                        <div class="table-cell">
+                                            <img src="@item.Photo" class="imageProductBasket" />
+                                        </div>
+                                    </a>
+                                    <div class="table-cell">
+                                        <a href="ProductPage/@item.Id" style="color: black">@item.Name</a>
+                                    </div>
+                                    <div class="table-cell">
+                                        <div class="quantity-controls2">
+                                            <button class="increase-quantity" data-id="@item.Id">
+                                                +
+                                            </button>
+                                            <span class="quantity">@item.Quantity</span>
+                                            <button class="decrease-quantity" data-id="@item.Id">
+                                                -
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="table-cell product-price" style="flex: 0 0 100px">
+                                        @item.TotalPrice ₽
+                                    </div>
+                                    <div class="table-cell" style="flex: 0 0 100px">
+                                        <button class="buttonTresh remove-from-cart"
+                                                data-id="@item.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="16"
+                                                 height="16"
+                                                 fill="currentColor"
+                                                 class="bi bi-trash"
+                                                 viewBox="0 0 16 16">
+                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="table-cell" style="flex: 0 0 100px;">2500₽</div>
-                            <div class="table-cell" style="flex: 0 0 100px;">
-                                <button class="buttonTresh">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
-                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
-                                    </svg>
-                                </button>
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
-            </div>
+            }
             <div class="totalBasket">
                 <div class="total">
                     <h3>Ваш заказ</h3>
                     <div class="info-row-Product">
                         <span>Товары</span>
-                        <span class="value">3456₽</span>
+                        <span id="total-products-value" class="value">0 ₽</span>
                     </div>
                     <div class="info-row-Product">
                         <span>Скидка</span>
-                        <span class="value">0₽</span>
+                        <span class="value">0 ₽</span>
                     </div>
                     <div class="info-row-Product">
                         <h5>Всего</h5>
-                        <h5 class="value">3456₽</h5>
+                        <h5 id="total-basket-value" class="value">0 ₽</h5>
                     </div>
-                    <button>оформить заказ</button>
+                    <button id="checkout-button">Оформить заказ</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const quantityDisplay = document.querySelector('.quantity-controls2 span');
-            const incrementButton = document.querySelector('.quantity-controls2 button:first-of-type');
-            const decrementButton = document.querySelector('.quantity-controls2 button:last-of-type');
-            let quantity = 1;
-
-
-            if (quantityDisplay && incrementButton && decrementButton) {
-                incrementButton.addEventListener('click', function () {
-                    quantity++;
-                    quantityDisplay.textContent = quantity;
-                });
-
-                decrementButton.addEventListener('click', function () {
-                    if (quantity > 1) {
-                        quantity--;
-                        quantityDisplay.textContent = quantity;
-                    }
-                });
-            }
-        });
-    </script>
-
-
-    <div id="bottom">
-        <div class="bA">
-            <a>Cвадебная флористика</a>
-            <a>Букеты на любые мероприятия</a>
-            <a>Букеты невесты</a>
-            <a>Композиции</a>
-        </div>
-        <div class="bLink">
-            <a href="https://www.instagram.com/">
-                <img src="./img_s/inst.svg" alt="Instagram" />
-            </a>
-            <a href="https://web.telegram.org/">
-                <img src="./img_s/tg.svg" alt="Telegram" />
-            </a>
+     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+          function updateCartTotal() {
+            let total = 0;
+            $('.table-row').each(function () {
+              let quantity = parseInt($(this).find('.quantity').text());
+              let price = parseFloat($(this).find('.product-price').text().replace(' ₽', '')) / quantity;
+              total += price * quantity;
+            });
+
+            $('#total-products-value').text(total.toFixed(2) + ' ₽');
+            $('#total-basket-value').text(total.toFixed(2) + ' ₽');
+          }
+          updateCartTotal()
+
+          $('.remove-from-cart').on('click', function () {
+            let productId = $(this).data('id');
+
+            $.post('/Home/RemoveFromCart', { id: productId }, function (response) {
+              if (response.success) {
+                $(`.table-row[data-id='${productId}']`).remove();
+                updateCartTotal()
+              } else {
+                showModalMessage('Не удалось удалить товар из корзины.');
+              }
+            });
+          });
+
+           function showModalMessage(message) {
+            $('#deleteModal .modal-body').text(message);
+            $('#deleteModal').modal('show'); 
+        }
+
+          $('.increase-quantity').on('click', function () {
+            let productId = $(this).data('id');
+            let quantitySpan = $(this).siblings('.quantity');
+            let currentQuantity = parseInt(quantitySpan.text());
+            let newQuantity = currentQuantity + 1;
+            $.post('/Home/UpdateQuantity', { id: productId, quantity: newQuantity }, function (response) {
+                if (response.success) {
+                quantitySpan.text(newQuantity);
+                updatePrice(productId, newQuantity);
+                updateCartTotal()
+
+                } else {
+                showModalMessage(response.message);
+                }
+            });
+
+          });
+
+          $('.decrease-quantity').on('click', function () {
+              let productId = $(this).data('id');
+               let quantitySpan = $(this).siblings('.quantity');
+              let currentQuantity = parseInt(quantitySpan.text());
+              let newQuantity = currentQuantity - 1;
+                if (newQuantity >= 0)
+                  $.post('/Home/UpdateQuantity', { id: productId, quantity: newQuantity }, function (response) {
+                    if (response.success) {
+                        if (response.success) {
+                      if (newQuantity === 0) {
+                          $(`.table-row[data-id='${productId}']`).remove();
+                      } else {
+                          quantitySpan.text(newQuantity);
+                          updatePrice(productId, newQuantity);
+                      }
+                      updateCartTotal();
+                  } else {
+                      showModalMessage(response.message);
+                  }
+                  };
+                });
+              });
+
+              function updatePrice(productId, quantity) {
+    let row = $(`.table-row[data-id='${productId}']`);
+    let unitPrice = parseFloat(row.attr("data-unit-price")); 
+    let productPrice = row.find('.product-price');
+    productPrice.text((unitPrice * quantity).toFixed(2) + ' ₽');
+}
+
+                $('#checkout-button').on('click', function () {
+                      $.post('/Home/Checkout', function (response) {
+                          if (response.success) {
+                              window.location.href = "/PaymentPage";
+                          } else {
+                              showModalMessage(response.message);
+                          }
+                      });
+                  });
+                });
+    </script>
 </body>
 </html>

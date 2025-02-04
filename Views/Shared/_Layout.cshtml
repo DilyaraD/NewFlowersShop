@@ -45,9 +45,9 @@
             <button class="footerBtn" id="profileButton">
                 <div><a href="@Url.Action("DataPage", "Home")"><img src="~/img_s/profil.svg" /></a></div>
             </button>
-            <button class="footerBtn">
-                <div>
-                    <img src="~/img_s/shopping-cart.svg" />
+            <button class="footerBtn" id="basketButton">
+                <div >
+                    <a href="@Url.Action("BasketPage", "Home")"> <img src="~/img_s/shopping-cart.svg" /></a>
                 </div>
             </button>
             <button class="footerBtn" id="menuButton">
@@ -169,6 +169,7 @@
             let closeModal2 = document.getElementById("closeModal2");
             let closeMenuModal = document.getElementById("closeMenuModal");
             let registrationBtn = document.getElementById("registration");
+            let basketButton = document.getElementById('basketButton');
 
             async function checkAuthAndProceed(action) {
                 try {
@@ -185,12 +186,19 @@
                 }
             }
 
+            basketButton.addEventListener("click", function (event) {
+                event.preventDefault();
+                checkAuthAndProceed((isAuthenticated) => {
+                    if (isAuthenticated) {
+                        window.location.href = "/Home/BasketPage";
+                    } else {
+                        authModal.style.display = "flex";
+                    }
+                });
+            });
 
-
-
-            // Проверяем авторизацию перед открытием профиля
             profileButton.addEventListener("click", function (event) {
-                event.preventDefault(); // Предотвращаем переход по ссылке
+                event.preventDefault(); 
                 checkAuthAndProceed((isAuthenticated) => {
                     if (isAuthenticated) {
                         window.location.href = "/Home/DataPage";
@@ -200,7 +208,6 @@
                 });
             });
 
-            // Проверяем авторизацию перед открытием меню
             menuButton.addEventListener("click", function () {
                 checkAuthAndProceed((isAuthenticated) => {
                     if (isAuthenticated) {
@@ -211,7 +218,6 @@
                 });
             });
 
-            // Закрытие окон
             closeModal.addEventListener("click", function () {
                 authModal.style.display = "none";
             });
@@ -224,13 +230,11 @@
                 menuModal.style.display = "none";
             });
 
-            // Переключение на регистрацию
             registrationBtn.addEventListener("click", function () {
                 authModal.style.display = "none";
                 registerModal.style.display = "flex";
             });
 
-            // Авторизация пользователя
             document.querySelectorAll(".custom-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     let login = document.getElementById("loginUser").value;
@@ -245,19 +249,19 @@
                     })
                         .then(response => {
                             if (response.redirected) {
-                                window.location.href = response.url; // если перенаправление, переходим
+                                window.location.href = response.url;
                             } else {
-                                return response.json(); // получаем json и передаем дальше
+                                return response.json();
                             }
                         })
                         .then(data => {
                             if (data && !data.success) {
-                                showMessage(data.message, "error"); // отображаем сообщение об ошибке
+                                showMessage(data.message, "error"); 
                             }
                         })
                         .catch(error => {
                             console.error("Ошибка:", error);
-                            showMessage("Произошла ошибка при авторизации.", "error"); //отображаем сообщение об ошибке
+                            showMessage("Произошла ошибка при авторизации.", "error"); 
                         });
                 });
             });
@@ -288,6 +292,7 @@
                     });
             }
         }
+
 
         document.addEventListener("DOMContentLoaded", function () {
             const registerForm = document.getElementById("registerForm");

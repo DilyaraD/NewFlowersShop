@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace NewFlowersShop.Controllers
 {
@@ -21,27 +22,35 @@ namespace NewFlowersShop.Controllers
         public IActionResult Index()
         {
             var newProducts = _context.Products
+                .Where(p => _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
                 .OrderByDescending(p => p.ProductID)
                 .Take(12)
                 .ToList();
+
             var discountProducts = _context.Products
-                .Where(p => _context.ProductDiscounts.Any(pd => pd.ProductID == p.ProductID))
+                .Where(p => _context.ProductDiscounts.Any(pd => pd.ProductID == p.ProductID) &&
+                            _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
                 .Take(12)
                 .ToList();
+
             var giftProducts = _context.Products
-                .Where(p => !newProducts.Contains(p) && !discountProducts.Contains(p))
+                .Where(p => !newProducts.Contains(p) && !discountProducts.Contains(p) &&
+                            _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
                 .Take(12)
                 .ToList();
+
             ViewBag.NewProducts = newProducts;
             ViewBag.DiscountProducts = discountProducts;
             ViewBag.GiftProducts = giftProducts;
             return View();
         }
 
+
         public IActionResult Privacy()
         {
             return View();
         }
+
         public IActionResult CatalogPage()
         {
             var packages = _context.Products.Select(p => p.Package).Distinct().ToList();
@@ -133,7 +142,8 @@ namespace NewFlowersShop.Controllers
                 p.ProductID,
                 p.ProductName,
                 p.Price,
-                p.Photo
+                p.Photo,
+                InStock = _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0)
             }).ToList();
 
             if (products.Count == 0)
@@ -444,7 +454,7 @@ namespace NewFlowersShop.Controllers
 
             var productContents = _context.ProductContents
     .Where(pc => pc.ProductID == productID)
-    .ToList(); // Выполняем запрос в память
+    .ToList();
 
 int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity) : 0;
 
@@ -460,24 +470,126 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
             return View(product);
         }
 
+        public IActionResult BasketPage()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
+            return View(cart);
+        }
 
+        [HttpPost]
+        public IActionResult AddToCart(int id, string name, decimal price, string photo, int quantity = 1)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            if (string.IsNullOrEmpty(login))
+            {
+                return Json(new { success = false, message = "Вы не авторизованы!" });
+            }
 
+            var productContents = _context.ProductContents
+                .FirstOrDefault(pc => pc.ProductID == id);
 
+            int maxQuantity = productContents != null ? productContents.Quantity : 0;
 
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
+            var existingProduct = cart.FirstOrDefault(p => p.Id == id);
+            if (existingProduct != null)
+            {
+                if (existingProduct.Quantity + quantity <= maxQuantity)
+                {
+                    existingProduct.Quantity += quantity;
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Достигнуто максимальное количество на складе" });
+                }
+            }
+            else
+            {
+                if (quantity > maxQuantity)
+                {
+                    return Json(new { success = false, message = "Достигнуто максимальное количество на складе" });
+                }
 
+                cart.Add(new CartItem { Id = id, Name = name, Price = price, Photo = photo, Quantity = quantity });
+            }
 
+            HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
 
+            return Json(new { success = true, message = "Товар добавлен в корзину!" });
+        }
 
+        [HttpPost]
+        public IActionResult RemoveFromCart(int id)
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
+            var itemToRemove = cart.FirstOrDefault(item => item.Id == id);
+            if (itemToRemove != null)
+            {
+                cart.Remove(itemToRemove);
+                HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+            }
 
+            return Json(new { success = true });
+        }
 
+        [HttpPost]
+        public IActionResult UpdateQuantity(int id, int quantity)
+        {
+            if (quantity < 0)
+            {
+                return Json(new { success = false, message = "Количество не может быть отрицательным" });
+            }
 
+            var productContents = _context.ProductContents
+                .FirstOrDefault(pc => pc.ProductID == id);
 
+            int maxQuantity = productContents != null ? productContents.Quantity : 0;
 
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
+            var itemToUpdate = cart.FirstOrDefault(item => item.Id == id);
+            if (itemToUpdate != null)
+            {
+                if (quantity == 0)
+                {
+                    cart.Remove(itemToUpdate);
+                }
+                else if (quantity <= maxQuantity)
+                {
+                    itemToUpdate.Quantity = quantity;
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Достигнуто максимальное количество на складе" });
+                }
 
+                HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+                return Json(new { success = true, message = "Количество товара изменено" });
+            }
+
+            return Json(new { success = false, message = "Товар не найден в корзине" });
+        }
+
+        [HttpPost]
+        public IActionResult Checkout()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
+
+            if (!cart.Any())
+            {
+                return Json(new { success = false, message = "Корзина пуста" });
+            }
+
+            return Json(new { success = true, items = cart });
+        }
 
 
 
