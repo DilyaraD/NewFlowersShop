@@ -57,7 +57,7 @@
                 </div>
             </div>
             <div class="infoOrder">
-                <button type="button" class="custom-btn" style="position: absolute; top: 10px; right: 10px">
+                <button type="button" class="custom-btn" style="position: absolute; top: 10px; right: 10px" onclick="openReviewModal()" id="openReviewModal">
                     Написать отзыв
                 </button>
                 <p><strong>Адрес доставки:</strong> @Model.Delivery.DeliveryAddress</p>
@@ -68,5 +68,75 @@
             </div>
         </div>
     </div>
+
+
+
+    <div class="modalM" id="reviewModal">
+        <div class="modal-contentM">
+            <div class="modal-headerM">
+                <span class="close-buttonM" id="closeReviewModal">&times;</span>
+            </div>
+            <div class="button-group" id="reviewButtons">
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+   
+    function openReviewModal() {
+        document.getElementById("reviewModal").style.display = "flex";
+    }
+
+    function redirectToReview(productId) {
+        window.location.href = `/ReviewsPage/` + productId;
+    }
+
+    document.getElementById("closeReviewModal").addEventListener("click", function () {
+        document.getElementById("reviewModal").style.display = "none";
+    });
+
+    window.onclick = function (event) {
+        let modal = document.getElementById("reviewModal");
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    $(document).ready(function () {
+        $("#openReviewModal").click(function () {
+            $.ajax({
+                url: "/Home/GetReviewableProducts",
+                type: "GET",
+                data: { orderId: @Model.OrderID },
+                success: function (data) {
+                    let buttonsContainer = $("#reviewButtons");
+                    buttonsContainer.empty();
+
+                    if (data.length === 0) {
+                        buttonsContainer.append("<p>Вы уже оставили отзывы на все товары.</p>");
+                    } else {
+                        data.forEach(product => {
+                            let button = `<button class="product-btn" onclick="window.location.href='/Home/ReviewsPage/${product.productID}'">
+                                    <img src="${product.photo}" class="imageProductBasket2" />
+                                    ${product.productName}
+                                </button>`;
+                            buttonsContainer.append(button);
+                        });
+                    }
+
+                    $("#reviewModal").show();
+                },
+                error: function () {
+                    alert("Ошибка загрузки товаров.");
+                }
+            });
+        });
+
+        $("#closeReviewModal").click(function () {
+            $("#reviewModal").hide();
+        });
+    });
+</script>

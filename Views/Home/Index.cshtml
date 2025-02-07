@@ -126,8 +126,8 @@
         const $button = $(this);
 
          function showModalMessage(message) {
-            $('#deleteModal .modal-body').text(message); // Меняем текст в модальном окне
-            $('#deleteModal').modal('show'); // Показываем окно
+            $('#deleteModal .modal-body').text(message); 
+            $('#deleteModal').modal('show'); 
         }
 
         $.get('/Home/IsAuthenticated', function (data) {

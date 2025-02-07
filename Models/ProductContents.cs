@@ -10,5 +10,6 @@ namespace NewFlowersShop
         public int FlowerTypeID { get; set; }
         public int Quantity { get; set; }
         public virtual FlowerType FlowerType { get; set; }
+
     }
 }

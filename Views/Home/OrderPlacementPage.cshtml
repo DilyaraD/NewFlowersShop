@@ -1,0 +1,418 @@
+﻿@{ var isAuthenticated = Context.User.Identity.IsAuthenticated; 
+var stores =ViewBag.Stores as List<NewFlowersShop.Stores>; }
+
+  <!DOCTYPE html>
+  <html lang="ru">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+      <link rel="stylesheet" href="style.css" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
+        rel="stylesheet"
+      />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+        rel="stylesheet"
+      />
+      <title>Новые цветы</title>
+    </head>
+    <body>
+      <div class="basket">
+        <h1>Оформление заказа</h1>
+        <form id="orderForm">
+          <div class="basket2">
+            <div class="infoBasket24">
+              <div class="productBasket3">
+                <div class="mb-6">
+                  <h2>Способ доставки</h2>
+                  <div class="flex space-x-4">
+                    <button
+                      id="courierDelivery"
+                      class="delivery-button"
+                      type="button"
+                    >
+                      Курьером
+                    </button>
+                    <button
+                      id="storePickup"
+                      class="delivery-button active"
+                      type="button"
+                    >
+                      Забрать в магазине
+                    </button>
+                  </div>
+
+                  <div id="storeDetails" class="m">
+                    <select class="store" name="store">
+                      <option value="" disabled selected hidden>Все</option>
+                      @if (stores != null) { foreach (var store in stores) {
+                                            <option value="@store.StoreID" data-address="@store.Address">@store.Address</option>
+                      } }
+                    </select>
+
+                    <div class="data">
+                      <input
+                        type="date"
+                        id="storeDate"
+                        name="storeDate"
+                        class="border border-gray-300 rounded-lg p-2 w-full"
+                      />
+                      <select class="hour" name="hour">
+                        <option value="" disabled selected hidden>час</option>
+                        <option>08</option>
+                        <option>09</option>
+                        <option>10</option>
+                        <option>11</option>
+                        <option>12</option>
+                        <option>13</option>
+                        <option>14</option>
+                        <option>15</option>
+                        <option>16</option>
+                        <option>17</option>
+                        <option>18</option>
+                        <option>19</option>
+                      </select>
+                      <select class="minute" name="minute">
+                        <option value="" disabled selected hidden>мин</option>
+                        <option>00</option>
+                        <option>15</option>
+                        <option>30</option>
+                        <option>45</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div id="courierDetails" class="hidden">
+                    <input
+                      type="date"
+                      name="courierDate"
+                      id="courierDate"
+                      class="border border-gray-300 rounded-lg p-2 w-full"
+                    />
+
+                    <select class="courierTime" name="courierTime">
+                      <option value="" disabled selected hidden>время</option>
+                      <option>08:00</option>
+                      <option>08:30</option>
+                      <option>09:00</option>
+                      <option>09:30</option>
+                      <option>10:00</option>
+                      <option>10:30</option>
+                      <option>11:00</option>
+                      <option>11:30</option>
+                      <option>12:00</option>
+                      <option>12:30</option>
+                      <option>13:00</option>
+                      <option>13:30</option>
+                      <option>14:00</option>
+                      <option>14:30</option>
+                      <option>15:00</option>
+                      <option>15:30</option>
+                      <option>16:00</option>
+                      <option>16:30</option>
+                      <option>17:00</option>
+                      <option>17:30</option>
+                      <option>18:00</option>
+                      <option>18:30</option>
+                      <option>19:00</option>
+                      <option>19:30</option>
+                      <option>20:00</option>
+                      <option>20:30</option>
+                      <option>21:00</option>
+                      <option>21:30</option>
+                      <option>22:00</option>
+                      <option>22:30</option>
+                      <option>23:00</option>
+                      <option>23:30</option>
+                      <option>00:00</option>
+                      <option>00:30</option>
+                      <option>01:00</option>
+                    </select>
+                    <br />
+                    <input
+                      type="text"
+                      name="deliveryAddress"
+                      placeholder="Адрес доставки"
+                      class="address"
+                    />
+                  </div>
+                </div>
+
+                <div class="mb-6">
+                  <div class="flex space-x-4">
+                    <button
+                      id="selfRecipient"
+                      class="recipient-button active"
+                      type="button"
+                    >
+                      Я получатель
+                    </button>
+                    <button
+                      id="giftRecipient"
+                      class="recipient-button"
+                      type="button"
+                    >
+                      В подарок
+                    </button>
+                  </div>
+
+                  <div id="giftDetails" class="hidden">
+                    <input
+                      type="text"
+                      name="NameCust"
+                      placeholder="Имя получателя"
+                      class="w-full border border-gray-300 rounded-lg p-2 mb-2"
+                    />
+                    <input
+                      type="text"
+                      name="recipientPhone"
+                      placeholder="Номер телефона"
+                      id="recipientPhone"
+                      class="w-full border border-gray-300 rounded-lg p-2 mb-2"
+                    />
+
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="selectedTypes"
+                        id="addNoteCheckbox"
+                        class="mr-2"
+                      />записка
+                    </label>
+
+                    <textarea
+                      id="noteTextarea"
+                      name="noteTextarea"
+                      class="flex items-center mb-2"
+                      placeholder="Введите текст вашей записки (max 20-100 символов) "
+                      style="display: none"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div class="pay">
+                  <h2 class="text-xl font-semibold mb-2">Способ оплаты</h2>
+                  <label class="flex items-center">
+                    <input type="radio" name="paymentMethod" class="mr-2" value="Карта"/>
+                    Карта
+                  </label>
+                  <label class="flex items-center">
+                    <input type="radio" name="paymentMethod" class="mr-2"  value="Наличные"/>
+                    Наличные
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="totalBasket">
+              <div class="total">
+                <h3>Ваш заказ</h3>
+                <div class="info-row-Product">
+                  <span>Товары</span>
+                  <span class="value">@ViewBag.TotalAmount.ToString("C")</span>
+                </div>
+                <div class="info-row-Product">
+                  <span>Скидка</span>
+                  <span class="value">0₽</span>
+                </div>
+                <div class="info-row-Product">
+                  <h5>Всего</h5>
+                  <h5 class="value">@ViewBag.TotalAmount.ToString("C")</h5>
+                </div>
+                <button id="order" type="submit">оформить заказ</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Сообщение</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+      <script>
+        function showMessage(message) {
+            document.getElementById('modalBody').textContent = message;
+            new bootstrap.Modal(document.getElementById('messageModal')).show();
+        }
+
+        document.getElementById("storePickup").onclick = function () {
+          toggleDeliveryMethod(true);
+        };
+        document.getElementById("courierDelivery").onclick = function () {
+          toggleDeliveryMethod(false);
+        };
+
+        document.getElementById("selfRecipient").onclick = function () {
+          toggleRecipientMethod(true);
+        };
+        document.getElementById("giftRecipient").onclick = function () {
+          toggleRecipientMethod(false);
+        };
+
+        function toggleDeliveryMethod(isStore) {
+          document
+            .getElementById("storePickup")
+            .classList.toggle("active", isStore);
+          document
+            .getElementById("courierDelivery")
+            .classList.toggle("active", !isStore);
+          document
+            .getElementById("storeDetails")
+            .classList.toggle("hidden", !isStore);
+          document
+            .getElementById("courierDetails")
+            .classList.toggle("hidden", isStore);
+        }
+
+        document
+          .getElementById("addNoteCheckbox")
+          .addEventListener("change", function () {
+            const noteTextarea = document.getElementById("noteTextarea");
+            if (this.checked) {
+              noteTextarea.style.display = "flex";
+            } else {
+              noteTextarea.style.display = "none";
+            }
+          });
+
+        function toggleRecipientMethod(isSelf) {
+          document
+            .getElementById("selfRecipient")
+            .classList.toggle("active", isSelf);
+          document
+            .getElementById("giftRecipient")
+            .classList.toggle("active", !isSelf);
+          document
+            .getElementById("giftDetails")
+            .classList.toggle("hidden", isSelf);
+        }
+
+        let today = new Date().toISOString().split("T")[0];
+        let maxDate = new Date();
+        maxDate.setMonth(maxDate.getMonth() + 4);
+        let maxDateString = maxDate.toISOString().split("T")[0];
+
+        document.getElementById("storeDate").setAttribute("min", today);
+        document.getElementById("storeDate").setAttribute("max", maxDateString);
+        document.getElementById("courierDate").setAttribute("min", today);
+        document
+          .getElementById("courierDate")
+          .setAttribute("max", maxDateString);
+
+        $(document).ready(function () {
+            $("#order").click(function (e) {
+                e.preventDefault();
+
+                let selectedDelivery = $(".delivery-button.active").attr("id");
+                let isStorePickup = selectedDelivery === "storePickup";
+                let isValid = true;
+
+                if (isStorePickup) {
+                    let store = $(".store").val();
+                    let date = $("#storeDate").val();
+                    let hour = $(".hour").val();
+                    let minute = $(".minute").val();
+
+                    if (!store) {
+                        showMessage("Выберите магазин.");
+                        isValid = false;
+                    }
+                    if (!date) {
+                        showMessage("Выберите дату.");
+                        isValid = false;
+                    }
+                    if (!hour || !minute) {
+                        showMessage("Выберите время.");
+                        isValid = false;
+                    }
+                } else {
+                    let date = $("#courierDate").val();
+                    let time = $(".courierTime").val();
+                    let address = $(".address").val().trim();
+
+                    if (!date) {
+                        showMessage("Выберите дату доставки.");
+                        isValid = false;
+                    }
+                    if (!time) {
+                        showMessage("Выберите время доставки.");
+                        isValid = false;
+                    }
+                    if (!address) {
+                        showMessage("Введите адрес доставки.");
+                        isValid = false;
+                    }
+                }
+                if (!$("input[name='paymentMethod']:checked").val()) {
+                    showMessage("Выберите способ оплаты.");
+                    return;
+                }
+
+                if (!isValid) return;
+
+                let phoneNumber = $("#recipientPhone").val().trim();
+                if (phoneNumber && !/^\d{11}$/.test(phoneNumber)) {
+                    showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX");
+                    return;
+                }
+
+                let selectedAddress = $(".store option:selected").attr("data-address");
+
+                let formData = {
+                    deliveryMethod: isStorePickup ? "Самовывоз" : "Курьером",
+                    store: isStorePickup ? $("#store").val() : "",
+                    deliveryAddress: isStorePickup ? selectedAddress || "" : $(".address").val().trim(),
+
+                    courierDate: isStorePickup ? $("#storeDate").val() : $("#courierDate").val(),
+                    courierTime: isStorePickup
+                        ? $(".hour").val() + ":" + $(".minute").val()
+                        : $(".courierTime").val(),
+                    NameCust:
+                        $("#recipientPhone").val() && $("#NameCust").val()
+                            ? $("#NameCust").val().trim()
+                            : "",
+                    recipientPhone: $("#recipientPhone").val().trim(),
+                    paymentMethod: $("input[name='paymentMethod']:checked").val(),
+                };
+
+                $.ajax({
+                    url: "/Home/ProcessOrder",
+                    type: "POST",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            showMessage(response.message);
+                            window.location.href =
+                                `/Home/DetailedOrderHistoryPage?orderId=` + response.orderId;
+                        } else {
+                            showMessage(response.message);
+                        }
+                    },
+                    error: function () {
+                        showMessage("Ошибка при отправке заказа.");
+                    },
+                });
+            });
+        });
+
+      </script>
+    </body>
+  </html>

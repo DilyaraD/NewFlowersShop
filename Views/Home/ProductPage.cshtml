@@ -220,37 +220,36 @@
                 });
             });
 
+        });
+      });
+                document.addEventListener('DOMContentLoaded', function () {
+                    const tabButtons = document.querySelectorAll('.tab-button');
 
-            const tabButtons = document.querySelectorAll('.selectProduct .tab-button');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const tabId = this.dataset.tab;
-                    const tabContent = document.getElementById(tabId);
-                    const currentActive = document.querySelector('.selectProduct .tab-button.active');
-                    if (currentActive) {
-                        if (currentActive !== this) {
-                            currentActive.classList.remove('active');
-                            document.getElementById(currentActive.dataset.tab).style.display = 'none';
+                    if (tabButtons.length === 0) {
+                        console.error("Кнопки табов (.tab-button) не найдены!");
+                        return;
+                    }
 
-                            this.classList.add('active');
-                            tabContent.style.display = 'block';
-                        }
-                        else {
+                    tabButtons.forEach(button => {
+                        button.addEventListener('click', function () {
+                            const tabId = this.dataset.tab;
+                            const tabContent = document.getElementById(tabId);
+
+                            if (!tabContent) return; // Если таба нет, ничего не делаем
+
+                            const currentActive = document.querySelector('.tab-button.active');
+
+                            if (currentActive && currentActive !== this) {
+                                currentActive.classList.remove('active');
+                                document.getElementById(currentActive.dataset.tab).style.display = 'none';
+                            }
 
                             this.classList.toggle('active');
                             tabContent.style.display = this.classList.contains('active') ? 'block' : 'none';
-                        }
-
-                    }
-                    else {
-
-                        this.classList.add('active');
-                        tabContent.style.display = 'block';
-                    }
+                        });
+                    });
                 });
-          });
-        });
-      });
+
 
         function showMessage(message) {
             document.getElementById('modalBody').textContent = message;

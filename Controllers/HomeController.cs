@@ -94,7 +94,7 @@ namespace NewFlowersShop.Controllers
 
             if (storeId.HasValue)
             {
-                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0));
+                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0)); ///////поменять бд и тут сменить
             }
 
             query = sort switch
@@ -578,7 +578,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
         }
 
         [HttpPost]
-        public IActionResult Checkout()////////////////////////////////////////////////////////////////////////&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&????????????????????????????????7
+        public IActionResult Checkout()
         {
             var cartJson = HttpContext.Session.GetString("Cart");
             List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
@@ -588,6 +588,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                 return Json(new { success = false, message = "Корзина пуста" });
             }
 
+            ViewBag.TotalAmount = cart.Sum(item => item.Price * item.Quantity);
             return Json(new { success = true, items = cart });
         }
 
@@ -647,6 +648,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                         .Join(_context.Products, oc => oc.ProductID, p => p.ProductID,
                             (oc, p) => new ProductViewModel
                             {
+                                ProductID = p.ProductID,
                                 ProductName = p.ProductName,
                                 Photo = p.Photo,
                                 Quantity = oc.Quantity,
@@ -663,6 +665,216 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             return View(order);
         }
+
+        [Route("Home/ReviewsPage/{productID:int}")]
+        public IActionResult ReviewsPage(int productId)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            if (string.IsNullOrEmpty(login))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var product = _context.Products.FirstOrDefault(p => p.ProductID == productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ReviewViewModel
+            {
+                ProductID = product.ProductID,
+                ProductName = product.ProductName,
+                Photo = product.Photo
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult SubmitReview([FromBody] ReviewInputModel model)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            if (string.IsNullOrEmpty(login))
+            {
+                return Unauthorized();
+            }
+
+            var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var review = new Reviews
+            {
+                CustomerID = user.CustomerID,
+                ProductID = model.ProductId,
+                ReviewText = model.ReviewText,
+                Rating = model.Rating,
+                StatusID = 2,
+                ReviewDate = DateTime.Now
+            };
+
+            _context.Reviews.Add(review);
+            _context.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpGet]
+        public IActionResult GetReviewableProducts(int orderId)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            if (string.IsNullOrEmpty(login))
+            {
+                return Unauthorized();
+            }
+
+            var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var products = _context.OrderContents
+             .Where(op => op.OrderID == orderId)
+             .Include(op => op.Product)  
+             .Select(op => new
+             {
+                 op.Product.ProductID, 
+                 op.Product.ProductName,
+                 op.Product.Photo
+             })
+             .ToList();
+
+            var reviewableProducts = products.Where(p =>
+                !_context.Reviews.Any(r => r.CustomerID == user.CustomerID && r.ProductID == p.ProductID))
+                .ToList();
+
+            return Json(reviewableProducts);
+        }
+
+        public IActionResult OrderPlacementPage()
+        {
+            var cartJson = HttpContext.Session.GetString("Cart");
+            var cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
+
+            ViewBag.TotalAmount = cart.Sum(item => item.Price * item.Quantity);
+            ViewBag.Stores = _context.Stores.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ProcessOrder()
+        {
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
+            
+            var deliveryMethod = Request.Form["deliveryMethod"];           
+            var deliveryDate = Request.Form["courierDate"];
+            var deliveryTime = Request.Form["courierTime"];
+            var paymentMethod = Request.Form["paymentMethod"];
+            var deliveryAddress = Request.Form["deliveryAddress"].FirstOrDefault() ?? "";
+            var fullName = string.IsNullOrEmpty(Request.Form["NameCust"].ToString())
+                ? user?.FirstName
+                : Request.Form["NameCust"].ToString();
+            var phone = string.IsNullOrEmpty(Request.Form["recipientPhone"].ToString())
+                ? user?.PhoneNumber
+                : Request.Form["recipientPhone"].ToString();
+
+
+
+            if (string.IsNullOrEmpty(deliveryMethod) || string.IsNullOrEmpty(paymentMethod))
+            {
+                return Json(new { success = false, message = "Заполните все обязательные поля." });
+            }
+
+            var cartJson = HttpContext.Session.GetString("Cart");
+            List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
+
+            if (!cart.Any())
+            {
+                return Json(new { success = false, message = "Корзина пуста." });
+            }
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                     var delivery = new Deliveries
+                    {
+                        DeliveryMethod = deliveryMethod,
+                        DeliveryAddress = deliveryAddress,
+                        DeliveryDate = DateTime.Parse(deliveryDate),
+                        DeliveryTime = deliveryTime,
+                        DeliveryStatusID = 1,
+                        DeliveryName = fullName,
+                        DeliveryPhone = phone,
+                        DeliveryPayment = paymentMethod
+                    };
+
+                    _context.Deliveries.Add(delivery);
+                    _context.SaveChanges();
+
+                    var order = new Orders
+                    {
+                        CustomerID = user.CustomerID, 
+                        OrderDate = DateTime.Now,
+                        TotalAmount = cart.Sum(item => item.Price * item.Quantity),
+                        StatusID = 1,
+                        DeliveryID = delivery.DeliveryID
+                    };
+
+                    _context.Orders.Add(order);
+                    _context.SaveChanges();
+
+                    foreach (var item in cart)
+                    {
+                        var productContent = _context.ProductContents.FirstOrDefault(pc => pc.ProductID == item.Id);
+
+                        if (productContent == null || productContent.Quantity < item.Quantity)
+                        {
+                            transaction.Rollback();
+                            return Json(new { success = false, message = "Некоторых товаров нет в наличии." });
+                        }
+
+                        var orderContent = new OrderContents
+                        {
+                            OrderID = order.OrderID,
+                            ProductID = item.Id,
+                            Quantity = item.Quantity,
+                            Price = item.Price
+                        };
+
+                        _context.OrderContents.Add(orderContent);
+
+                        productContent.Quantity -= item.Quantity;
+                    }
+
+                    _context.SaveChanges();
+                    transaction.Commit();
+
+                    HttpContext.Session.Remove("Cart");
+
+                    return Json(new { success = true, message = "Заказ успешно оформлен.", orderId = order.OrderID });
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Json(new { success = false, message = "Ошибка при оформлении заказа: " + ex.Message });
+                }
+            }
+        }
+
+
+
 
 
 

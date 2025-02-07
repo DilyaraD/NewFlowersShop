@@ -11,7 +11,6 @@ namespace NewFlowersShop
         }
     
         public int FlowerTypeID { get; set; }
-        public int CategoryID { get; set; }
         public string FlowerTypeName { get; set; }
     }
 }

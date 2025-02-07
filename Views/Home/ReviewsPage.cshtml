@@ -1,0 +1,87 @@
+﻿@model NewFlowersShop.Models.ReviewViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Оставить отзыв</title>
+</head>
+<body>
+    <div class="infoProfil">
+        <h1>Мои данные</h1>
+        <div class="infoReviews">
+            <div class="review-header">
+                <div class="product-info">
+                    <img src="@Model.Photo" class="imageProductBasket2" />
+                    <h3>@Model.ProductName</h3>
+                </div>
+                <div class="starsReviews">
+                    <span class="star" data-value="1">&#9733;</span>
+                    <span class="star" data-value="2">&#9733;</span>
+                    <span class="star" data-value="3">&#9733;</span>
+                    <span class="star" data-value="4">&#9733;</span>
+                    <span class="star" data-value="5">&#9733;</span>
+                </div>
+            </div>
+
+            <textarea id="reviewText" class="review-input" placeholder="Введите текст вашего отзыва"></textarea>
+            <button type="button" class="custom-btn" onclick="submitReview(@Model.ProductID)" style="width: 200px;">отправить</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let selectedRating = 0;
+
+        $(".star").on("mouseenter", function () {
+            let value = $(this).data("value");
+            $(".star").each(function () {
+                $(this).toggleClass("gold", $(this).data("value") <= value);
+            });
+        });
+
+        $(".starsReviews").on("mouseleave", function () {
+            $(".star").each(function () {
+                $(this).toggleClass("gold", $(this).data("value") <= selectedRating);
+            });
+        });
+
+        $(".star").on("click", function () {
+            selectedRating = $(this).data("value");
+            $(".star").each(function () {
+                $(this).removeClass("gold");
+                if ($(this).data("value") <= selectedRating) {
+                    $(this).addClass("gold");
+                }
+            });
+        });
+
+        function submitReview(productId) {
+            let reviewText = $("#reviewText").val();
+            if (!reviewText.trim() || selectedRating === 0) {
+                alert("Введите текст отзыва и выберите оценку.");
+                return;
+            }
+
+            $.ajax({
+                url: "/Home/SubmitReview",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    productId: productId,
+                    reviewText: reviewText,
+                    rating: selectedRating
+                }),
+                success: function () {
+                    alert("Отзыв сохранен!");
+                    window.location.href = "/Home/OrderHistoryPage";
+                },
+                error: function () {
+                    alert("Ошибка сохранения.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

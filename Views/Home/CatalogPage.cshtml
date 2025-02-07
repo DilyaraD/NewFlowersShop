@@ -23,9 +23,17 @@
                 <h5>Цена, ₽</h5>
                 <div class="PriceCatalog">
                     <p>от</p>
-                    <input id="minPrice" type="number" min="0" max="100000" />
+                    <input id="minPrice" placeholder="1"
+                           type="number"
+                           min="0"
+                           max="100000"
+                           oninput="validateInput(this)" />
                     <p>до</p>
-                    <input id="maxPrice" type="number" min="0" max="100000" />
+                    <input id="maxPrice" placeholder="100000"
+                           type="number"
+                           min="0"
+                           max="100000"
+                           oninput="validateInput(this)" />
                 </div>
 
                 <h5>Категория</h5>
@@ -114,6 +122,17 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function validateInput(inputElement) {
+            inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
+            let value = parseInt(inputElement.value, 10);
+            if (isNaN(value)) {
+                value = 0
+            }
+            if (value > 100000) {
+                inputElement.value = 100000;
+            }
+        }
+
         function loadProducts() {
             var selectedTypes = $('#flowerTypes input:checked').map(function () {
                 return $(this).val();

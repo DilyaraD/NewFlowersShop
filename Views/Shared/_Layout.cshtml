@@ -108,8 +108,8 @@
                 <span class="close-buttonM" id="closeMenuModal">&times;</span>
             </div>
             <div class="button-group">
-               <button type="button" class="custom-btn" data-href="@Url.Action("OrderHistoryPage", "Home")">история заказов</button>
                 <button type="button" class="custom-btn" data-href="@Url.Action("DataPage", "Home")">мои данные</button>
+               <button type="button" class="custom-btn" data-href="@Url.Action("OrderHistoryPage", "Home")">история заказов</button>
                 <button type="button" class="custom-btn" data-href="/Home/Logout">выйти</button>
             </div>
         </div>
@@ -125,7 +125,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="messageBox" class="message" style="display: none;"></div>
+                    <div id="messageBox" class="message" 
+                        @* style="display: none;" *@
+                        ></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
@@ -282,6 +284,7 @@
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
             if (messageBox && deleteModal) {
+                deleteModal.style.zIndex = "1000";
                 messageBox.textContent = message;
                 messageBox.style.display = "block";
                 if (type === "error") {

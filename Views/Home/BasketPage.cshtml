@@ -209,7 +209,7 @@
                 $('#checkout-button').on('click', function () {
                       $.post('/Home/Checkout', function (response) {
                           if (response.success) {
-                              window.location.href = "/PaymentPage";
+                        window.location.href = "/Home/OrderPlacementPage";
                           } else {
                               showModalMessage(response.message);
                           }
