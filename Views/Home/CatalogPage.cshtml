@@ -173,7 +173,12 @@
                             $('#products').append(`
                             <div class="product" data-id="${product.productID}">
                                 <a href="ProductPage/${product.productID}">
-                                    <img src="${product.photo}" class="imageProduct" />
+
+                                            <img src="data:image/${product.photo.startsWith("/9j/") ? "jpeg" :
+                                    product.photo.startsWith("iVBORw0KGgo=") ? "png" :
+                                        product.photo.startsWith("R0lGOD") ? "gif" :
+                                            product.photo.startsWith("UklGR") ? "webp" : "jpeg"
+                                };base64,${product.photo}" class="imageProduct" />
                                     <h4 class="nameProduct">${product.productName}</h4>
                                 </a>
                                 <h5 class="priceProduct">${product.price} ₽</h5>

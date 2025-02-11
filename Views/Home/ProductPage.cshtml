@@ -20,7 +20,13 @@
         <button><a href="@Url.Action("CatalogPage", "Home")">назад в каталог</a></button>
         <div class="infoProduct">
             <div class="sidebar2">
-                <img src="./img_s/logo.svg" class="imageProductMain" />
+                <img src="@("data:image/" +
+(Model.Photo.StartsWith("/9j/") ? "jpeg" :
+(Model.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
+(Model.Photo.StartsWith("R0lGOD") ? "gif" :
+(Model.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
+";base64," +Model.Photo)" class="imageProductMain" alt="@Model.ProductName" />
+                @* <img src="./img_s/logo.svg" class="imageProductMain" /> *@
             </div>
             <div class="content2">
                 <h2 class="productNameMain">@Model.ProductName</h2>

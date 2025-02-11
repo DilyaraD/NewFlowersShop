@@ -300,15 +300,15 @@ color: black;
 
 
 /* !!!!!!!!! */
-.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1, .basket h1 {
-color: black;
-font-family: "Marmelad", serif;
-font-size: 46px;
-margin: 3% 0 1.5% 2%;
-text-decoration: underline;
+.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1, .basket h1, .productManagement h1 {
+    color: black;
+    font-family: "Marmelad", serif;
+    font-size: 46px;
+    margin: 3% 0 1.5% 2%;
+    text-decoration: underline;
 }
 
-.address {
+.addressBlock {
 text-align: center;
 border: 1px solid black;
 font-family: "Marmelad", serif;
@@ -851,8 +851,8 @@ padding: 10px;
 
 .imageProductMain {
 height: auto;
-max-height: 100%;
-max-width: 100%;
+max-height: 90%;
+max-width: 90%;
 display: block;
 border: 1px solid black;
 width: auto;
@@ -1487,6 +1487,112 @@ font-size: 16px;
 height: 35px;
 text-align: left;
 }
+
+/* /////////////////////////////////productManagement////////////////////////// */
+
+.hidden {
+    display: none;
+}
+
+.columns {
+    display: flex;
+    gap: 20px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.column {
+    flex: 1;
+    text-align: left;
+}
+
+.boxProducts {
+    padding: 1%;
+}
+
+.infoProductManagement button {
+    margin: 5px 0 0 0;
+    border-radius: 10px;
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 18px;
+    padding: 5px 20px;
+}
+
+#addProduct select, .infoProductManagement input {
+    font-size: 15px;
+    padding: 5px;
+    font-family: "Marmelad", serif;
+    width: 92%;
+    background-color: #3F1536;
+    color: white;
+    margin: 5px;
+}
+
+.infoProductManagement input {
+    background-color: #f2f2f2;
+    border: none;
+    width: 90%;
+    color: black;
+}
+
+
+.infoProductManagement h3 {
+    font-size: 25px;
+    font-family: "Marmelad", serif;
+}
+
+textarea {
+    width: 90%;
+    display: inline-block;
+    margin-right: 4%;
+    font-size: 15px;
+    font-family: "Marmelad", serif;
+    padding: 5px;
+    height: 20%;
+}
+
+.column .imageAdd {
+    border: none;
+    background-color: #d7d7d7;
+    margin: 5px 0 5px 0;
+    border-radius: 10px;
+}
+
+table th, td {
+    font-size: 20px;
+    margin: 5px 10px 0 0;
+    font-family: "Marmelad", serif;
+    width: 40%;
+    text-align: center;
+}
+
+#addProduct, #inventory {
+    text-align: center;
+}
+
+.column .action-panel {
+    font-size: 25px;
+    font-family: "Marmelad", serif;
+    text-align: center;
+}
+
+    .column .action-panel h4, p {
+        margin-bottom: 3px;
+    }
+
+.column p, span {
+    font-family: "Marmelad", serif;
+}
+
+
+
+
+
+
+
+
 
 /*.....................\\\\\\\\\\\\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\........*/
 

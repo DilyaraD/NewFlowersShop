@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+Ôªøusing Microsoft.AspNetCore.Mvc;
 using NewFlowersShop.Models;
 using System.Linq;
 using System.Diagnostics;
@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Newtonsoft.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace NewFlowersShop.Controllers
 {
@@ -22,20 +23,20 @@ namespace NewFlowersShop.Controllers
         public IActionResult Index()
         {
             var newProducts = _context.Products
-                .Where(p => _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
+                .Where(p => _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .OrderByDescending(p => p.ProductID)
                 .Take(12)
                 .ToList();
 
             var discountProducts = _context.Products
                 .Where(p => _context.ProductDiscounts.Any(pd => pd.ProductID == p.ProductID) &&
-                            _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
+                            _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .Take(12)
                 .ToList();
 
             var giftProducts = _context.Products
                 .Where(p => !newProducts.Contains(p) && !discountProducts.Contains(p) &&
-                            _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0))
+                            _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .Take(12)
                 .ToList();
 
@@ -94,7 +95,7 @@ namespace NewFlowersShop.Controllers
 
             if (storeId.HasValue)
             {
-                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0)); ///////ÔÓÏÂÌˇÚ¸ ·‰ Ë ÚÛÚ ÒÏÂÌËÚ¸
+                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0)); 
             }
 
             query = sort switch
@@ -143,12 +144,13 @@ namespace NewFlowersShop.Controllers
                 p.ProductName,
                 p.Price,
                 p.Photo,
-                InStock = _context.ProductContents.Any(pc => pc.ProductID == p.ProductID && pc.Quantity > 0)
+                InStock = _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0)
             }).ToList();
+
 
             if (products.Count == 0)
             {
-                return Json(new { message = "ÕÂÚ ÚÓ‚‡Ó‚" });
+                return Json(new { message = "–ù–µ—Ç —Ç–æ–≤–∞—Ä–æ–≤" });
             }
 
             return Json(products);
@@ -173,8 +175,9 @@ namespace NewFlowersShop.Controllers
         [HttpGet]
         public JsonResult IsAuthenticated()
         {
-            bool isAuthenticated = !string.IsNullOrEmpty(HttpContext.Session.GetString("UserRole"));
-            return Json(new { isAuthenticated });
+            var userRole = HttpContext.Session.GetString("UserRole");
+            bool isAuthenticated = !string.IsNullOrEmpty(userRole);
+            return Json(new { isAuthenticated, role = userRole });
         }
 
         public IActionResult DataPage()
@@ -299,7 +302,7 @@ namespace NewFlowersShop.Controllers
 
 
 
-                return Json(new { success = true, message = "ƒ‡ÌÌ˚Â ÛÒÔÂ¯ÌÓ ÒÓı‡ÌÂÌ˚.", redirectUrl = Url.Action("DataPage", "Home") });
+                return Json(new { success = true, message = "–î–∞–Ω–Ω—ã–µ —É—Å–ø–µ—à–Ω–æ —Å–æ—Ö—Ä–∞–Ω–µ–Ω—ã.", redirectUrl = Url.Action("DataPage", "Home") });
             }
             else if (employee != null)
             {
@@ -322,10 +325,10 @@ namespace NewFlowersShop.Controllers
                 HttpContext.Session.SetString("FullName", $"{firstName} {lastName}");
                 HttpContext.Session.SetString("Password", password);
 
-                return Json(new { success = true, message = "ƒ‡ÌÌ˚Â ÛÒÔÂ¯ÌÓ ÒÓı‡ÌÂÌ˚.", redirectUrl = Url.Action("DataPage", "Home") });
+                return Json(new { success = true, message = "–î–∞–Ω–Ω—ã–µ —É—Å–ø–µ—à–Ω–æ —Å–æ—Ö—Ä–∞–Ω–µ–Ω—ã.", redirectUrl = Url.Action("DataPage", "Home") });
             }
 
-            return Json(new { success = false, message = "œÓÎ¸ÁÓ‚‡ÚÂÎ¸ ÌÂ Ì‡È‰ÂÌ." });
+            return Json(new { success = false, message = "–ü–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å –Ω–µ –Ω–∞–π–¥–µ–Ω." });
         }
 
         [HttpPost]
@@ -333,7 +336,7 @@ namespace NewFlowersShop.Controllers
         {
             if (_context.Customers.Any(c => c.LoginCustomer == login) || _context.Employees.Any(e => e.LoginEmployee == login))
             {
-                return Json(new { success = false, message = "ÀÓ„ËÌ ÛÊÂ Á‡ÌˇÚ" });
+                return Json(new { success = false, message = "–õ–æ–≥–∏–Ω —É–∂–µ –∑–∞–Ω—è—Ç" });
             }
 
             var newCustomer = new Customers
@@ -396,7 +399,7 @@ namespace NewFlowersShop.Controllers
 
             if (employee != null)
             {
-                var role = _context.Roles.FirstOrDefault(r => r.RoleID == employee.RoleID)?.RoleName ?? "Employee";
+                var role = _context.Roles.FirstOrDefault(r => r.RoleID == employee.RoleID)?.RoleName;
                 HttpContext.Session.SetInt32("EmUserId", employee.EmployeeID);
                 HttpContext.Session.SetInt32("CusUserId", 0);
                 HttpContext.Session.SetString("UserRole", role);
@@ -410,8 +413,9 @@ namespace NewFlowersShop.Controllers
 
                 return RedirectToAction("DataPage", "Home");
             }
+            ViewData["UserRole"] = HttpContext.Session.GetString("UserRole");
 
-            return Json(new { success = false, message = "ÕÂ‚ÂÌ˚È ÎÓ„ËÌ ËÎË Ô‡ÓÎ¸" });
+            return Json(new { success = false, message = "–ù–µ–≤–µ—Ä–Ω—ã–π –ª–æ–≥–∏–Ω –∏–ª–∏ –ø–∞—Ä–æ–ª—å" });
         }
 
         [Route("Home/ProductPage/{productID:int}")]
@@ -420,7 +424,7 @@ namespace NewFlowersShop.Controllers
             var product = _context.Products.FirstOrDefault(p => p.ProductID == productID);
             if (product == null)
             {
-                return Content($"œÓ‰ÛÍÚ ÌÂ Ì‡È‰ÂÌ.");
+                return Content($"–ü—Ä–æ–¥—É–∫—Ç –Ω–µ –Ω–∞–π–¥–µ–Ω.");
             }
 
             var categoryName = _context.FlowerCategories
@@ -429,19 +433,19 @@ namespace NewFlowersShop.Controllers
                 .FirstOrDefault();
 
             var flowerTypeNames = _context.FlowerType
-                .Where(ft => _context.ProductContents
-                    .Any(pc => pc.ProductID == productID && pc.FlowerTypeID == ft.FlowerTypeID && pc.Quantity > 0))
-                .Select(ft => ft.FlowerTypeName)
-                .ToList();
+    .Where(ft => _context.ProductContents
+        .Any(pc => pc.ProductID == productID && pc.FlowerTypeID == ft.FlowerTypeID))
+    .Select(ft => ft.FlowerTypeName)
+    .ToList();
+
 
             ViewData["FlowerTypes"] = string.Join(", ", flowerTypeNames);
-
             var storeIds = _context.StoreFlowerStocks
-                .Where(sfs => _context.ProductContents
-                    .Any(pc => pc.ProductID == productID && pc.FlowerTypeID == sfs.FlowerTypeID))
-                .Select(sfs => sfs.StoreID)
-                .Distinct()
-                .ToList();
+     .Where(sfs => _context.ProductContents.Any(pc => pc.ProductID == productID && sfs.FlowerTypeID == pc.ProductID) ||
+                   !_context.ProductContents.Any(pc => pc.ProductID == productID) && sfs.FlowerTypeID == productID)
+     .Select(sfs => sfs.StoreID)
+     .Distinct()
+     .ToList();
 
             var storeAddresses = _context.Stores
                 .Where(store => storeIds.Contains(store.StoreID))
@@ -450,16 +454,17 @@ namespace NewFlowersShop.Controllers
 
             ViewData["Stores"] = storeAddresses;
 
+
             ViewBag.FlowerCategories = categoryName;
 
-            var productContents = _context.ProductContents
-    .Where(pc => pc.ProductID == productID)
+            var productContents = _context.StoreFlowerStocks
+    .Where(pc => pc.FlowerTypeID == productID)
     .ToList();
 
-int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity) : 0;
+            int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity) : 0;
 
             var reviews = _context.Reviews
-        .Where(r => r.ProductID == productID)
+        .Where(r => r.ProductID == productID && r.StatusID==12)
         .OrderByDescending(r => r.ReviewDate)
         .ToList();
 
@@ -484,11 +489,11 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
             var login = HttpContext.Session.GetString("Login");
             if (string.IsNullOrEmpty(login))
             {
-                return Json(new { success = false, message = "¬˚ ÌÂ ‡‚ÚÓËÁÓ‚‡Ì˚!" });
+                return Json(new { success = false, message = "–í—ã –Ω–µ –∞–≤—Ç–æ—Ä–∏–∑–æ–≤–∞–Ω—ã!" });
             }
 
-            var productContents = _context.ProductContents
-                .FirstOrDefault(pc => pc.ProductID == id);
+            var productContents = _context.StoreFlowerStocks
+                .FirstOrDefault(pc => pc.FlowerTypeID == id);
 
             int maxQuantity = productContents != null ? productContents.Quantity : 0;
 
@@ -504,14 +509,14 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                 }
                 else
                 {
-                    return Json(new { success = false, message = "ƒÓÒÚË„ÌÛÚÓ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ÍÓÎË˜ÂÒÚ‚Ó Ì‡ ÒÍÎ‡‰Â" });
+                    return Json(new { success = false, message = "–î–æ—Å—Ç–∏–≥–Ω—É—Ç–æ –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∫–æ–ª–∏—á–µ—Å—Ç–≤–æ –Ω–∞ —Å–∫–ª–∞–¥–µ" });
                 }
             }
             else
             {
                 if (quantity > maxQuantity)
                 {
-                    return Json(new { success = false, message = "ƒÓÒÚË„ÌÛÚÓ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ÍÓÎË˜ÂÒÚ‚Ó Ì‡ ÒÍÎ‡‰Â" });
+                    return Json(new { success = false, message = "–î–æ—Å—Ç–∏–≥–Ω—É—Ç–æ –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∫–æ–ª–∏—á–µ—Å—Ç–≤–æ –Ω–∞ —Å–∫–ª–∞–¥–µ" });
                 }
 
                 cart.Add(new CartItem { Id = id, Name = name, Price = price, Photo = photo, Quantity = quantity });
@@ -519,7 +524,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
 
-            return Json(new { success = true, message = "“Ó‚‡ ‰Ó·‡‚ÎÂÌ ‚ ÍÓÁËÌÛ!" });
+            return Json(new { success = true, message = "–¢–æ–≤–∞—Ä –¥–æ–±–∞–≤–ª–µ–Ω –≤ –∫–æ—Ä–∑–∏–Ω—É!" });
         }
 
         [HttpPost]
@@ -543,11 +548,11 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
         {
             if (quantity < 0)
             {
-                return Json(new { success = false, message = " ÓÎË˜ÂÒÚ‚Ó ÌÂ ÏÓÊÂÚ ·˚Ú¸ ÓÚËˆ‡ÚÂÎ¸Ì˚Ï" });
+                return Json(new { success = false, message = "–ö–æ–ª–∏—á–µ—Å—Ç–≤–æ –Ω–µ –º–æ–∂–µ—Ç –±—ã—Ç—å –æ—Ç—Ä–∏—Ü–∞—Ç–µ–ª—å–Ω—ã–º" });
             }
 
-            var productContents = _context.ProductContents
-                .FirstOrDefault(pc => pc.ProductID == id);
+            var productContents = _context.StoreFlowerStocks
+                .FirstOrDefault(pc => pc.FlowerTypeID == id);
 
             int maxQuantity = productContents != null ? productContents.Quantity : 0;
 
@@ -567,14 +572,14 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                 }
                 else
                 {
-                    return Json(new { success = false, message = "ƒÓÒÚË„ÌÛÚÓ Ï‡ÍÒËÏ‡Î¸ÌÓÂ ÍÓÎË˜ÂÒÚ‚Ó Ì‡ ÒÍÎ‡‰Â" });
+                    return Json(new { success = false, message = "–î–æ—Å—Ç–∏–≥–Ω—É—Ç–æ –º–∞–∫—Å–∏–º–∞–ª—å–Ω–æ–µ –∫–æ–ª–∏—á–µ—Å—Ç–≤–æ –Ω–∞ —Å–∫–ª–∞–¥–µ" });
                 }
 
                 HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
-                return Json(new { success = true, message = " ÓÎË˜ÂÒÚ‚Ó ÚÓ‚‡‡ ËÁÏÂÌÂÌÓ" });
+                return Json(new { success = true, message = "–ö–æ–ª–∏—á–µ—Å—Ç–≤–æ —Ç–æ–≤–∞—Ä–∞ –∏–∑–º–µ–Ω–µ–Ω–æ" });
             }
 
-            return Json(new { success = false, message = "“Ó‚‡ ÌÂ Ì‡È‰ÂÌ ‚ ÍÓÁËÌÂ" });
+            return Json(new { success = false, message = "–¢–æ–≤–∞—Ä –Ω–µ –Ω–∞–π–¥–µ–Ω –≤ –∫–æ—Ä–∑–∏–Ω–µ" });
         }
 
         [HttpPost]
@@ -585,7 +590,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             if (!cart.Any())
             {
-                return Json(new { success = false, message = " ÓÁËÌ‡ ÔÛÒÚ‡" });
+                return Json(new { success = false, message = "–ö–æ—Ä–∑–∏–Ω–∞ –ø—É—Å—Ç–∞" });
             }
 
             ViewBag.TotalAmount = cart.Sum(item => item.Price * item.Quantity);
@@ -632,6 +637,13 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
             return View(orders);
         }
 
+
+
+
+
+
+
+
         public IActionResult DetailedOrderHistoryPage(int orderId)
         {
             var order = _context.Orders
@@ -665,6 +677,15 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             return View(order);
         }
+
+
+
+
+
+
+
+
+
 
         [Route("Home/ReviewsPage/{productID:int}")]
         public IActionResult ReviewsPage(int productId)
@@ -718,7 +739,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                 ProductID = model.ProductId,
                 ReviewText = model.ReviewText,
                 Rating = model.Rating,
-                StatusID = 2,
+                StatusID = 10,
                 ReviewDate = DateTime.Now
             };
 
@@ -793,7 +814,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             if (string.IsNullOrEmpty(deliveryMethod) || string.IsNullOrEmpty(paymentMethod))
             {
-                return Json(new { success = false, message = "«‡ÔÓÎÌËÚÂ ‚ÒÂ Ó·ˇÁ‡ÚÂÎ¸Ì˚Â ÔÓÎˇ." });
+                return Json(new { success = false, message = "–ó–∞–ø–æ–ª–Ω–∏—Ç–µ –≤—Å–µ –æ–±—è–∑–∞—Ç–µ–ª—å–Ω—ã–µ –ø–æ–ª—è." });
             }
 
             var cartJson = HttpContext.Session.GetString("Cart");
@@ -801,7 +822,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
             if (!cart.Any())
             {
-                return Json(new { success = false, message = " ÓÁËÌ‡ ÔÛÒÚ‡." });
+                return Json(new { success = false, message = "–ö–æ—Ä–∑–∏–Ω–∞ –ø—É—Å—Ç–∞." });
             }
 
             using (var transaction = _context.Database.BeginTransaction())
@@ -814,7 +835,7 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
                         DeliveryAddress = deliveryAddress,
                         DeliveryDate = DateTime.Parse(deliveryDate),
                         DeliveryTime = deliveryTime,
-                        DeliveryStatusID = 1,
+                        DeliveryStatusID = 17,
                         DeliveryName = fullName,
                         DeliveryPhone = phone,
                         DeliveryPayment = paymentMethod
@@ -837,12 +858,12 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
                     foreach (var item in cart)
                     {
-                        var productContent = _context.ProductContents.FirstOrDefault(pc => pc.ProductID == item.Id);
+                        var productContent = _context.StoreFlowerStocks.FirstOrDefault(pc => pc.FlowerTypeID == item.Id);
 
                         if (productContent == null || productContent.Quantity < item.Quantity)
                         {
                             transaction.Rollback();
-                            return Json(new { success = false, message = "ÕÂÍÓÚÓ˚ı ÚÓ‚‡Ó‚ ÌÂÚ ‚ Ì‡ÎË˜ËË." });
+                            return Json(new { success = false, message = "–ù–µ–∫–æ—Ç–æ—Ä—ã—Ö —Ç–æ–≤–∞—Ä–æ–≤ –Ω–µ—Ç –≤ –Ω–∞–ª–∏—á–∏–∏." });
                         }
 
                         var orderContent = new OrderContents
@@ -863,15 +884,259 @@ int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity)
 
                     HttpContext.Session.Remove("Cart");
 
-                    return Json(new { success = true, message = "«‡Í‡Á ÛÒÔÂ¯ÌÓ ÓÙÓÏÎÂÌ.", orderId = order.OrderID });
+                    return Json(new { success = true, message = "–ó–∞–∫–∞–∑ —É—Å–ø–µ—à–Ω–æ –æ—Ñ–æ—Ä–º–ª–µ–Ω.", orderId = order.OrderID });
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    return Json(new { success = false, message = "Œ¯Ë·Í‡ ÔË ÓÙÓÏÎÂÌËË Á‡Í‡Á‡: " + ex.Message });
+                    return Json(new { success = false, message = "–û—à–∏–±–∫–∞ –ø—Ä–∏ –æ—Ñ–æ—Ä–º–ª–µ–Ω–∏–∏ –∑–∞–∫–∞–∑–∞: " + ex.Message });
                 }
             }
         }
+
+        public IActionResult productManagementPage()
+        {
+            var productStocks = _context.StoreFlowerStocks
+                .Join(
+                    _context.Products,
+                    stock => stock.FlowerTypeID,
+                    product => product.ProductID,
+                    (stock, product) => new ProductStock
+                    {
+                        ProductID = product.ProductID,
+                        ProductName = product.ProductName,
+                        Quantity = stock.Quantity,
+                        StoreID = stock.StoreID
+
+                    }).Distinct()
+                .ToList();
+
+            var query = _context.Products.AsQueryable();
+            var newProducts = query.Select(p => new
+            {
+                p.ProductID,
+                p.ProductName,
+                p.Price,
+                p.Photo,
+                InStock = _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0)
+            }).ToList();
+            ViewBag.Products = newProducts;
+
+
+            ViewBag.ProductStocks = productStocks;
+            var packages = _context.Products.Select(p => p.Package).Distinct().ToList();
+
+            var flowerTypes = _context.FlowerType.ToList();
+
+            ViewBag.Packages = packages;
+            ViewBag.FlowerTypes = flowerTypes;
+
+
+            ViewBag.Categories = _context.FlowerCategories.ToList();
+            ViewBag.Stores = _context.Stores.ToList();
+
+            return View();
+        }
+
+        private string ConvertImageToBase64(IFormFile photo)
+        {
+            if (photo == null)
+            {
+                Console.WriteLine("–§–æ—Ç–æ –Ω–µ –ø–µ—Ä–µ–¥–∞–Ω–æ –≤ –º–µ—Ç–æ–¥ ConvertImageToBase64.");
+                return "";
+            }
+
+            if (photo.Length == 0)
+            {
+                Console.WriteLine("–§–æ—Ç–æ –ø–µ—Ä–µ–¥–∞–Ω–æ, –Ω–æ –ø—É—Å—Ç–æ–µ.");
+                return "";
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                photo.CopyTo(ms);
+                return Convert.ToBase64String(ms.ToArray());
+            }
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult productAdd(IFormFile photo, int categoryID, string productName, string description,
+      string careDescription, decimal price, string size, string package,
+      List<int> selectedFlowerTypes, List<int> selectedStores, int quantity)
+        {
+            if (selectedStores == null || selectedFlowerTypes == null)
+            {
+                TempData["ErrorMessage"] = "–ù–µ –≤—ã–±—Ä–∞–Ω—ã –º–∞–≥–∞–∑–∏–Ω—ã –∏–ª–∏ —Ç–∏–ø—ã —Ü–≤–µ—Ç–æ–≤";
+                return RedirectToAction("productManagementPage");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(productName) || price <= 0 || categoryID <= 0)
+                {
+                    TempData["ErrorMessage"] = "–ó–∞–ø–æ–ª–Ω–∏—Ç–µ –≤—Å–µ –æ–±—è–∑–∞—Ç–µ–ª—å–Ω—ã–µ –ø–æ–ª—è!";
+                    return RedirectToAction("productManagementPage");
+                }
+
+                using var transaction = _context.Database.BeginTransaction();
+
+                try
+                {
+                    string base64Photo = ConvertImageToBase64(photo);
+                    var newProduct = new Products
+                    {
+                        CategoryID = categoryID,
+                        ProductName = productName,
+                        DescriptionProduct = description,
+                        CareDescription = careDescription,
+                        Price = price,
+                        Size = size,
+                        Package = package,
+                        StatusID = 1,
+                        Photo = base64Photo
+                    };
+
+                    _context.Products.Add(newProduct);
+                    _context.SaveChanges();
+
+                    if (selectedStores != null && selectedStores.Count > 0)
+                    {
+                        foreach (var storeID in selectedStores)
+                        {
+                            var newStock = new StoreFlowerStocks
+                            {
+                                StoreID = storeID,
+                                FlowerTypeID = newProduct.ProductID,
+                                Quantity = quantity
+                            };
+                            _context.StoreFlowerStocks.Add(newStock);
+                        }
+                    }
+
+                    if (selectedFlowerTypes != null && selectedFlowerTypes.Count > 0)
+                    {
+                        foreach (var flowerTypeID in selectedFlowerTypes)
+                        {
+                            _context.ProductContents.Add(new ProductContents
+                            {
+                                ProductID = newProduct.ProductID,
+                                FlowerTypeID = flowerTypeID
+                            });
+                        }
+                    }
+
+                    _context.SaveChanges();
+
+                    transaction.Commit(); 
+                    return RedirectToAction("productManagementPage");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    TempData["ErrorMessage"] = "–û—à–∏–±–∫–∞ –ø—Ä–∏ —Å–æ—Ö—Ä–∞–Ω–µ–Ω–∏–∏!";
+                    return RedirectToAction("productManagementPage");
+                }
+            }
+        }
+
+
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        public IActionResult RequestRestock(int productId, int quantity, int storeID)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
+
+            var product = _context.Products.FirstOrDefault(p => p.ProductID == productId);
+            if (product == null)
+            {
+                return BadRequest("–¢–æ–≤–∞—Ä –Ω–µ –Ω–∞–π–¥–µ–Ω.");
+            }
+
+            var restockRequest = new RestockRequests
+            {
+                ProductID = productId,
+                Quantity = quantity,
+                RequestDate = DateTime.Now,
+                StatusID = 18,
+                EmployeeID = user.EmployeeID,
+                StoreID = storeID
+            };
+            _context.RestockRequests.Add(restockRequest);
+            _context.SaveChanges();
+
+            return Ok("–ó–∞–ø—Ä–æ—Å –Ω–∞ –ø–æ–ø–æ–ª–Ω–µ–Ω–∏–µ –æ—Ç–ø—Ä–∞–≤–ª–µ–Ω.");
+        }
+
+        [HttpPost]
+        public IActionResult WriteOff(int productId, int quantity, int storeID)
+        {
+            var stock = _context.StoreFlowerStocks
+                                .FirstOrDefault(s => s.FlowerTypeID == productId && s.StoreID == storeID);
+            var prod = _context.Products.FirstOrDefault(p=>p.ProductID == productId);
+
+            if (stock == null)
+            {
+                return BadRequest("–ù–µ—Ç —Ç–æ–≤–∞—Ä–∞ –¥–ª—è —Å–ø–∏—Å–∞–Ω–∏—è.");
+            }
+            else if(stock.Quantity < quantity)
+            {
+                stock.Quantity = 0;
+                prod.StatusID = 2;
+            } else
+            {
+                stock.Quantity -= quantity;
+            }
+
+            _context.Products.Update(prod);
+            _context.StoreFlowerStocks.Update(stock);
+            _context.SaveChanges();
+
+            return Ok("–°–ø–∏—Å–∞–Ω–∏–µ –≤—ã–ø–æ–ª–Ω–µ–Ω–æ.");
+        }
+
+
+
+
+
+
+
+
+
+
+
+        public IActionResult orderManagementPage()
+        {
+            return View();
+        }
+
+        public IActionResult homePageManagementPage()
+        {
+            return View();
+        }
+
+
+
+
+
+
 
 
 

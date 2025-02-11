@@ -9,5 +9,6 @@ namespace NewFlowersShop
         public int StoreID { get; set; }
         public int FlowerTypeID { get; set; }
         public int Quantity { get; set; }
+        public virtual Stores Store { get; set; }
     }
 }

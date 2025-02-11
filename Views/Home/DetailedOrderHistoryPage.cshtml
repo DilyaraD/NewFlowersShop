@@ -45,7 +45,15 @@
                         <div class="table-row">
                             <div class="table-cell products-cell">
                                 <div class="product-item">
-                                    <img src="@product.Photo" class="imageProductBasket" />
+
+                                    <img src="@("data:image/" +
+(product.Photo.StartsWith("/9j/") ? "jpeg" :
+(product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
+(product.Photo.StartsWith("R0lGOD") ? "gif" :
+(product.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
+";base64," +product.Photo)" class="imageProductBasket" />
+
+                                    @* <img src="@product.Photo" class="imageProductBasket" /> *@
                                 </div>
                             </div>
                             <div class="table-cell">@product.ProductName</div>

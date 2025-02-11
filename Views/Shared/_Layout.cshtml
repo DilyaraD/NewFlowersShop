@@ -109,7 +109,10 @@
             </div>
             <div class="button-group">
                 <button type="button" class="custom-btn" data-href="@Url.Action("DataPage", "Home")">мои данные</button>
-               <button type="button" class="custom-btn" data-href="@Url.Action("OrderHistoryPage", "Home")">история заказов</button>
+                <button type="button" class="custom-btn" data-href="@Url.Action("productManagementPage", "Home")">товары</button>
+                <button type="button" class="custom-btn" data-href="@Url.Action("orderManagementPage", "Home")">заказы</button>
+                <button type="button" class="custom-btn" data-href="@Url.Action("homePageManagementPage", "Home")">управление главной страницей</button>
+                <button type="button" class="custom-btn" data-href="@Url.Action("OrderHistoryPage", "Home")">история заказов</button>
                 <button type="button" class="custom-btn" data-href="/Home/Logout">выйти</button>
             </div>
         </div>
@@ -121,13 +124,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Ошибка</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body">
-                    <div id="messageBox" class="message" 
-                        @* style="display: none;" *@
-                        ></div>
+                <div class="modal-body" id="notificationModalBody">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
@@ -161,6 +161,30 @@
    <script>
 
         document.addEventListener("DOMContentLoaded", function () {
+
+            const userRole = '@ViewData["UserRole"]';  // Получаем роль из ViewData
+
+            // Скрываем или показываем кнопки в зависимости от роли
+
+            const productButton = document.querySelector('button[data-href="@Url.Action("productManagementPage", "Home")"]');
+            const orderButton = document.querySelector('button[data-href="@Url.Action("orderManagementPage", "Home")"]');
+            const historyButton = document.querySelector('button[data-href="@Url.Action("OrderHistoryPage", "Home")"]');
+            const homePageManagementPage = document.querySelector('button[data-href="@Url.Action("homePageManagementPage", "Home")"]');
+
+            // Для роли "Customer" скрываем кнопки "товары" и "заказы"
+            if (userRole === "Customer") {
+                if (productButton) productButton.style.display = "none";
+                if (orderButton) orderButton.style.display = "none";
+                if (homePageManagementPage) homePageManagementPage.style.display = "none";
+            }
+
+            // Для роли "Florist" скрываем кнопки "история заказов"
+            if (userRole === "Florist") {
+                if (historyButton) historyButton.style.display = "none";
+            }
+
+
+
             let authModal = document.getElementById("authModal");
             let registerModal = document.getElementById("registerModal");
             let menuModal = document.getElementById("menuModal");
@@ -266,12 +290,12 @@
                         })
                         .then(data => {
                             if (data && !data.success) {
-                                showMessage(data.message, "error"); 
+                                showMessage(data.message); 
                             }
                         })
                         .catch(error => {
                             console.error("Ошибка:", error);
-                            showMessage("Произошла ошибка при авторизации.", "error"); 
+                            showMessage("Произошла ошибка при авторизации."); 
                         });
                 });
             });
@@ -279,31 +303,11 @@
         });
 
 
-        function showMessage(message, type) {
-            const messageBox = document.getElementById("messageBox");
-            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-
-            if (messageBox && deleteModal) {
-                deleteModal.style.zIndex = "1000";
-                messageBox.textContent = message;
-                messageBox.style.display = "block";
-                if (type === "error") {
-                    messageBox.classList.add("error-message");
-                    messageBox.classList.remove("success-message");
-                } else if (type === "success") {
-                    messageBox.classList.add("success-message");
-                    messageBox.classList.remove("error-message");
-                }
-                deleteModal.show();
-                const okButton = deleteModalElement.querySelector('[data-bs-dismiss="modal"]');
-
-                if (okButton)
-                    okButton.addEventListener("click", function () {
-                        deleteModal.hide();
-                    });
-            }
+       function showMessage(message) {
+           $('#deleteModal .modal-body').text(message);
+           $('#deleteModal').modal('show');
+            $('#deleteModal').css('z-index', '2000');
         }
-
 
         document.addEventListener("DOMContentLoaded", function () {
             const registerForm = document.getElementById("registerForm");
@@ -321,18 +325,18 @@
                     const phoneNumber = formData.get("phoneNumber");
 
                     if (login === "" || lastName === "" || firstName === "" || phoneNumber === "" || password === "") {
-                        showMessage("Все поля должны быть заполнены!", "error");
+                        showMessage("Все поля должны быть заполнены!");
                         return false;
                     }
 
                     let phonePattern = /^(\8)9\d{9}$/;
                     if (!phonePattern.test(phoneNumber)) {
-                        showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX", "error");
+                        showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX");
                         return false;
                     }
 
                     if (password.length > 0 && password.length < 6) {
-                        showMessage("Пароль должен содержать минимум 6 символов!", "error");
+                        showMessage("Пароль должен содержать минимум 6 символов!");
                         return false;
                     }
 
@@ -350,12 +354,12 @@
                             if (data.success) {
                                 window.location.href = data.redirectUrl;
                             } else {
-                                showMessage(data.message, "error");
+                                showMessage(data.message);
                             }
                         })
                         .catch(error => {
-                            console.error("Ошибка при регистрации:", error);
-                            showMessage("Произошла ошибка. Попробуйте снова.", "error");
+                            console.error("Ошибка при регистрации:");
+                            showMessage("Произошла ошибка. Попробуйте снова.");
                         });
                 });
             }

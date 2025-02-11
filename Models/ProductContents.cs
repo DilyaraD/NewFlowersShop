@@ -8,7 +8,6 @@ namespace NewFlowersShop
         public int ProductContentID { get; set; }
         public int ProductID { get; set; }
         public int FlowerTypeID { get; set; }
-        public int Quantity { get; set; }
         public virtual FlowerType FlowerType { get; set; }
 
     }

@@ -39,7 +39,13 @@ s://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:
                                 @foreach (var product in order.Products)
                                 {
                                     <div class="product-item">
-                                        <img src="@product.Photo" class="imageProductBasket">
+                                        <img src="@("data:image/" +
+(product.Photo.StartsWith("/9j/") ? "jpeg" :
+(product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
+(product.Photo.StartsWith("R0lGOD") ? "gif" :
+(product.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
+";base64," +product.Photo)" class="imageProductBasket" />
+                                        @* <img src="@product.Photo" class="imageProductBasket"> *@
                                     </div>
                                 }
                             </div>

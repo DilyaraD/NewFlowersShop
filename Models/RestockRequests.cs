@@ -11,5 +11,6 @@ namespace NewFlowersShop
         public int Quantity { get; set; }
         public int StatusID { get; set; }
         public int EmployeeID { get; set; }
+        public int StoreID { get; set; }
     }
 }

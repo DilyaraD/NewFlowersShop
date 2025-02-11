@@ -48,7 +48,15 @@
                                 <div class="table-row" data-id="@item.Id" data-unit-price="@item.Price">
                                     <a href="ProductPage/@item.Id">
                                         <div class="table-cell">
-                                            <img src="@item.Photo" class="imageProductBasket" />
+                                            @* <img src="@" class="imageProductBasket" /> *@
+
+                                            <img src="@("data:image/" +
+    (item.Photo.StartsWith("/9j/") ? "jpeg" :
+    (item.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
+    (item.Photo.StartsWith("R0lGOD") ? "gif" :
+    (item.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
+    ";base64," +item.Photo)"  class="imageProductBasket" />
+
                                         </div>
                                     </a>
                                     <div class="table-cell">
