@@ -35,7 +35,7 @@ namespace NewFlowersShop.Controllers
                 .ToList();
 
             var giftProducts = _context.Products
-                .Where(p => !newProducts.Contains(p) && !discountProducts.Contains(p) &&
+                .Where(p => p.CategoryID == 10 && !newProducts.Contains(p) && !discountProducts.Contains(p) &&
                             _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .Take(12)
                 .ToList();
@@ -1041,23 +1041,6 @@ namespace NewFlowersShop.Controllers
             }
         }
 
-
-
-       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         [HttpPost]
         public IActionResult RequestRestock(int productId, int quantity, int storeID)
         {
@@ -1124,6 +1107,9 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult orderManagementPage()
         {
+            var orders = _context.Orders.Where(p => p.StatusID == 14).ToList();
+            ViewBag.orders = orders;
+
             return View();
         }
 

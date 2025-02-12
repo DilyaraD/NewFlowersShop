@@ -1,606 +1,674 @@
 ﻿@{
-  var productStocks = ViewBag.ProductStocks as List<ProductStock>;
-  List<Products> newProducts = ViewBag.NewProducts;
-  var categories = ViewBag.Categories as List<NewFlowersShop.FlowerCategories>;
-  var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
-  var packages = ViewBag.Packages as List<string>;
-  var flowerTypes = ViewBag.FlowerTypes as List<NewFlowersShop.FlowerType>;
-  var isAuthenticated = Context.User.Identity.IsAuthenticated;
+    var productStocks = ViewBag.ProductStocks as List<ProductStock>;
+    List<Products> newProducts = ViewBag.NewProducts;
+    var categories = ViewBag.Categories as List<NewFlowersShop.FlowerCategories>;
+    var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
+    var packages = ViewBag.Packages as List<string>;
+    var flowerTypes = ViewBag.FlowerTypes as List<NewFlowersShop.FlowerType>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
-        rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
-        rel="stylesheet" />
-  <title>Новые цветы</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+          rel="stylesheet" />
+    <title>Новые цветы</title>
 </head>
 <body>
-  <div class="productManagement">
-      <h1>Управление товарами</h1>
-      <div class="infoProductManagement">
-          <div class="button-product">
-              <button id="addProductBtn">Добавить товар</button>
-              <button id="inventoryBtn">Инвентаризация</button>
-          </div>
-          <div>
-              <div id="products" class="divProducts">
-                  @if (ViewBag.Products != null)
-                  {
-                      var products = ViewBag.Products as IEnumerable<dynamic>;
-                      foreach (var product in products)
-                      {
-                          <div class="product" data-id="@product.ProductID">
-                              <a href="/Home/ProductPage/@product.ProductID">
-                                  <img src="@("data:image/" +
-  (product.Photo.StartsWith("/9j/") ? "jpeg" :
-  (product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
-  (product.Photo.StartsWith("R0lGOD") ? "gif" :
-  (product.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
-  ";base64," + product.Photo)"
-                                       alt="@product.ProductName" class="imageProduct" />
-
-                                  <h4 class="nameProduct">@product.ProductName</h4>
-                              </a>
-                              <h5 class="priceProduct">@product.Price ₽</h5>
-
-                              @if (product.InStock)
-                              {
-                                  <span class="out-of-stock">Есть в наличии</span>
-                              }
-                              else
-                              {
-                                  <span class="out-of-stock">Нет в наличии</span>
-                              }
-                          </div>
-                      }
-                  }
-              </div>
-          </div>
-
-          <div id="addProduct" class="popup hidden">
-              <form method="post" enctype="multipart/form-data">
-                  @Html.AntiForgeryToken()
-                  <h3>Добавление товара</h3>
-                  <div class="columns">
-                      <div class="column">
-                          <input type="text" name="productName" placeholder="Название" />
-                          <input type="text" name="price" placeholder="Цена" />
-                          <select name="size">
-                              <option value="" disabled selected hidden>Размер</option>
-                              <option value="Средний">Средний</option>
-                              <option value="Маленький">Маленький</option>
-                              <option value="Большой">Большой</option>
-                          </select>
-
-
-                          <select name="package">
-                              <option value="" disabled selected hidden>Упаковка</option>
-                              @if (packages != null)
-                              {
-                                  foreach (var package in packages)
-                                  {
-                                      <option value="@package"> @package</option>
-                                  }
-                              }
-                          </select>
-                          <select name="categoryID">
-                              <option value="" disabled selected hidden>Категория</option>
-                              @if (categories != null)
-                              {
-                                  foreach (var category in categories)
-                                  {
-                                      <option value="@category.CategoryID">@category.CategoryName</option>
-                                  }
-                              }
-                          </select>
-                          <button type="button" id="openStoreModal" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#storeModal">Выбрать магазины</button>
-                          <p>Выбранные магазины: <span id="selectedStores"></span></p>
-                          <input type="hidden" id="selectedStoreIdsInput" name="selectedStores" />
-
-                          <button class="imageAdd">
-                              <img src="~/img_s/image-plus.svg" />
-                          </button>
-                          <input type="file" name="photo" id="fileInput" accept="image/*" style="display: none" required />
-                          <label for="fileInput" id="fileLabel">Выберите изображение</label>
-
-                      </div>
-                      <div class="column">
-                          <textarea placeholder="Описание товара" name="description"></textarea>
-                          <textarea placeholder="Уход за цветами" name="careDescription"></textarea>
-                          <input type="text" placeholder="Количество" name="quantity" />
-                          <button type="button" id="openFlowerModal" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#flowerModal">Добавить содержимое</button>
-                          <p>Выбранные типы: <span id="selectedFlowers"></span></p>
-                          <input type="hidden" id="selectedFlowerTypesInput" name="selectedFlowerTypes" />
-                      </div>
-                  </div>
-                  <button type="submit" class="add">Добавить</button>
-                  <button class="close">Закрыть</button>
-              </form>
-          </div>
-
-
-          <div id="inventory" class="popup hidden">
-              <h3>Инвентаризация</h3>
-              <div class="columns">
-                  <div class="column">
-                      <select id="store">
-                           <option value="" disabled selected hidden>Адрес магазина</option>
-                          @if (stores != null)
-                          {
-                              foreach (var store in stores)
-                              {
-                                  <option value="@store.StoreID" name="@store.Address">@store.Address</option>
-                              }
-                          }
-                      </select>
-                      <table>
-                          <tr>
-                              <th>Товар</th>
-                              <th>Количество</th>
-                          </tr>
-                         @foreach (var productStock in productStocks)
-{
-    <tr class="item-row" name="@productStock.ProductID" data-store="@productStock.StoreID" data-quantity="@productStock.Quantity">
-        <td>@productStock.ProductName</td>
-        <td>@productStock.Quantity</td>
-    </tr>
-}
-
-                      </table>
-                  </div>
-                  <div class="column">
-                      <div class="column action-panel"></div>
-                  </div>
-              </div>
-              <button class="close">Закрыть</button>
-          </div>
-      </div>
-  </div>
-
-
-
-
-
-  <div class="modal fade" id="flowerModal" tabindex="-1" aria-labelledby="flowerModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="flowerModalLabel">Выбор содержимого</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-              </div>
-              <div class="modal-body" style="text-align:left;">
-                  @if (flowerTypes != null)
-                  {
-                      foreach (var flowerType in flowerTypes)
-                      {
-                          <label>
-                              <input type="checkbox" name="selectedFlowerTypes" value="@flowerType.FlowerTypeID" class="flowerCheckbox" />
-                              @flowerType.FlowerTypeName
-                          </label>
-
-                          <br>
-                      }
-                  }
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" id="saveFlowerSelection">Сохранить</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-
-  <div class="modal fade" id="storeModal" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="storeModalLabel">Выбор магазинов</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-              </div>
-              <div class="modal-body" style="text-align:left;">
-                  @if (stores != null)
-                  {
-                      foreach (var store in stores)
-                      {
-                          <label>
-                              <input type="checkbox" name="selectedStores" value="@store.StoreID" class="storeCheckbox" />
-                              @store.Address
-                          </label>
-                          <br>
-                      }
-                  }
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-primary" id="saveStoreSelection">Сохранить</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-              </div>
-              <div class="modal-body" id="notificationModalBody">
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-
-      $(document).ready(function () {
-  $(".button-product button").click(function () {
-      let targetId = $(this).attr("id") === "addProductBtn" ? "#addProduct" : "#inventory";
-  
-      $(".popup").addClass("hidden"); // скрываем все окна
-      $(".divProducts").addClass("hidden");
-
-      $(targetId).removeClass("hidden"); // открываем нужное
-  });
-
-          $("#requestStockBtn").click(function () {
-              $("#requestStock").toggleClass("hidden");
-          });
-
-          $(".item-row").click(function () {
-              $("#writeOff").removeClass("hidden");
-          });
-
-          $(".close").click(function () {
-  $(this).closest(".popup").addClass("hidden");
-  $("#products").removeClass("hidden"); 
-});
-
-      });
-
-      document
-          .querySelector(".imageAdd")
-          .addEventListener("click", function () {
-              event.preventDefault();
-              document.getElementById("fileInput").click();
-          });
-
-
-      document.getElementById("fileInput").addEventListener("change", function (event) {
-          let file = event.target.files[0];
-          if (file) {
-              document.getElementById("fileLabel").textContent = file.name;
-          }
-      });
-
-      $("input[type='file']").change(function () {
-          console.log("Выбран файл:", this.files[0]?.name);
-      });
-
-      $("input[type='text'][placeholder='Цена'], input[type='text'][placeholder='Количество']").on("input", function () {
-          let value = $(this).val().replace(/[^0-9]/g, "");
-          if (value !== "") {
-              value = Math.min(parseInt(value, 10), $(this).attr("placeholder") === "Цена" ? 150000 : 1000);
-          }
-          $(this).val(value);
-      });
-
-      $(".add").click(function () {
-          let valid = true;
-          $("input[type='text']").each(function () {
-              if ($(this).val().trim() === "" || $(this).hasClass("error")) {
-                  $(this).addClass("error");
-                  valid = false;
-              } else {
-                  $(this).removeClass("error");
-              }
-          });
-
-          if (!valid) {
-              showMessage("Заполните все поля правильно!");
-          } else {
-              showMessage("Товар добавлен!");
-          }
-      });
-
-      function showMessage(message) {
-          $('#deleteModal .modal-body').text(message);
-          $('#deleteModal').modal('show');
-          $('#deleteModal').css('z-index', '2000');
-      }
-
-      $("#saveFlowerSelection").click(function () {
-          let selectedFlowers = [];
-          $(".flowerCheckbox:checked").each(function () {
-              selectedFlowers.push($(this).val());
-          });
-
-          $("#selectedFlowers").text(selectedFlowers.join(", "));
-
-          $("#selectedFlowerTypesInput").empty();
-
-          selectedFlowers.forEach(flower => {
-              $("#selectedFlowerTypesInput").append(`<input type="hidden" name="selectedFlowerTypes" value="${flower}" />`);
-          });
-
-          $("#flowerModal").modal("hide");
-      });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      $(document).ready(function () {
-          // Фильтрация товаров по магазину
-          $("#store").change(function () {
-              let selectedStore = $(this).val();
-              $(".item-row").each(function () {
-                  if (selectedStore === "" || $(this).data("store") == selectedStore) {
-                      $(this).show();
-                  } else {
-                      $(this).hide();
-                  }
-              });
-          });
-
-          // При нажатии на товар
-          $(".item-row").click(function () {
-               $(".item-row").click(function () {
-              let productName = $(this).find("td:first").text();
-              let productId = $(this).closest("tr").attr("name");
-              console.log("Product ID:", productId);
-              let quantity = $(this).data("quantity");
-              let storeId = $("#store").val();
-
-
-
-              let actionPanel = $(".column.action-panel");
-              actionPanel.html(`
-                  <h4>Действия с товаром: ${productName}</h4>
-                  <button class="request-btn" value="${productId}">Запрос на пополнение</button>
-                  ${quantity > 0 ? '<button class="write-off-btn" value="${productId}">Списание</button>' : ''}
-                  <div id="action-form"></div>
-              `);
-          });
-
-                          // ...
-$(document).on("click", ".write-off-btn", function () {
-    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-
-    $("#action-form").html(`
-        <p>Списания товара “${itemName}”</p>
-        <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
-        <button id="confirmWriteOff">Списать</button>
-    `);
-});
-
-$(document).on("click", ".request-btn", function () {
-    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-    $("#action-form").html(`
-        <p>Запрос на пополнение товара “${itemName}”</p>
-        <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
-        <button class="submit-request">Отправить</button>
-    `);
-});
-
-
-
-
-
-
-
-
-
-$(document).ready(function () {
-  // Фильтрация товаров по магазину
-  $("#store").change(function () {
-    let selectedStore = $(this).val();
-    $(".item-row").each(function () {
-      if (selectedStore === "" || $(this).data("store") == selectedStore) {
-        $(this).show();
-      } else {
-        $(this).hide();
-      }
-    });
-  });
-
-  // При нажатии на товар
-  $(document).on("click", ".item-row", function () {
-    let productName = $(this).find("td:first").text();
-    let productId = $(this).attr("name");
-    let quantity = $(this).data("quantity");
-    let storeId = $("#store").val();
-
-    let actionPanel = $(".column.action-panel");
-   actionPanel.html(`
-    <h4>Действия с товаром: ${productName}</h4>
-    <button class="request-btn" name="${productId}" data-store-id="${storeId}">Запрос на пополнение</button>
-    ${quantity > 0 ? `<button class="write-off-btn" name="${productId}" data-store-id="${storeId}">Списание</button>` : ""}
-    <div id="action-form"></div>
-`);
-
-  });
-
-  $(document).on("click", ".write-off-btn", function () {
-    let productId = $(this).attr("name");
-    let storeID = $(this).data("store-id");
-    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-
-    $("#action-form").html(`
-        <p>Списания товара “${itemName}”</p>
-        <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
-        <button id="confirmWriteOff" name="${productId}" data-store-id="${storeID}">Списать</button>
-    `);
-  });
-
-  $(document).on("click", ".request-btn", function () {
-    let productId = $(this).attr("name");
-    let storeID = $(this).data("store-id");
-    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-    $("#action-form").html(`
-        <p>Запрос на пополнение товара “${itemName}”</p>
-        <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
-        <button id="submit-request" name="${productId}" data-store-id="${storeID}">Отправить</button>
-    `);
-  });
-
-  // Обработчик для кнопки "Списать"
-  $(document).on("click", "#confirmWriteOff", function () {
-    let quantity = $("#writeOffQuantity").val();
-    let productId = $(this).attr("name");
-    // let quantity = $(".stock-input").val();
-    let storeID = $(this).data("store-id");
-
-    if (!quantity || quantity <= 0) {
-      showMessage("Укажите корректное количество для списания.");
-      return;
-    }
-
-    $.post("/Home/WriteOff", {
-        productId: productId,
-        quantity: quantity,
-        storeID: storeID
-      })
-      .done(function (response) {
-        showMessage(response);
-        setTimeout(function () {
-          location.reload();
-        }, 2000);
-        console.log(response);
-      })
-      .fail(function (error) {
-        showMessage("Ошибка при списании: " + error.responseText);
-      });
-  });
-
-  // Обработчик для кнопки "Отправить" (Запрос на пополнение)
-  $(document).on("click", ".submit-request", function () {
-   let $this = $(this);
-  
-  if ($this.data("sending")) return; // Блокируем повторное нажатие  
-  $this.data("sending", true);
-  
-  
-  let productId = $(this).attr("name");
-    let quantity = $(".stock-input").val();
-    let storeID = $(this).data("store-id");
-
-    if (!quantity || quantity <= 0) {
-      showMessage("Укажите корректное количество для запроса.");
-      $this.data("sending", false); // Разблокируем, если ошибка
-    return;
-    }
-
-    $.post("/Home/RequestRestock", {
-        productId: productId,
-        quantity: quantity,
-        storeID: storeID
-      })
-      .done(function (response) {
-        showMessage(response);
-        setTimeout(function () {
-          location.reload();
-        }, 2000);
-        console.log(response);
-
-      })
-      .fail(function (error) {
-        showMessage("Ошибка при отправке запроса: " + error.responseText);
-      })
-      .always(function () {
-      $this.data("sending", false); // Разблокируем после выполнения запроса
-    });
-  });
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-          $("form").submit(function (event) {
-              event.preventDefault();
-
-              let formData = new FormData(this);
-
-              console.log("Отправляемые данные:");
-              for (let pair of formData.entries()) {
-                  console.log(pair[0], pair[1]);
-              }
-
-              $.ajax({
-                  url: "/Home/productAdd",
-                  type: "POST",
-                  data: formData,
-                  contentType: false,
-                  processData: false,
-                  success: function (response) {
-                      showMessage("Товар добавлен успешно!");
-                  },
-                  error: function () {
-                      showMessage("Ошибка при добавлении товара!");
-                  }
-              });
-          });
-
-      $("#saveStoreSelection").click(function () {
-          let selectedStores = [];
-          $(".storeCheckbox:checked").each(function () {
-              selectedStores.push($(this).val());
-          });
-
-          $("#selectedStores").text(selectedStores.join(", "));
-
-          $("#selectedStoreIdsInput").empty();
-
-          selectedStores.forEach(store => {
-              $("#selectedStoreIdsInput").append(`<input type="hidden" name="selectedStores" value="${store}" />`);
-          });
-
-          $("#storeModal").modal("hide");
-      });
-    });
-  });
-  </script>
+    <div class="productManagement">
+        <h1>Управление товарами</h1>
+        <div class="infoProductManagement">
+            <div class="button-product">
+                <button id="addProductBtn">Добавить товар</button>
+                <button id="inventoryBtn">Инвентаризация</button>
+            </div>
+            <div>
+                <div id="products" class="divProducts">
+                    @if (ViewBag.Products != null)
+                    {
+                        var products = ViewBag.Products as IEnumerable<dynamic>;
+                        foreach (var product in products)
+                        {
+                            <div class="product" data-id="@product.ProductID">
+                                <a href="/Home/ProductPage/@product.ProductID">
+                                    <img src="@("data:image/" +
+    (product.Photo.StartsWith("/9j/") ? "jpeg" :
+    (product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
+    (product.Photo.StartsWith("R0lGOD") ? "gif" :
+    (product.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
+    ";base64," + product.Photo)"
+                                         alt="@product.ProductName" class="imageProduct" />
+
+                                    <h4 class="nameProduct">@product.ProductName</h4>
+                                </a>
+                                <h5 class="priceProduct">@product.Price ₽</h5>
+
+                                @if (product.InStock)
+                                {
+                                    <span class="out-of-stock">Есть в наличии</span>
+                                }
+                                else
+                                {
+                                    <span class="out-of-stock">Нет в наличии</span>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div id="addProduct" class="popup hidden">
+                <form method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <h3>Добавление товара</h3>
+                    <div class="columns">
+                        <div class="column">
+                            <input type="text" name="productName" placeholder="Название" />
+                            <input type="text" name="price" placeholder="Цена" />
+                            <select name="size">
+                                <option value="" disabled selected hidden>Размер</option>
+                                <option value="Средний">Средний</option>
+                                <option value="Маленький">Маленький</option>
+                                <option value="Большой">Большой</option>
+                            </select>
+
+
+                            <select name="package">
+                                <option value="" disabled selected hidden>Упаковка</option>
+                                @if (packages != null)
+                                {
+                                    foreach (var package in packages)
+                                    {
+                                        <option value="@package"> @package</option>
+                                    }
+                                }
+                            </select>
+                            <select name="categoryID">
+                                <option value="" disabled selected hidden>Категория</option>
+                                @if (categories != null)
+                                {
+                                    foreach (var category in categories)
+                                    {
+                                        <option value="@category.CategoryID">@category.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                            <button type="button" id="openStoreModal" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#storeModal">Выбрать магазины</button>
+                            <p>Выбранные магазины: <span id="selectedStores"></span></p>
+                            <input type="hidden" id="selectedStoreIdsInput" name="selectedStores" />
+
+                            <button class="imageAdd">
+                                <img src="~/img_s/image-plus.svg" />
+                            </button>
+                            <input type="file" name="photo" id="fileInput" accept="image/*" style="display: none" required />
+                            <label for="fileInput" id="fileLabel">Выберите изображение</label>
+
+                        </div>
+                        <div class="column">
+                            <textarea placeholder="Описание товара" name="description"></textarea>
+                            <textarea placeholder="Уход за цветами" name="careDescription"></textarea>
+                            <input type="text" placeholder="Количество" name="quantity" />
+                            <button type="button" id="openFlowerModal" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#flowerModal">Добавить содержимое</button>
+                            <p>Выбранные типы: <span id="selectedFlowers"></span></p>
+                            <input type="hidden" id="selectedFlowerTypesInput" name="selectedFlowerTypes" />
+                        </div>
+                    </div>
+                    <button type="submit" class="add">Добавить</button>
+                    <button class="close">Закрыть</button>
+                </form>
+            </div>
+
+
+            <div id="inventory" class="popup hidden">
+                <h3>Инвентаризация</h3>
+                <div class="columns">
+                    <div class="column">
+                        <select id="store">
+                            <option value="" disabled selected hidden>Адрес магазина</option>
+                            @if (stores != null)
+                            {
+                                foreach (var store in stores)
+                                {
+                                    <option value="@store.StoreID" name="@store.Address">@store.Address</option>
+                                }
+                            }
+                        </select>
+                        <table id="productTable" style="display:none;">
+                            <tr>
+                                <th>Товар</th>
+                                <th>Количество</th>
+                            </tr>
+                            @foreach (var productStock in productStocks)
+                            {
+                                <tr class="item-row" name="@productStock.ProductID" data-store="@productStock.StoreID" data-quantity="@productStock.Quantity">
+                                    <td>@productStock.ProductName</td>
+                                    <td>@productStock.Quantity</td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                    <div class="column">
+                        <div class="column action-panel"></div>
+                    </div>
+                </div>
+                <button class="close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <div class="modal fade" id="flowerModal" tabindex="-1" aria-labelledby="flowerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="flowerModalLabel">Выбор содержимого</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" style="text-align:left;">
+                    @if (flowerTypes != null)
+                    {
+                        foreach (var flowerType in flowerTypes)
+                        {
+                            <label>
+                                <input type="checkbox" name="selectedFlowerTypes" value="@flowerType.FlowerTypeID" class="flowerCheckbox" />
+                                @flowerType.FlowerTypeName
+                            </label>
+
+                            <br>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveFlowerSelection">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="storeModal" tabindex="-1" aria-labelledby="storeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="storeModalLabel">Выбор магазинов</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" style="text-align:left;">
+                    @if (stores != null)
+                    {
+                        foreach (var store in stores)
+                        {
+                            <label>
+                                <input type="checkbox" name="selectedStores" value="@store.StoreID" class="storeCheckbox" />
+                                @store.Address
+                            </label>
+                            <br>
+                        }
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="saveStoreSelection">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            $("select[name='package'] option[value='-']").remove();
+
+            $("select[name='categoryID']").change(function () {
+                const selectedCategory = $(this).val();
+                console.log("Выбрана категория:", selectedCategory);
+
+                if (selectedCategory == 10) {
+                    $("select[name='package']").hide();
+                    $("textarea[name='careDescription']").hide();
+                    $("#openFlowerModal").hide();
+                    $("#selectedFlowers").closest("p").hide();
+                } else {
+                    $("select[name='package']").show();
+                    $("textarea[name='careDescription']").show();
+                    $("#openFlowerModal").show();
+                    $("#selectedFlowers").closest("p").show();
+                }
+            });
+
+
+
+
+
+
+
+            $("#productTable").hide();
+               $("#store").change(function () {
+                let selectedStore = $(this).val();
+
+                if (selectedStore !== "") {
+                    $("#productTable").show();
+                    $(".item-row").each(function () {
+                        if (selectedStore === "" || $(this).data("store") == selectedStore) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                } else {
+                    $("#productTable").hide();
+                }
+            });
+
+
+            $(".button-product button").click(function () {
+                let targetId = $(this).attr("id") === "addProductBtn" ? "#addProduct" : "#inventory";
+
+                $(".popup").addClass("hidden");
+                $(".divProducts").addClass("hidden");
+
+                $(targetId).removeClass("hidden");
+            });
+
+            $("#requestStockBtn").click(function () {
+                $("#requestStock").toggleClass("hidden");
+            });
+
+            $(".item-row").click(function () {
+                $("#writeOff").removeClass("hidden");
+            });
+
+            $(".close").click(function () {
+                $(this).closest(".popup").addClass("hidden");
+                $("#products").removeClass("hidden");
+            });
+
+        });
+
+        document
+            .querySelector(".imageAdd")
+            .addEventListener("click", function () {
+                event.preventDefault();
+                document.getElementById("fileInput").click();
+            });
+
+
+        document.getElementById("fileInput").addEventListener("change", function (event) {
+            let file = event.target.files[0];
+            if (file) {
+                document.getElementById("fileLabel").textContent = file.name;
+            }
+        });
+
+        $("input[type='file']").change(function () {
+            console.log("Выбран файл:", this.files[0]?.name);
+        });
+
+        $("input[type='text'][placeholder='Цена'], input[type='text'][placeholder='Количество']").on("input", function () {
+            let value = $(this).val().replace(/[^0-9]/g, "");
+            if (value !== "") {
+                value = Math.min(parseInt(value, 10), $(this).attr("placeholder") === "Цена" ? 150000 : 1000);
+            }
+            $(this).val(value);
+        });
+
+        $(".add").click(function () {
+            let valid = true;
+            $("input[type='text']").each(function () {
+                if ($(this).val().trim() === "" || $(this).hasClass("error")) {
+                    $(this).addClass("error");
+                    valid = false;
+                } else {
+                    $(this).removeClass("error");
+                }
+            });
+
+            if (!valid) {
+                showMessage("Заполните все поля правильно!");
+            } else {
+                showMessage("Товар добавлен!");
+            }
+        });
+
+        function showMessage(message) {
+            $('#deleteModal .modal-body').text(message);
+            $('#deleteModal').modal('show');
+            $('#deleteModal').css('z-index', '2000');
+        }
+
+        $("#saveFlowerSelection").click(function () {
+            let selectedFlowers = [];
+            $(".flowerCheckbox:checked").each(function () {
+                selectedFlowers.push($(this).val());
+            });
+
+            $("#selectedFlowers").text(selectedFlowers.join(", "));
+
+            $("#selectedFlowerTypesInput").empty();
+
+            selectedFlowers.forEach(flower => {
+                $("#selectedFlowerTypesInput").append(`<input type="hidden" name="selectedFlowerTypes" value="${flower}" />`);
+            });
+
+            $("#flowerModal").modal("hide");
+        });
+
+        $(document).ready(function () {
+            $("#store").change(function () {
+                let selectedStore = $(this).val();
+                $(".item-row").each(function () {
+                    if (selectedStore === "" || $(this).data("store") == selectedStore) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            
+
+            $(".item-row").click(function () {
+                $(".item-row").click(function () {
+                    let productName = $(this).find("td:first").text();
+                    let productId = $(this).closest("tr").attr("name");
+                    console.log("Product ID:", productId);
+                    let quantity = $(this).data("quantity");
+                    let storeId = $("#store").val();
+
+
+
+                    let actionPanel = $(".column.action-panel");
+                    actionPanel.html(`
+                                    <h4>Действия с товаром: ${productName}</h4>
+                                    <button class="request-btn" value="${productId}">Запрос на пополнение</button>
+                                    ${quantity > 0 ? '<button class="write-off-btn" value="${productId}">Списание</button>' : ''}
+                                    <div id="action-form"></div>
+                                `);
+                });
+
+                $(document).on("click", ".write-off-btn", function () {
+                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
+
+                    $("#action-form").html(`
+                          <p>Списания товара “${itemName}”</p>
+                          <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
+                          <button id="confirmWriteOff">Списать</button>
+                      `);
+                });
+
+                $(document).on("click", ".request-btn", function () {
+                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
+                    $("#action-form").html(`
+                          <p>Запрос на пополнение товара “${itemName}”</p>
+                          <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
+                          <button class="submit-request">Отправить</button>
+                      `);
+                });
+
+                $(document).on("click", ".item-row", function () {
+                    let productName = $(this).find("td:first").text();
+                    let productId = $(this).attr("name");
+                    let quantity = $(this).data("quantity");
+                    let storeId = $("#store").val();
+
+                    let actionPanel = $(".column.action-panel");
+                    actionPanel.html(`
+                      <h4>Действия с товаром: ${productName}</h4>
+                      <button class="request-btn" name="${productId}" data-store-id="${storeId}">Запрос на пополнение</button>
+                      ${quantity > 0 ? `<button class="write-off-btn" name="${productId}" data-store-id="${storeId}">Списание</button>` : ""}
+                      <div id="action-form"></div>
+                  `);
+
+                });
+
+                $(document).on("click", ".write-off-btn", function () {
+                    let productId = $(this).attr("name");
+                    let storeID = $(this).data("store-id");
+                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
+
+                    $("#action-form").html(`
+                          <p>Списания товара “${itemName}”</p>
+                          <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
+                          <button id="confirmWriteOff" name="${productId}" data-store-id="${storeID}">Списать</button>
+                      `);
+                });
+
+                $(document).on("click", ".request-btn", function () {
+                    let productId = $(this).attr("name");
+                    let storeID = $(this).data("store-id");
+                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
+                    $("#action-form").html(`
+                          <p>Запрос на пополнение товара “${itemName}”</p>
+                          <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
+                          <button id="submit-request" name="${productId}" data-store-id="${storeID}">Отправить</button>
+                      `);
+                });
+
+                $(document).on("click", "#confirmWriteOff", function () {
+                    let $this = $(this);
+
+                    if ($this.data("sending")) return;
+                    $this.data("sending", true);
+                    let quantity = $("#writeOffQuantity").val();
+                    let productId = $(this).attr("name");
+                    let storeID = $(this).data("store-id");
+
+                    if (!quantity || quantity <= 0) {
+                        showMessage("Укажите корректное количество для списания.");
+                        return;
+                    }
+
+                    $.post("/Home/WriteOff", {
+                        productId: productId,
+                        quantity: quantity,
+                        storeID: storeID
+                    })
+                        .done(function (response) {
+                            showMessage(response);
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                            console.log(response);
+                        })
+                        .fail(function (error) {
+                            showMessage("Ошибка при списании: " + error.responseText);
+                        }).always(function () {
+                            $this.data("sending", false); 
+                        });
+                });
+
+                $(document).on("click", "#submit-request", function () {
+                    let $this = $(this);
+
+                    if ($this.data("sending")) return;
+                    $this.data("sending", true);
+
+
+                    let productId = $(this).attr("name");
+                    let quantity = $(".stock-input").val();
+                    let storeID = $(this).data("store-id");
+
+                    if (!quantity || quantity <= 0) {
+                        showMessage("Укажите корректное количество для запроса.");
+                        $this.data("sending", false); 
+                        return;
+                    }
+
+                    $.post("/Home/RequestRestock", {
+                        productId: productId,
+                        quantity: quantity,
+                        storeID: storeID
+                    })
+                        .done(function (response) {
+                            showMessage(response);
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                            console.log(response);
+
+                        })
+                        .fail(function (error) {
+                            showMessage("Ошибка при отправке запроса: " + error.responseText);
+                        })
+                        .always(function () {
+                            $this.data("sending", false);
+                        });
+                });
+            });
+
+            $(document).ready(function () {
+                $("form").submit(function (event) {
+                    event.preventDefault();
+
+                    let valid = true;
+
+                    // Проверка текстовых полей (input type='text'), только если они видимы
+                    $("input[type='text']:visible").each(function () {
+                        if ($(this).val().trim() === "") {
+                            $(this).addClass("error").css("border", "1px solid red");
+                            valid = false;
+                        } else {
+                            $(this).removeClass("error").css("border", "");
+                        }
+                    });
+
+                    // Проверка textarea, только если оно видимо
+                    $("textarea:visible").each(function () {
+                        if ($(this).val().trim() === "") {
+                            $(this).addClass("error").css("border", "1px solid red");
+                            valid = false;
+                        } else {
+                            $(this).removeClass("error").css("border", "");
+                        }
+                    });
+
+                    // Проверка select, только если они видимы
+                    $("select:visible").each(function () {
+                        if ($(this).val() == null || $(this).val().trim() === "") {
+                            $(this).addClass("error").css("border", "1px solid red");
+                            valid = false;
+                        } else {
+                            $(this).removeClass("error").css("border", "");
+                        }
+                    });
+
+                    // Проверка файла изображения (если input[type="file"] видим)
+                    let fileInput = $("input[type='file']:visible");
+                    if (fileInput.length > 0 && fileInput[0].files.length === 0) {
+                        fileInput.addClass("error").css("border", "1px solid red");
+                        valid = false;
+                    } else {
+                        fileInput.removeClass("error").css("border", "");
+                    }
+
+                    // Если есть ошибки, показываем сообщение и не отправляем форму
+                    if (!valid) {
+                        showMessage("Заполните все поля!");
+                        return;
+                    }
+
+                    let categoryId = $("select[name='category']").val();
+
+                    // Если категория товара = 10, применяем специальные настройки
+                    if (categoryId == 10) {
+                        formData.delete("selectedFlowerTypes");  // Удаляем поле
+                        formData.set("package", "-");            
+                        formData.set("careDescription", "-"); 
+                        $("#selectedFlowers").closest("p").hide();
+                    }
+                    // Проверяем, скрыты ли поля перед отправкой
+                    if ($("select[name='package']").is(":hidden")) {
+                        $("select[name='package']").append('<option value="-" selected>-</option>');
+                    } else {
+                        $("select[name='package'] option[value='-']").remove(); // Убираем "-", если поле видно
+                    }
+
+                    if ($("textarea[name='careDescription']").is(":hidden")) {
+                        $("textarea[name='careDescription']").val("-");
+                    }
+
+
+                    // Если проверка пройдена, отправляем данные
+                    let formData = new FormData(this);
+                    $.ajax({
+                        url: "/Home/productAdd",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function () {
+                            showMessage("Товар добавлен!");
+                            location.reload();
+                        },
+                        error: function () {
+                            showMessage("Ошибка при добавлении товара!");
+                        }
+                    });
+
+                    this.reset();
+                    $("#addProduct").addClass("hidden");
+                    $("#products").removeClass("hidden");
+                });
+
+                function showMessage(message) {
+                    $('#deleteModal .modal-body').text(message);
+                    $('#deleteModal').modal('show');
+                    $('#deleteModal').css('z-index', '2000');
+                }
+            });
+
+
+
+
+
+            $("#saveStoreSelection").click(function () {
+                let selectedStores = [];
+                $(".storeCheckbox:checked").each(function () {
+                    selectedStores.push($(this).val());
+                });
+
+                $("#selectedStores").text(selectedStores.join(", "));
+
+                $("#selectedStoreIdsInput").empty();
+
+                selectedStores.forEach(store => {
+                    $("#selectedStoreIdsInput").append(`<input type="hidden" name="selectedStores" value="${store}" />`);
+                });
+
+                $("#storeModal").modal("hide");
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,9 +1,88 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-
-
-    orderManagementPage
-*@
-@{
+﻿@* @{
+    var orders = ViewBag.ProductStocks as List<ProductStock>;
+    List<Products> newProducts = ViewBag.NewProducts;
+    var categories = ViewBag.Categories as List<NewFlowersShop.FlowerCategories>;
+    var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
+    var packages = ViewBag.Packages as List<string>;
+    var flowerTypes = ViewBag.FlowerTypes as List<NewFlowersShop.FlowerType>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+          rel="stylesheet" />
+    <title>Новые цветы</title>
+</head>
+<body>
+    <div class="productManagement">
+        <h1>Управление заказами</h1>
+        <div class="infoProductManagement">
+            <div class="columns">
+                <div class="column">
+                    <select id="store">
+                        <option value="" disabled selected hidden>Адрес магазина</option>
+                        @if (stores != null)
+                        {
+                            foreach (var store in stores)
+                            {
+                                <option value="@store.StoreID" name="@store.Address">@store.Address</option>
+                            }
+                        }
+                    </select>
+                    <table id="ordersTable">
+                        <tr>
+                            <th>Стоимость</th>
+                            <th>Количество</th>
+                            <th>Дата</th>
+                        </tr>
+                        @foreach (var order in orders)
+                        {
+                            <tr class="item-row" name="@order.ProductID" data-store="@order.StoreID" data-quantity="@order.Quantity">
+                                <td>@order.TotalAmount</td>
+                                <td>@order.Quantity</td>
+                                <td>@order.OrderDate</td>
+                            </tr>
+                        }
+
+                    </table>
+                </div>
+                <div class="column">
+                    <div class="column action-panel"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+    </script>
+</body>
+</html> *@
