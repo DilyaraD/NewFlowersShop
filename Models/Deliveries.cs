@@ -14,7 +14,6 @@ namespace NewFlowersShop
         public string DeliveryMethod { get; set; }
         public string DeliveryAddress { get; set; }
         public System.DateTime DeliveryDate { get; set; }
-        public int DeliveryStatusID { get; set; }
         public string DeliveryTime { get; set; }
         public string DeliveryName { get; set; }
         public string DeliveryPhone { get; set; }

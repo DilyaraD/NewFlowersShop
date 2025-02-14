@@ -1,19 +1,18 @@
-﻿@* @{
-    var orders = ViewBag.ProductStocks as List<ProductStock>;
-    List<Products> newProducts = ViewBag.NewProducts;
-    var categories = ViewBag.Categories as List<NewFlowersShop.FlowerCategories>;
-    var stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
-    var packages = ViewBag.Packages as List<string>;
-    var flowerTypes = ViewBag.FlowerTypes as List<NewFlowersShop.FlowerType>;
+﻿@{
+    var OrdersStatus = ViewBag.OrdersStatus as List<NewFlowersShop.Models.OrderViewModel2>;
+    var SelectedStatus = ViewBag.SelectedStatus ?? null;
+    var Orders = ViewBag.Orders as List<NewFlowersShop.Models.OrderViewModel2>;
+    var Stores = ViewBag.Stores as List<NewFlowersShop.Stores>;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="~/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
@@ -21,48 +20,111 @@
     <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
           rel="stylesheet" />
     <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="productManagement">
         <h1>Управление заказами</h1>
         <div class="infoProductManagement">
+            <select id="orders">
+                <option value="0" disabled selected hidden>Заказы</option>
+                <option value="14" selected="@(SelectedStatus == 14)">Приняты</option>
+                <option value="15" selected="@(SelectedStatus == 15)">В сборке</option>
+            </select>
             <div class="columns">
-                <div class="column">
-                    <select id="store">
-                        <option value="" disabled selected hidden>Адрес магазина</option>
-                        @if (stores != null)
+                <div class="column3" id="productList" style="@(SelectedStatus == null ? "display:block;" : "display:none;")">
+                    <h3>Выберите, какой список заказов вам нужен! </h3>
+                </div>
+                <div class="column" id="productAssemblyList" style="@(SelectedStatus == 15 ? "display:block;" : "display:none;")">
+                    <h3>Заказы в сборке</h3>
+                    <div id="productContainer">
+                        @if (OrdersStatus != null && OrdersStatus.Any())
                         {
-                            foreach (var store in stores)
+                            <table class="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Общая стоимость</th>
+                                        <th>Количество товаров</th>
+                                        <th>Дата доставки</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var ord in OrdersStatus)
+                                    {
+                                        <tr class="item-row" data-id="@ord.OrderID"
+                                            data-delivery-method="@ord.Delivery?.DeliveryMethod"
+                                            data-delivery-address="@ord.Delivery?.DeliveryAddress">
+                                            <td>@ord.TotalAmount</td>
+                                            <td>@ord.Products.Count</td>
+                                            <td>@(ord.Delivery?.DeliveryDate != null ? ord.Delivery.DeliveryDate.ToShortDateString() : "Не указано")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Нет заказов в сборке</p>
+                        }
+                    </div>
+                </div>
+
+
+                <div class="column" id="orderList" style="@(SelectedStatus == 14 ? "display:block;" : "display:none;")">
+                    <select id="store">
+                        <option value="0" disabled selected hidden>Адрес магазина</option>
+                        @if (Stores != null)
+                        {
+                            foreach (var store in Stores)
                             {
-                                <option value="@store.StoreID" name="@store.Address">@store.Address</option>
+                                <option value="@store.StoreID">@store.Address</option>
                             }
                         }
+                        <option value="-1">Курьер</option>
                     </select>
+
+                    <h3>Заказы в ожидании(приняты)</h3>
                     <table id="ordersTable">
-                        <tr>
-                            <th>Стоимость</th>
-                            <th>Количество</th>
-                            <th>Дата</th>
-                        </tr>
-                        @foreach (var order in orders)
-                        {
-                            <tr class="item-row" name="@order.ProductID" data-store="@order.StoreID" data-quantity="@order.Quantity">
-                                <td>@order.TotalAmount</td>
-                                <td>@order.Quantity</td>
-                                <td>@order.OrderDate</td>
+                        <thead>
+                            <tr>
+                                <th>Общая стоимость</th>
+                                <th>Количество товаров</th>
+                                <th>Дата доставки</th>
                             </tr>
-                        }
+                        </thead>
+                        <tbody>
+                            @if (Orders != null && Orders.Any())
+                            {
+                                @foreach (var order in Orders)
+                                {
+                                    <tr class="item-row" data-id="@order.OrderID"
+                                        data-delivery-method="@order.Delivery?.DeliveryMethod"
+                                        data-delivery-address="@order.Delivery?.DeliveryAddress">
+                                        <td>@order.TotalAmount</td>
+                                        <td>@order.Products.Count</td>
+                                        <td>@order.Delivery?.DeliveryDate.ToShortDateString()</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3">Нет заказов для отображения</td>
+                                </tr>
+                            }
+                        </tbody>
 
                     </table>
                 </div>
+
                 <div class="column">
                     <div class="column action-panel"></div>
                 </div>
             </div>
 
+
         </div>
     </div>
-
 
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -80,9 +142,304 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
 
+    <script>
+        $('#deleteModal').on('shown.bs.modal', function () {
+    setTimeout(function () {
+        location.reload();
+    }, 500); // Добавляем небольшую задержку
+});
+
+        function showMessage(message) {
+            $('#deleteModal .modal-body').text(message);
+            $('#deleteModal').modal('show');
+            $('#deleteModal').css('z-index', '2000');
+        }
+
+        $(document).ready(function () {
+             $('#deleteModal').on('shown.bs.modal', function () {
+    setTimeout(function () {
+        location.reload();
+    }, 1500); // Добавляем небольшую задержку
+});
+
+
+            $('#orders').change(function () {
+                var selectedStatus = $(this).val(); // Определяем значение статуса
+                console.log(selectedStatus); // Проверяем в консоли
+
+                if (selectedStatus == 14) {
+                    $('#orderList').show();
+                    $('.column3').hide();
+                    $('.action-panel').empty();
+                    $('#productAssemblyList').hide();
+                } else if (selectedStatus == 15) {
+                    $('#orderList').hide();
+                    $('.action-panel').empty();
+                    $('.column3').hide();
+                    $('#productAssemblyList').show();
+                } else {
+                    $('.column3').show();
+                    $('#orderList').hide();
+                    $('.action-panel').empty();
+                    $('#productAssemblyList').hide();
+                }
+
+                $.ajax({
+                    url: '/Home/OrderManagementPageV2',
+                    type: 'POST',
+                    data: { statusId: selectedStatus },
+                    success: function (data) {
+                        console.log("Полученные данные:", data);
+                        if (data && Array.isArray(data.orders)) {
+                            var tableHtml = `
+                            <table class="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Общая стоимость</th>
+                                        <th>Дата доставки</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                            data.orders.forEach(order => {
+                                console.log(order.orderID);
+                                console.log("Delivery data:", order.delivery?.deliveryDate);
+
+                                let formattedDate = "Не указано";
+                                if (order.delivery?.deliveryDate) {
+                                    try {
+                                        const date = new Date(order.delivery.deliveryDate);
+                                        if (!isNaN(date)) {  // Проверяем, является ли дата валидной
+                                            formattedDate = date.toLocaleDateString(); // Форматируем дату
+                                        } else {
+                                            console.error("Invalid date:", order.delivery.deliveryDate); // Выводим ошибку в консоль, если дата невалидна
+                                            formattedDate = "Некорректная дата";
+                                        }
+                                    } catch (e) {
+                                        console.error("Error parsing date:", order.delivery.deliveryDate, e);
+                                        formattedDate = "Ошибка даты";
+                                    }
+                                }
+
+
+                                tableHtml += `
+                                <tr class="item-row" data-id="${order.orderID}">
+                                    <td>${order.totalAmount}</td>
+                                    <td>${formattedDate}</td>
+                                </tr>`;
+                            });
+
+                            tableHtml += `</tbody></table>`;
+                            $('#productContainer').html(tableHtml);
+                        } else {
+                            $('#productContainer').html("<p>Нет заказов в сборке</p>");
+                        }
+                    }
+
+
+                });
+
+            });
+
+            $('.orders-table').on('click', '.item-row', function () {
+                var orderId = $(this).data('id');
+
+                $('.action-panel').empty().show();
+
+                if ($('#orders').val() == 15) {
+                    loadOrderDetails(orderId);
+                    location.reload();
+                } else {
+                    loadOrderActions(orderId);
+                }
+            });
+
+            // Фильтрация заказов при выборе адреса магазина
+            $('#store').change(function () {
+                var selectedStoreId = $(this).val();
+
+                // Если выбран вариант "Курьер"
+                if (selectedStoreId == -1) {
+                    $('#ordersTable tbody tr').each(function () {
+                        var orderDeliveryMethod = $(this).data('delivery-method');
+                        if (orderDeliveryMethod == "Курьер" || orderDeliveryMethod == "Курьером") {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                } else {
+                    // Получаем адрес выбранного магазина
+                    var selectedStoreAddress = $('#store option:selected').text();
+
+                    // Отображаем только те заказы, у которых адрес доставки совпадает с выбранным магазином
+                    $('#ordersTable tbody tr').each(function () {
+                        var orderDeliveryAddress = $(this).data('delivery-address');
+                        if (orderDeliveryAddress == selectedStoreAddress) {
+                            $(this).show();
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                }
+            });
+
+            // Обработчик клика по строке с заказом
+            $(document).on('click', '.item-row', function () {
+                var orderId = $(this).data('id');
+                // loadOrderActions(orderId);
+                $('.action-panel').empty().show();
+                if ($('#orders').val() == 15) {
+                    loadOrderDetails(orderId);
+                } else {
+                    loadOrderActions(orderId);
+                }
+            });
+
+
+            function refreshOrdersList() {
+                var selectedStatus = $('#orders').val(); 
+                $.ajax({
+                    url: '/Home/OrderManagementPageV2',
+                    type: 'POST',
+                    data: { statusId: selectedStatus },
+                    success: function (data) {
+                        if (data && Array.isArray(data.orders)) {
+                            var tableHtml = `
+                            <table class="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Общая стоимость</th>
+                                        <th>Дата доставки</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                            data.orders.forEach(order => {
+                                let formattedDate = order.delivery?.deliveryDate ? new Date(order.delivery.deliveryDate).toLocaleDateString() : "Не указано";
+                                tableHtml += `
+                                <tr class="item-row" data-id="${order.orderID}">
+                                    <td>${order.totalAmount}</td>
+                                    <td>${formattedDate}</td>
+                                </tr>`;
+                            });
+
+                            tableHtml += `</tbody></table>`;
+                            $('#productContainer').html(tableHtml);
+                        } else {
+                            $('#productContainer').html("<p>Нет заказов в сборке</p>");
+                        }
+                    }
+                });
+            }
+
+            function loadOrderActions(orderId) {
+                var actionPanel = $('.action-panel');
+                actionPanel.empty(); // Очищаем панель действий
+
+                // Создаем div для подтверждения сборки
+                var confirmDiv = $('<div class="confirm-assembly">')
+                    .append('<p>Принять в сборку товар?</p>')
+                    .append($('<button class="btn btn-success accept" style="margin:5px;" >Да</button>').click(function () {
+                        updateOrderStatus2(orderId, 15);
+                        loadOrderDetails(orderId);
+                    }))
+                    .append($('<button class="btn btn-danger reject"  style="margin:5px;">Нет</button>').click(function () {
+                        updateOrderStatus(orderId, 1018);
+                    }))
+                    .append($('<button class="btn btn-secondary hide"  style="margin:5px;">Скрыть</button>').click(function () {
+                        actionPanel.empty();
+                    }));
+
+                actionPanel.append(confirmDiv);
+            }
+
+            function loadOrderDetails(orderId) {
+                var actionPanel = $('.action-panel');
+                actionPanel.empty();
+
+                $.get('/Home/GetOrderDetails', { orderId: orderId }, function (data) {
+                    console.log(data);  // Проверим, что данные приходят
+
+                    if (data.success && data.order) {
+                        var detailsDiv = $('<div class="order-details">');
+
+                        // Проверяем, что данные о доставке существуют
+                        if (data.order.delivery) {
+                            // Преобразуем строку даты в объект Date
+                            var deliveryDate = new Date(data.order.delivery.deliveryDate);
+
+                            // Проверяем, является ли это допустимой датой
+                            if (!isNaN(deliveryDate)) {
+                                detailsDiv
+                                    .append('<p> Товар в сборке!</p>')
+                                    .append('<p><b>Дата доставки:</b> ' + deliveryDate.toLocaleDateString() + '</p>') // Преобразуем дату в строку
+                                    .append('<p><b>Время:</b> ' + data.order.delivery.deliveryTime + '</p>')
+                                    .append('<p><b>Цена:</b> ' + data.order.totalAmount + '</p>')  // Обратите внимание на правильное использование `totalAmount`
+                                    .append('<p><b>Адрес:</b> ' + data.order.delivery.deliveryAddress + '</p>');
+                            } else {
+                                detailsDiv.append('<p>Некорректная дата доставки.</p>');
+                            }
+                        } else {
+                            detailsDiv.append('<p>Информация о доставке недоступна.</p>');
+                        }
+
+                        detailsDiv.append('<h4>Товары:</h4>');
+
+                        var productsTable = $('<table>').addClass('table');
+                        productsTable.append('<thead><tr><th>Фото</th><th>Название</th><th>Кол-во</th><th>Цена</th></tr></thead>');
+                        var productsBody = $('<tbody>');
+
+                        $.each(data.order.products, function (i, product) {
+                            productsBody.append('<tr>' +
+                                '<td><img src="' + product.productImage + '" width="50"></td>' +
+                                '<td>' + product.productName + '</td>' +
+                                '<td>' + product.quantity + '</td>' +
+                                '<td>' + product.price + '</td>' +
+                                '</tr>');
+                        });
+
+                        productsTable.append(productsBody);
+                        detailsDiv.append(productsTable);
+
+                        detailsDiv.append($('<button class="btn btn-primary transfer">Передать курьеру</button>').click(function () {
+                            updateOrderStatus(orderId, 16);
+                            refreshOrdersList();
+                        }));
+
+                        actionPanel.append(detailsDiv);
+                    } else {
+                        showMessage("Информация о заказе недоступна.");
+                    }
+                })
+                    .fail(function () {
+                        showMessage("Ошибка при загрузке данных.");
+                    });
+            }
+
+            function updateOrderStatus(orderId, statusId) {
+                $.post('/Home/UpdateOrderStatus', { orderId: orderId, status: statusId }, function (response) {
+                    if (response.success) {
+                        $('.action-panel').empty();
+                                                 // location.reload();
+                        showMessage(response.message);
+                    } else {
+                        showMessage('Ошибка: ' + response.message);
+                    }
+                });
+            }
+
+            function updateOrderStatus2(orderId, statusId) {
+                $.post('/Home/UpdateOrderStatus', { orderId: orderId, status: statusId }, function (response) {
+                    if (response.success) {
+                        // $('.action-panel').empty();
+                    } else {
+                        showMessage('Ошибка: ' + response.message);
+                    }
+                });
+            }
+        });
     </script>
 </body>
-</html> *@
+</html>

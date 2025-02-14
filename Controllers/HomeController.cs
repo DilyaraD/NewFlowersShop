@@ -22,6 +22,8 @@ namespace NewFlowersShop.Controllers
         }
         public IActionResult Index()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             var newProducts = _context.Products
                 .Where(p => _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .OrderByDescending(p => p.ProductID)
@@ -54,6 +56,8 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult CatalogPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             var packages = _context.Products.Select(p => p.Package).Distinct().ToList();
 
             var flowerTypes = _context.FlowerType.Select(p => p.FlowerTypeName).Distinct().ToList();
@@ -158,11 +162,15 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult DeliveryPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             return View();
         }
 
         public IActionResult ContactPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             return View();
         }
          
@@ -176,6 +184,7 @@ namespace NewFlowersShop.Controllers
         public JsonResult IsAuthenticated()
         {
             var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             bool isAuthenticated = !string.IsNullOrEmpty(userRole);
             return Json(new { isAuthenticated, role = userRole });
         }
@@ -239,6 +248,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult EditDataPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
             var login = HttpContext.Session.GetString("Login");
             var firstName = HttpContext.Session.GetString("FirstName");
             var lastName = HttpContext.Session.GetString("LastName");
@@ -255,7 +265,7 @@ namespace NewFlowersShop.Controllers
             ViewBag.LastName = lastName;
             ViewBag.PhoneNumber = phoneNumber;
             ViewBag.Password = password;
-
+            ViewBag.UserRole = userRole;
             return View();
         }
 
@@ -421,6 +431,8 @@ namespace NewFlowersShop.Controllers
         [Route("Home/ProductPage/{productID:int}")]
         public IActionResult ProductPage(int productID)
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
+
             var product = _context.Products.FirstOrDefault(p => p.ProductID == productID);
             if (product == null)
             {
@@ -477,6 +489,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult BasketPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
             var cartJson = HttpContext.Session.GetString("Cart");
             List<CartItem> cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
@@ -599,6 +612,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult OrderHistoryPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
             var login = HttpContext.Session.GetString("Login");
             if (string.IsNullOrEmpty(login))
             {
@@ -637,15 +651,12 @@ namespace NewFlowersShop.Controllers
             return View(orders);
         }
 
-
-
-
-
-
-
-
         public IActionResult DetailedOrderHistoryPage(int orderId)
         {
+
+            var userRole = HttpContext.Session.GetString("UserRole"); 
+            ViewBag.UserRole = userRole;
+
             var order = _context.Orders
                 .Where(o => o.OrderID == orderId)
                 .Select(o => new OrderViewModel
@@ -678,18 +689,10 @@ namespace NewFlowersShop.Controllers
             return View(order);
         }
 
-
-
-
-
-
-
-
-
-
         [Route("Home/ReviewsPage/{productID:int}")]
         public IActionResult ReviewsPage(int productId)
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
             var login = HttpContext.Session.GetString("Login");
             if (string.IsNullOrEmpty(login))
             {
@@ -784,6 +787,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult OrderPlacementPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
             var cartJson = HttpContext.Session.GetString("Cart");
             var cart = cartJson != null ? JsonConvert.DeserializeObject<List<CartItem>>(cartJson) : new List<CartItem>();
 
@@ -835,7 +839,6 @@ namespace NewFlowersShop.Controllers
                         DeliveryAddress = deliveryAddress,
                         DeliveryDate = DateTime.Parse(deliveryDate),
                         DeliveryTime = deliveryTime,
-                        DeliveryStatusID = 17,
                         DeliveryName = fullName,
                         DeliveryPhone = phone,
                         DeliveryPayment = paymentMethod
@@ -849,7 +852,7 @@ namespace NewFlowersShop.Controllers
                         CustomerID = user.CustomerID, 
                         OrderDate = DateTime.Now,
                         TotalAmount = cart.Sum(item => item.Price * item.Quantity),
-                        StatusID = 1,
+                        StatusID = 14,
                         DeliveryID = delivery.DeliveryID
                     };
 
@@ -896,6 +899,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult productManagementPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole"); ViewBag.UserRole = userRole;
             var productStocks = _context.StoreFlowerStocks
                 .Join(
                     _context.Products,
@@ -958,8 +962,6 @@ namespace NewFlowersShop.Controllers
                 return Convert.ToBase64String(ms.ToArray());
             }
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -1095,31 +1097,253 @@ namespace NewFlowersShop.Controllers
             return Ok("Списание выполнено.");
         }
 
-
-
-
-
-
-
-
-
-
-
-        public IActionResult orderManagementPage()
+        public IActionResult OrderManagementPage()
         {
-            var orders = _context.Orders.Where(p => p.StatusID == 14).ToList();
-            ViewBag.orders = orders;
+            var ordersQuery = _context.Orders
+                .Where(o => o.StatusID == 14);
 
+            var orders = ordersQuery
+                .OrderBy(o => o.OrderDate)
+                .Select(o => new OrderViewModel2
+                {
+                    OrderID = o.OrderID,
+                    TotalAmount = o.TotalAmount,
+                    OrderDate = o.OrderDate,
+                    StatusID = o.StatusID,
+                    DeliveryID = o.DeliveryID,
+                    Delivery = _context.Deliveries
+                        .Where(d => d.DeliveryID == o.DeliveryID)
+                        .Select(d => new OrderDelivery2
+                        {
+                            DeliveryDate = d.DeliveryDate,
+                            DeliveryTime = d.DeliveryTime,
+                            DeliveryAddress = d.DeliveryAddress,
+                            DeliveryMethod = d.DeliveryMethod
+                        }).FirstOrDefault(),
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Select(oc => new Product2
+                        {
+                            Quantity = oc.Quantity,
+                            Price = oc.Product.Price,
+                            ProductName = oc.Product.ProductName,
+                            ProductImage = oc.Product.Photo
+                        }).ToList()
+                })
+                .ToList();
+
+            ViewBag.Orders = orders;
+            ViewBag.Stores = _context.Stores.ToList();
+
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
             return View();
         }
+
+        [HttpPost]
+        public IActionResult OrderManagementPageV2(int? statusId)
+        {
+            if (statusId == null)
+            {
+                ViewBag.OrdersStatus = null;
+                ViewBag.SelectedStatus = statusId;
+            } 
+            else if (statusId == 14)
+            {
+                ViewBag.OrdersStatus = null;
+                ViewBag.SelectedStatus = 14;
+            }
+            else
+            //if (statusId == 15)
+            {
+                    var ordersQuery = _context.Orders.Where(o => o.StatusID == statusId);
+                var ordersList = ordersQuery
+                    .OrderBy(o => o.OrderDate)
+                    .Select(o => new OrderViewModel2
+                    {
+                        OrderID = o.OrderID,
+                        TotalAmount = o.TotalAmount,
+                        OrderDate = o.OrderDate,
+                        StatusID = o.StatusID,
+                        DeliveryID = o.DeliveryID,
+                        Delivery = _context.Deliveries
+    .Where(d => d.DeliveryID == o.DeliveryID)
+    .Select(d => new OrderDelivery2
+    {
+        DeliveryDate = d.DeliveryDate,
+        DeliveryTime = d.DeliveryTime ?? "Не указано",
+        DeliveryAddress = d.DeliveryAddress ?? "Адрес не указан",
+        DeliveryMethod = d.DeliveryMethod ?? "Не указано"
+    }).FirstOrDefault() ?? new OrderDelivery2(),
+                        Products = _context.OrderContents
+    .Where(oc => oc.OrderID == o.OrderID)
+    .Select(oc => new Product2
+    {
+        Quantity = oc.Quantity,
+        Price = oc.Product.Price,
+        ProductName = oc.Product.ProductName,
+        ProductImage = oc.Product.Photo
+    }).ToList() ?? new List<Product2>()
+                    })
+                    .ToList();
+
+                ViewBag.OrdersStatus = ordersList;
+                ViewBag.SelectedStatus = 15;
+                return Json(new { orders = ordersList });
+            }
+            return View();
+        }
+
+
+
+        [HttpPost]
+        public IActionResult UpdateOrderStatus(int orderId, int status)
+        {
+            var order = _context.Orders.FirstOrDefault(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Заказ не найден" });
+            }
+
+            order.StatusID = status;
+
+            if (status == 1018)
+            {
+                var orderContents = _context.OrderContents
+                    .Where(oc => oc.OrderID == orderId)
+                    .ToList();
+
+                var delivery = _context.Deliveries.FirstOrDefault(d => d.DeliveryID == order.DeliveryID);
+                if (delivery == null)
+                {
+                    return Json(new { success = false, message = "Доставка не найдена" });
+                }
+
+                string storeAddress = null;
+
+                if (delivery.DeliveryMethod == "Самовывоз")
+                {
+                    var store = _context.Stores.FirstOrDefault(s => s.Address == delivery.DeliveryAddress);
+                    if (store != null)
+                    {
+                        storeAddress = store.Address;
+                    }
+                }
+
+                foreach (var orderContent in orderContents)
+                {
+                    var product = _context.Products.FirstOrDefault(p => p.ProductID == orderContent.ProductID);
+                    if (product == null) continue;
+
+                    var storeStock = _context.StoreFlowerStocks
+                        .FirstOrDefault(sfs => sfs.FlowerTypeID == product.ProductID &&
+                                               (storeAddress == null || sfs.Store.Address == storeAddress));
+
+                    if (storeStock == null)
+                    {
+                        storeStock = _context.StoreFlowerStocks
+                            .FirstOrDefault(sfs => sfs.FlowerTypeID == product.ProductID);
+                    }
+
+                    if (storeStock != null)
+                    {
+                        storeStock.Quantity += orderContent.Quantity;
+                    }
+                }
+
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Заказ отменен, товары возвращены на склад" });
+            }
+            else
+            {
+
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Заказ передан курьеру" });
+            }
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateOrderStatus2(int orderId, int status)
+        {
+            var order = _context.Orders.FirstOrDefault(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Заказ не найден" });
+            }
+
+            order.StatusID = status;
+
+            _context.SaveChanges();
+            return Json(new { success = true, message = "Заказ в сборке" });
+        }
+
+        public IActionResult GetOrderDetails(int orderId)
+        {
+            var order = _context.Orders
+                .Where(o => o.OrderID == orderId)
+                .Select(o => new OrderViewModel2
+                {
+                    OrderID = o.OrderID,
+                    TotalAmount = o.TotalAmount,
+                    OrderDate = o.OrderDate,
+                    StatusID = o.StatusID,
+                    DeliveryID = o.DeliveryID,
+                    Delivery = _context.Deliveries
+                        .Where(d => d.DeliveryID == o.DeliveryID)
+                        .Select(d => new OrderDelivery2
+                        {
+                            DeliveryDate = d.DeliveryDate,
+                            DeliveryTime = d.DeliveryTime,
+                            DeliveryAddress = d.DeliveryAddress,
+                            DeliveryMethod = d.DeliveryMethod
+                        }).FirstOrDefault(),
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Select(oc => new Product2
+                        {
+                            Quantity = oc.Quantity,
+                            Price = oc.Product.Price,
+                            ProductName = oc.Product.ProductName,
+                            ProductImage = oc.Product.Photo
+                        }).ToList()
+                })
+                .FirstOrDefault(); 
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Заказ не найден" });
+            }
+
+            return Json(new { success = true, order });
+        }
+
+        
+
+
+
+
+
+
 
         public IActionResult homePageManagementPage()
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole; 
+            
             return View();
         }
 
 
-
+        public IActionResult managingReviewsPage()
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
+            
+            return View();
+        }
 
 
 

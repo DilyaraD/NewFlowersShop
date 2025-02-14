@@ -16,5 +16,6 @@ namespace NewFlowersShop
         public decimal TotalAmount { get; set; }
         public int StatusID { get; set; }
         public int DeliveryID { get; set; }
+
     }
 }

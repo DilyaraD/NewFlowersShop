@@ -267,12 +267,6 @@
                 }
             });
 
-
-
-
-
-
-
             $("#productTable").hide();
                $("#store").change(function () {
                 let selectedStore = $(this).val();
@@ -486,8 +480,16 @@
 
                     if (!quantity || quantity <= 0) {
                         showMessage("Укажите корректное количество для списания.");
+                         $this.data("sending", false);
                         return;
                     }
+
+                    if (quantity < 1 || quantity > 300) {
+        showMessage("Количество для запроса должно быть до 300.");
+        $this.data("sending", false);
+        return;
+    }
+
 
                     $.post("/Home/WriteOff", {
                         productId: productId,
@@ -519,11 +521,19 @@
                     let quantity = $(".stock-input").val();
                     let storeID = $(this).data("store-id");
 
+
                     if (!quantity || quantity <= 0) {
-                        showMessage("Укажите корректное количество для запроса.");
-                        $this.data("sending", false); 
+                        showMessage("Укажите корректное количество для списания.");
+                         $this.data("sending", false);
                         return;
                     }
+
+                    if (quantity < 1 || quantity > 300) {
+        showMessage("Количество для запроса должно быть до 300.");
+        $this.data("sending", false);
+        return;
+    }
+
 
                     $.post("/Home/RequestRestock", {
                         productId: productId,

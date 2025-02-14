@@ -58,7 +58,12 @@ s://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:
                                 }
                             </div>
                             <div class="table-cell">
-                                @(order.StatusID == 1 ? "В обработке" : order.StatusID == 2 ? "Доставлен" : "Отменен")
+                                @(order.StatusID == 15 ? "В сборке"
+                                    : order.StatusID == 14 ? "Принят"
+                                    : order.StatusID == 16 ? "В пути"
+                                    : order.StatusID == 17 ? "Доставлен"
+                                    : order.StatusID == 1018 ? "Отменен"
+                                    : "Неизвестный статус")
                             </div>
                             <div class="table-cell">
                                 @order.Products.Sum(p => p.Quantity)

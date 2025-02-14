@@ -1224,7 +1224,7 @@ top: 35%;
 left: 3%;
 width: 98%;
 height: 4px;
-background: lightgray;
+background: none;
 z-index: 1;
 transform: translateY(-50%);
 transition: width 0.5s ease;
@@ -1255,6 +1255,18 @@ font-size: 14px;
 font-weight: bold;
 }
 
+.statusCircle34 {
+    width: 50px;
+    height: 50px;
+    background: red;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 .active {
 background: green;
 color: green;
@@ -1274,6 +1286,11 @@ font-size: 20px;
 
 .infoOrder p {
 margin: 1%;
+}
+
+.active24 {
+    background: red;
+    color: green;
 }
 
 
@@ -1497,7 +1514,6 @@ text-align: left;
 .columns {
     display: flex;
     gap: 20px;
-    width: 80%;
     margin: 0 auto;
 }
 
@@ -1589,10 +1605,18 @@ table th, td {
 
 
 
+#ordersTable{
+    width:100%;
+}
 
 
-
-
+.infoProductManagement .column #store, .infoProductManagement #orders{
+    font-size: 15px;
+    padding: 5px;
+    font-family: "Marmelad", serif;
+    background-color: #3F1536;
+    color: white;
+}
 
 /*.....................\\\\\\\\\\\\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\........*/
 

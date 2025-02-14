@@ -167,7 +167,7 @@
                     } else {
                         data.forEach(product => {
                             let buttonHtml = product.inStock
-                                ? `<button class="add-to-cart" data-id='${product.productID}'' data-name='${product.productName}' data-price='${product.price}' data-photo='${product.photo}'>в корзину</button>`
+                                ? `<button class="add-to-cart" data-id='${product.productID}' data-name='${product.productName}' data-price='${product.price}' data-photo='${product.photo}'>в корзину</button>`
                                 : `<span class="out-of-stock">Нет в наличии</span>`;
 
                             $('#products').append(`
