@@ -2,6 +2,7 @@
     List<Products> newProducts = ViewBag.NewProducts;
     List<Products> discountProducts = ViewBag.DiscountProducts;
     List<Products> giftProducts = ViewBag.GiftProducts;
+    var selectedBackground = ViewBag.SelectedBackground as MainPage;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
 
@@ -14,7 +15,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
-    <link rel="stylesheet" href="style.css" />
+    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
@@ -22,13 +23,29 @@
     <link rel="stylesheet" href="~/NewFlowersShop.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="block1">
+   @*  <div class="block1">
         <div class="box1">
             <h1>
                 Цветы – лучший способ<br />
                 выразить чувства
             </h1>
             <button><a href="@Url.Action("CatalogPage", "Home")">выбрать букет</a></button>
+        </div>
+    </div> *@
+    <div class="block1" style="@(selectedBackground != null && !string.IsNullOrEmpty(selectedBackground.Photo) ? $"background-image: url(data:image/jpeg;base64,{selectedBackground.Photo});" : "")">
+        <div class="box1 @(ViewBag.Position)" style="color: @ViewBag.BackgroundTextColor">
+            <!-- Добавляем класс позиции -->
+            <h1 style="color: @ViewBag.BackgroundTextColor">
+                <!-- Устанавливаем цвет текста -->
+                @ViewBag.BackgroundText
+            </h1>
+            @if (@ViewBag.ButtonText != null)
+            {
+                <button style="background-color: @ViewBag.ButtonColor; color: @ViewBag.ButtonTextColor">
+                    <!-- Устанавливаем цвет фона и текста кнопки -->
+                        <a href="@Url.Action("CatalogPage", "Home")" style="color: @ViewBag.ButtonTextColor">@ViewBag.ButtonText</a>
+                </button>
+            }
         </div>
     </div>
     <div class="block2">

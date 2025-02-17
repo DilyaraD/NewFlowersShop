@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Newtonsoft.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewFlowersShop.Controllers
 {
@@ -27,7 +28,7 @@ namespace NewFlowersShop.Controllers
             var newProducts = _context.Products
                 .Where(p => _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .OrderByDescending(p => p.ProductID)
-                .Take(12)
+                .Take(6)
                 .ToList();
 
             var discountProducts = _context.Products
@@ -39,8 +40,26 @@ namespace NewFlowersShop.Controllers
             var giftProducts = _context.Products
                 .Where(p => p.CategoryID == 10 && !newProducts.Contains(p) && !discountProducts.Contains(p) &&
                             _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
-                .Take(12)
+                .Take(6)
                 .ToList();
+
+            var SelectedBackground = _context.MainPage.FirstOrDefault(b => b.Used == "Да");
+            ViewBag.SelectedBackground = SelectedBackground;
+
+            ViewBag.BackgroundText = SelectedBackground?.BackgroundText;
+            ViewBag.BackgroundTextColor = SelectedBackground?.BackgroundTextColor;
+
+            if (SelectedBackground?.ButtonText != "error")
+            {
+                ViewBag.ButtonColor = SelectedBackground?.ButtonColor;
+                ViewBag.ButtonTextColor = SelectedBackground?.ButtonTextColor;
+                ViewBag.ButtonText = SelectedBackground?.ButtonText;
+            }
+            else
+            {
+                ViewBag.ButtonText = null;
+            }
+            ViewBag.Position = SelectedBackground?.Position;
 
             ViewBag.NewProducts = newProducts;
             ViewBag.DiscountProducts = discountProducts;
@@ -99,7 +118,7 @@ namespace NewFlowersShop.Controllers
 
             if (storeId.HasValue)
             {
-                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0)); 
+                query = query.Where(p => _context.StoreFlowerStocks.Any(s => s.StoreID == storeId && s.FlowerTypeID == p.ProductID && s.Quantity > 0));
             }
 
             query = sort switch
@@ -173,7 +192,7 @@ namespace NewFlowersShop.Controllers
             ViewBag.UserRole = userRole;
             return View();
         }
-         
+
         private byte[] HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
@@ -242,7 +261,7 @@ namespace NewFlowersShop.Controllers
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); 
+            HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
 
@@ -476,7 +495,7 @@ namespace NewFlowersShop.Controllers
             int maxQuantity = productContents.Any() ? productContents.Max(pc => pc.Quantity) : 0;
 
             var reviews = _context.Reviews
-        .Where(r => r.ProductID == productID && r.StatusID==12)
+        .Where(r => r.ProductID == productID && r.StatusID == 12)
         .OrderByDescending(r => r.ReviewDate)
         .ToList();
 
@@ -654,7 +673,7 @@ namespace NewFlowersShop.Controllers
         public IActionResult DetailedOrderHistoryPage(int orderId)
         {
 
-            var userRole = HttpContext.Session.GetString("UserRole"); 
+            var userRole = HttpContext.Session.GetString("UserRole");
             ViewBag.UserRole = userRole;
 
             var order = _context.Orders
@@ -769,10 +788,10 @@ namespace NewFlowersShop.Controllers
 
             var products = _context.OrderContents
              .Where(op => op.OrderID == orderId)
-             .Include(op => op.Product)  
+             .Include(op => op.Product)
              .Select(op => new
              {
-                 op.Product.ProductID, 
+                 op.Product.ProductID,
                  op.Product.ProductName,
                  op.Product.Photo
              })
@@ -801,8 +820,8 @@ namespace NewFlowersShop.Controllers
         {
             var login = HttpContext.Session.GetString("Login");
             var user = _context.Customers.FirstOrDefault(u => u.LoginCustomer == login);
-            
-            var deliveryMethod = Request.Form["deliveryMethod"];           
+
+            var deliveryMethod = Request.Form["deliveryMethod"];
             var deliveryDate = Request.Form["courierDate"];
             var deliveryTime = Request.Form["courierTime"];
             var paymentMethod = Request.Form["paymentMethod"];
@@ -833,7 +852,7 @@ namespace NewFlowersShop.Controllers
             {
                 try
                 {
-                     var delivery = new Deliveries
+                    var delivery = new Deliveries
                     {
                         DeliveryMethod = deliveryMethod,
                         DeliveryAddress = deliveryAddress,
@@ -849,7 +868,7 @@ namespace NewFlowersShop.Controllers
 
                     var order = new Orders
                     {
-                        CustomerID = user.CustomerID, 
+                        CustomerID = user.CustomerID,
                         OrderDate = DateTime.Now,
                         TotalAmount = cart.Sum(item => item.Price * item.Quantity),
                         StatusID = 14,
@@ -1031,7 +1050,7 @@ namespace NewFlowersShop.Controllers
 
                     _context.SaveChanges();
 
-                    transaction.Commit(); 
+                    transaction.Commit();
                     return RedirectToAction("productManagementPage");
                 }
                 catch (Exception ex)
@@ -1075,13 +1094,13 @@ namespace NewFlowersShop.Controllers
         {
             var stock = _context.StoreFlowerStocks
                                 .FirstOrDefault(s => s.FlowerTypeID == productId && s.StoreID == storeID);
-            var prod = _context.Products.FirstOrDefault(p=>p.ProductID == productId);
+            var prod = _context.Products.FirstOrDefault(p => p.ProductID == productId);
 
             if (stock == null)
             {
                 return BadRequest("Нет товара для списания.");
             }
-            else if(stock.Quantity < quantity)
+            else if (stock.Quantity < quantity)
             {
                 stock.Quantity = 0;
                 prod.StatusID = 2;
@@ -1147,16 +1166,15 @@ namespace NewFlowersShop.Controllers
             {
                 ViewBag.OrdersStatus = null;
                 ViewBag.SelectedStatus = statusId;
-            } 
+            }
             else if (statusId == 14)
             {
                 ViewBag.OrdersStatus = null;
                 ViewBag.SelectedStatus = 14;
             }
             else
-            //if (statusId == 15)
             {
-                    var ordersQuery = _context.Orders.Where(o => o.StatusID == statusId);
+                var ordersQuery = _context.Orders.Where(o => o.StatusID == statusId);
                 var ordersList = ordersQuery
                     .OrderBy(o => o.OrderDate)
                     .Select(o => new OrderViewModel2
@@ -1310,7 +1328,7 @@ namespace NewFlowersShop.Controllers
                             ProductImage = oc.Product.Photo
                         }).ToList()
                 })
-                .FirstOrDefault(); 
+                .FirstOrDefault();
 
             if (order == null)
             {
@@ -1320,30 +1338,144 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = true, order });
         }
 
-        
+        private string ConvertImageToBase(IFormFile photo)
+        {
+            if (photo == null || photo.Length == 0) return "";
+
+            using (var ms = new MemoryStream())
+            {
+                photo.CopyTo(ms);
+                return Convert.ToBase64String(ms.ToArray());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult AddBackground(IFormFile photo, string BackgroundText, string BackgroundTextColor,
+                                   string ButtonText, string ButtonColor, string ButtonTextColor,
+                                   string Position)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
+            var userRole = HttpContext.Session.GetString("UserRole");
+            if (photo == null || photo.Length == 0)
+            {
+                return Json(new { success = false, message = "Файл изображения обязателен." });
+            }
+
+            if (ButtonText == null)
+            {
+                ButtonText = "error";
+            }
+
+            string base64Image = ConvertImageToBase(photo);
+            var newBackground = new MainPage
+            {
+                BackgroundText = BackgroundText,
+                BackgroundTextColor = BackgroundTextColor,
+                ButtonText = ButtonText,
+                ButtonColor = ButtonColor,
+                ButtonTextColor = ButtonTextColor,
+                Position = Position,
+                Used = "Нет",
+                UserId = user.EmployeeID,
+                Photo = base64Image
+            };
+
+            _context.MainPage.Add(newBackground);
+            _context.SaveChanges();
+
+            return Json(new { success = true, data = newBackground });
+        }
 
 
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            var backgrounds = _context.MainPage.ToList();
+            return Json(backgrounds);
+        }
 
+        [HttpPost]
+        public IActionResult SetBackgroundUsed(int backgroundId)
+        {
+            var background = _context.MainPage.FirstOrDefault(x => x.BackgroundId == backgroundId);
+            if (background != null)
+            {
+                if (background.Used == "Нет")
+                {
+                    var otherBackgrounds = _context.MainPage.Where(x => x.BackgroundId != backgroundId).ToList();
+                    foreach (var bg in otherBackgrounds)
+                    {
+                        bg.Used = "Нет";
+                    }
+                    background.Used = "Да";
+                }
+                else
+                {
+                    background.Used = "Нет";
+                }
 
+                _context.SaveChanges();
+            }
 
+            return Json(new { success = true, used = background?.Used });
+        }
 
 
         public IActionResult homePageManagementPage()
         {
             var userRole = HttpContext.Session.GetString("UserRole");
-            ViewBag.UserRole = userRole; 
-            
-            return View();
+            ViewBag.UserRole = userRole;
+            var backgrounds = _context.MainPage.ToList();
+            var SelectedBackground = _context.MainPage.FirstOrDefault(b => b.Used == "Да");
+            ViewBag.SelectedBackground = SelectedBackground;
+            ViewBag.backgrounds = backgrounds;
+            return View(backgrounds);
         }
-
 
         public IActionResult managingReviewsPage()
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             ViewBag.UserRole = userRole;
-            
+            var reviewsList = _context.Reviews.Where(r => r.StatusID == 11).ToList();
+            ViewBag.reviewsList = reviewsList;
+
             return View();
         }
+
+        [HttpPost]
+        public IActionResult DeleteReview(int reviewId)
+        {
+            // Логика удаления отзыва (например, изменение StatusID)
+            var review = _context.Reviews.Find(reviewId);
+            if (review != null)
+            {
+                review.StatusID = 13; // Или другой статус, обозначающий удаленный отзыв
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Отзыв успешно удален" });
+            }
+            return Json(new { success = false, message = "Отзыв не найден" });
+        }
+
+        [HttpPost]
+        public IActionResult PostReview(int reviewId)
+        {
+            // Логика публикации отзыва (например, изменение StatusID)
+            var review = _context.Reviews.Find(reviewId);
+            if (review != null)
+            {
+                review.StatusID = 12; // Или другой статус, обозначающий опубликованный отзыв
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Отзыв успешно опубликован" });
+            }
+            return Json(new { success = false, message = "Отзыв не найден" });
+        }
+
+
+
+
+
+
 
 
 

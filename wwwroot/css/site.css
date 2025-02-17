@@ -169,27 +169,6 @@ gap: 20px;
 margin-bottom: 2%;
 }
 
-.block1 {
-background: url("../img_s/flowers_image.svg") no-repeat center center;
-background-size: cover;
-height: auto;
-aspect-ratio: 14/7;
-border-radius: 4%;
-background-position-x: center;
-margin-top: 5px;
-position: relative;
-}
-
-.block1 .box1 {
-font-family: "Marmelad", serif;
-text-align: right;
-position: absolute;
-top: 20%;
-right: 3%;
-width: 40%;
-}
-
-
 @media (max-width: 1100px) {
 .block1 .box1 {
 position: relative;
@@ -212,24 +191,72 @@ font-size: 20px;
 }
 }
 
+
+.block1 {
+/*background: url("../img_s/flowers_image.svg") no-repeat center center;*/
+background-size: cover;
+height: auto;
+aspect-ratio: 14/7;
+border-radius: 4%;
+background-position-x: center;
+margin-top: 5px;
+position: relative;
+}
+
+
+
+.block1 .box1 {
+font-family: "Marmelad", serif;
+/*text-align: right;*/
+position: absolute;
+/*top: 20%;*/
+/*right: 3%;*/
+width: 40%;
+}
+
+
+
 .box1 h1 {
 font-family: "Marmelad", serif;
-color: #8A226F;
-text-align: right;
+/*color: #8A226F;*/
+/*text-align: right;*/
 font-size: 32px;
-white-space: nowrap;
+/*white-space: nowrap;*/
 }
 
 .box1 button {
 border: 1px solid black;
 border-radius: 20px;
-background-color: rgba(245, 192, 239, 0.4);
-color: #5C234D;
+/*background-color: rgba(245, 192, 239, 0.4);*/
+/*color: #5C234D;*/
 font-family: "Marmelad", serif;
 font-size: 20px;
 padding: 5px 20px 5px 20px;
 margin: 1% 3% 0 0;
 }
+
+.box1.left {
+    top: 50%;
+    left: 5%;
+    transform: translateY(-50%);
+    text-align: left;
+}
+
+.box1.center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.box1.right {
+    top: 50%;
+    right: 5%;
+    transform: translateY(-50%);
+    text-align: right;
+}
+
+
 
 .box1 button:hover, .box1 button:focus,.box1 a:hover
 {
@@ -300,7 +327,7 @@ color: black;
 
 
 /* !!!!!!!!! */
-.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1, .basket h1, .productManagement h1 {
+.Contact h1, .Delivery h1, .infoProfil h1, .editProfil h1, .catalog h1, .basket h1, .productManagement h1, .backgroundManagement h1 {
     color: black;
     font-family: "Marmelad", serif;
     font-size: 46px;
@@ -1618,5 +1645,186 @@ table th, td {
     color: white;
 }
 
-/*.....................\\\\\\\\\\\\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\........*/
+/*.....................\\\\\\\\\\\\\\\\\\\\\homePageManagementPage \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\........*/
+
+
+
+.backgroundManagement .block1 {
+    /*background: @(selectedBackground != null ? $"url(data:image/jpeg;base64,{selectedBackground.Photo})" : "url('../img_s/flowers_image.svg')") no-repeat center center;*/
+    background-size: cover;
+    aspect-ratio: 14/7;
+    border-radius: 4%;
+    margin-top: 5px;
+    position: relative;
+}
+
+.background-item {
+    width: 100px;
+    height: 50px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+}
+
+#addBackgroundDiv, #selectBackgroundDiv {
+    display: none;
+}
+
+#addBackgroundDiv #addbut, .backgroundManagement button {
+    margin: 5px 0 0 0;
+    border-radius: 10px;
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 16px;
+    padding: 5px 20px 5px 20px;
+}
+
+#addBackgroundDiv select {
+    font-size: 16px;
+    padding: 5px;
+    font-family: "Marmelad", serif;
+    background-color: #3F1536;
+    color: white;
+}
+
+.backgroundManagement label {
+    font-size: 16px;
+    padding: 5px;
+    font-family: "Marmelad", serif;
+    color: black;
+}
+
+#addBackgroundDiv h3, #selectBackgroundDiv h3, #addBackgroundDiv label, #selectBackgroundDiv label,
+#addBackgroundDiv input, #selectBackgroundDiv input {
+    font-family: "Marmelad", serif;
+    /*font-size: 16px;*/
+}
+
+.previewContainer {
+    width: 100%;
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+}
+
+#previewContainerNew {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+    font-size: 10px;
+}
+
+ #previewContainerSelect {
+    overflow: hidden;
+    word-wrap: break-word;
+    font-size: 10px;
+}
+
+.textButtonContainer, .textButtonContainerSelect {
+    width: 30%;
+    font-size: 10px;
+}
+
+.previewText{
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 300px;
+    max-height: 250px;
+    white-space: pre-wrap;
+    font-size: 10px;
+}
+
+.previewTextSelect {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-height: 250px;
+    white-space: pre-wrap;
+    font-size: 10px;
+}
+    .previewButton, .previewButtonSelect {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
+    font-size: 10px;
+}
+
+.textButtonContainer {
+    width: 200px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 5%;
+    right: auto;
+    font-size: 10px;
+}
+
+.textButtonContainer.right {
+    left: 60%;
+    right: auto;
+}
+
+
+
+
+
+.bgSelect {
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.textButtonContainerSelectItem {
+    width: 100%;
+    height: 90%;
+}
+
+
+.textButtonContainer1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.textButtonContainerSelect {
+    position: absolute;
+    top: 50%;
+    left: 50%; /* Initial center position */
+    transform: translate(-50%, -50%); /* Center the element */
+    width: 80%; /* Adjust as needed */
+    text-align: center; /* Default text alignment */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+
+    .textButtonContainerSelect.left {
+        left: 10%;
+        transform: translateY(-50%);
+        text-align: left;
+    }
+
+    .textButtonContainerSelect.right {
+        left: auto; /* Remove the left positioning */
+        right: 10%;
+        transform: translateY(-50%);
+        text-align: right;
+    }
+
+    .textButtonContainerSelect.center {
+        left: 50%; /* Center horizontally */
+        transform: translate(-50%, -50%); /* Center the element */
+        text-align: center; /* Center-align the text */
+    }
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\managingReviewsPage\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ C*/
+
 

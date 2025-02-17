@@ -1,9 +1,668 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-
-
-    homePageManagementPage
-*@
+﻿
 @{
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+    var backgrounds = ViewBag.backgrounds as List<MainPage>;
+    var selectedBackground = ViewBag.SelectedBackground as MainPage;
 }
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="~/img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"
+          rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap"
+          rel="stylesheet" />
+    <title>Управление главной страницы</title>
+</head>
+<body>
+    <div class="backgroundManagement">
+        <h1>Управление фонами</h1>
+        <div class="tabs">
+            <button id="btnExisting">Выбрать фон</button>
+            <button id="btnNew">Добавить новый фон</button>
+        </div>
+
+        <div id="selectBackgroundDiv">
+            <div class="columns">
+                <div class="column">
+                    <h3>Предпросмотр</h3>
+                    <div id="previewContainerSelect" class="previewContainer">
+                        <div class="textButtonContainerSelect">
+                            <h5 id="previewTextSelect" class="previewTextSelect">Пример текста</h5><br />
+                            <button id="previewButtonSelect" class="previewButtonSelect" style="font-size: 10px;">Кнопка</button>
+                        </div>
+                    </div>
+                    <br />
+                    <button id="setBackgroundButton" style="display:none;">Установить</button>
+                </div>
+
+
+                <div class="column">
+                     <h3>Выберите фон:</h3>
+                    <div id="background-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="addBackgroundDiv">
+            <div class="columns">
+                <div class="column">
+                    <h3>Предпросмотр</h3>
+                    <div id="previewContainerNew" class="previewContainer">
+                        <div class="textButtonContainer">
+                            <h5 id="previewText" class="previewText">Пример текста</h5><br />
+                            <button id="previewButton" class="previewButton" style="display: none; font-size: 10px;">Кнопка</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <h3>Добавить новый фон</h3>
+                    <form method="post" enctype="multipart/form-data" id="addBackgroundForm" onsubmit="return validateForm()" novalidate>
+                        <button class="imageAdd">
+                            <img src="~/img_s/image-plus.svg" />
+                        </button>
+                        <input type="file" name="photo" id="fileInput" accept="image/*" style="position: absolute; left: -9999px;" required />
+                        <label for="fileInput" id="fileLabel">Выберите изображение</label>
+                        <br />
+
+                        <input type="text" name="BackgroundText" id="backgroundTextInput" placeholder="Текст фона" required>
+                        <br />
+
+                        <label>Цвет текста:</label>
+                        <input type="color" name="BackgroundTextColor">
+                        <br />
+
+                        <select name="Position">
+                            <option value="left">Слева</option>
+                            <option value="right">Справа</option>
+                            <option value="center">Центр</option>
+                        </select>
+                        <br />
+
+                        <label>
+                            <input type="checkbox" id="showButton" name="ShowButton"> Показать кнопку
+                        </label>
+                        <br />
+
+                        <div id="buttonSettings" style="display: none;">
+                            <input type="text" name="ButtonText" id="buttonTextInput" placeholder="Текст кнопки">
+                            <br />
+
+                            <label>Цвет кнопки:</label>
+                            <input type="color" name="ButtonColor">
+                            <br />
+
+                            <label>Цвет текста кнопки:</label>
+                            <input type="color" name="ButtonTextColor">
+                        </div>
+                        <br />
+
+                        <button id="addbut" type="submit">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            let selectedBackgroundId = null;
+
+            function showModalMessage(message) {
+                $('#deleteModal .modal-body').text(message);
+                $('#deleteModal').modal('show');
+            }
+
+            function showModalMessageFon(message, callback) {
+                $('#deleteModal .modal-body').text(message);
+                $('#deleteModal').modal('show');
+
+                $('#deleteModal').on('hidden.bs.modal', function () {
+                    if (callback && typeof callback === "function") {
+                        callback();
+                    }
+                    $('#deleteModal').off('hidden.bs.modal');
+                });
+            }
+
+            function decodeHtml(html) {
+                let txt = document.createElement("textarea");
+                txt.innerHTML = html;
+                return txt.value;
+            }
+
+            function clearForm() {
+                $('#addBackgroundForm')[0].reset(); // Сброс всех полей формы
+                $('#fileLabel').text('Выберите изображение'); // Возвращаем текст label к исходному
+                $('#previewContainerNew').css('background-image', 'none'); // Очищаем предпросмотр
+                $('#buttonSettings').hide();
+                $('#previewButton').hide();
+
+                // Сброс значений preview
+                $("#previewText").text("Пример текста");
+                $("#previewText").css("color", "");
+                $("#previewButton").text("");
+                $("#previewButton").css("background-color", "");
+                $("#previewButton").css("color", "");
+                $("#previewContainerNew").removeClass("left right center");
+            }
+          
+
+            $(document).ready(function () { 
+
+                loadBackgrounds(); 
+                setBackgroundOnLoad();
+
+                function showModalMessageFon(message, callback) {
+                    $('#deleteModal .modal-body').text(message);
+                    $('#deleteModal').modal('show');
+
+                    $('#deleteModal').on('hidden.bs.modal', function () {
+                        if (callback && typeof callback === "function") {
+                            callback();
+                        }
+                        $('#deleteModal').off('hidden.bs.modal');
+                    });
+
+                }
+
+
+                function clearForm() {
+                    $('#addBackgroundForm')[0].reset(); // Сброс всех полей формы
+                    $('#fileLabel').text('Выберите изображение'); // Возвращаем текст label к исходному
+                    $('#previewContainerNew').css('background-image', 'none'); // Очищаем предпросмотр
+                    $('#buttonSettings').hide();
+                    $('#previewButton').hide();
+
+                    // Сброс значений preview
+                    $("#previewText").text("Пример текста");
+                    $("#previewText").css("color", "");
+                    $("#previewButton").text("");
+                    $("#previewButton").css("background-color", "");
+                    $("#previewButton").css("color", "");
+                    $("#previewContainerNew").removeClass("left right center");
+
+                }
+                
+                function setBackgroundOnLoad() {
+                    if (@(selectedBackground != null && selectedBackground.Photo != null ? "true" : "false")) {
+                        let selectedBackgroundId = @(selectedBackground.BackgroundId);
+
+                        $.ajax({
+                            url: '/Home/GetAll',
+                            type: 'GET',
+                            success: function (backgrounds) {
+                                // Находим соответствующий фон в полученном списке
+                                let selectedBg = backgrounds.find(bg => bg.backgroundId === selectedBackgroundId);
+
+                                if (selectedBg) {
+                                    // Используем данные из selectedBg
+                                    let photoData = selectedBg.photo;
+
+                                    // let photoData = "@(selectedBackground?.Photo)";
+                                    let backgroundText = "@(selectedBackground?.BackgroundText)";
+                                    let backgroundTextColor = "@(selectedBackground?.BackgroundTextColor ?? "")";
+                                    let buttonText = "@(selectedBackground?.ButtonText ?? "")";
+                                    let buttonColor = "@(selectedBackground?.ButtonColor ?? "")";
+                                    let buttonTextColor = "@(selectedBackground?.ButtonTextColor ?? "")";
+                                    let position = "@(selectedBackground?.Position ?? "center")";
+
+
+
+                                    const imageUrl = `url('data:image/${photoData.startsWith("/9j/") ? "jpeg" :
+                                        photoData.startsWith("iVBORw0KGgo=") ? "png" :
+                                            photoData.startsWith("R0lGOD") ? "gif" :
+                                                photoData.startsWith("UklGR") ? "webp" : "jpeg"
+                                        };base64,${photoData}')`;
+                                    // Установка фонового изображения
+                                    $("#previewContainerSelect").css({
+                                        'background-image': imageUrl,
+                                        'background-size': 'cover',
+                                        'background-position': 'center'
+                                    });
+
+                                    // Установка текста и цвета
+                                    $("#previewTextSelect").text(decodeHtml(backgroundText)); // Устанавливаем пустую строку, если backgroundText пуст
+                                    $("#previewTextSelect").css("color", backgroundTextColor || "");// Устанавливаем цвет по умолчанию, если не задан
+
+                                    // Установка свойств кнопки
+                                    let previewButtonSelect = $("#previewButtonSelect");
+                                    previewButtonSelect.text(decodeHtml(buttonText) || ""); // Устанавливаем пустую строку, если buttonText пуст
+                                    previewButtonSelect.css("background-color", buttonColor || ""); // Устанавливаем цвет по умолчанию, если не задан
+                                    previewButtonSelect.css("color", buttonTextColor || ""); // Устанавливаем цвет по умолчанию, если не задан
+
+                                    // Показать/скрыть кнопку
+                                    if (decodeHtml(buttonText) != "error") {
+                                        previewButtonSelect.show();
+                                    } else {
+                                        previewButtonSelect.hide();
+                                    }
+
+                                    //  Добавляем классы для выравнивания текста
+                                    let textButtonContainerSelect = $(".textButtonContainerSelect");
+                                    textButtonContainerSelect.removeClass("left right center");
+
+                                    if (position === "left") {
+                                        textButtonContainerSelect.addClass("left");
+                                    } else if (position === "right") {
+                                        textButtonContainerSelect.addClass("right");
+                                    } else {
+                                        textButtonContainerSelect.addClass("center");
+                                    }
+
+                                    $("#setBackgroundButton").hide();  //  скрыть кнопку "Установить", так как фон уже установлен
+                                }
+                            }
+                        });
+                    }
+                }
+
+
+
+                function loadBackgrounds() {
+
+                    $.ajax({
+                        url: '/Home/GetAll',
+                        type: 'GET',
+                        success: function (backgrounds) {
+                            let backgroundList = $('#background-list');
+                            backgroundList.empty();
+
+                            backgrounds.forEach(bg => {
+                                let bgDiv = $('<div></div>')
+                                    .addClass('background-item')
+                                    .attr('data-id', bg.backgroundId)
+                                    .attr('data-photo', bg.photo)
+                                    .attr('data-backgroundtext', bg.backgroundText)
+                                    .attr('data-backgroundtextcolor', bg.backgroundTextColor)
+                                    .attr('data-buttontext', bg.buttonText)
+                                    .attr('data-buttoncolor', bg.buttonColor)
+                                    .attr('data-buttontextcolor', bg.buttonTextColor)
+                                    .attr('data-position', bg.position)
+                                    .css({
+                                        'background-image': `url('data:image/jpeg;base64,${bg.photo}')`,
+                                        'width': '400px',
+                                        'height': '250px',
+                                        'margin': '10px',
+                                        'display': 'inline-block',
+                                        'background-size': 'cover',
+                                        'background-position': 'center',
+                                        'cursor': 'pointer',
+                                        'position': 'relative'
+                                    });
+
+                                let textButtonContainer = $('<div></div>')
+                                    .addClass('textButtonContainer1')
+                                    .css({
+                                        'position': 'absolute',
+                                        'top': '50%',
+                                        'width': '95%',
+                                        'transform': 'translateY(-50%)',
+                                        'color': bg.backgroundTextColor || '#fff',
+                                        'display': 'flex',
+                                        'flex-direction': 'column',
+                                        'align-items': getTextAlignment(bg.position),
+                                        'text-align': bg.position || 'center',
+                                        'padding': '0 10px'
+                                    });
+
+                                if (bg.backgroundText) {
+                                    let previewText = $('<h5></h5>')
+                                        .addClass('previewText1')
+                                        .text(bg.backgroundText)
+                                        .css({
+                                            'font-size': '10px',
+                                            'word-wrap': 'break-word',
+                                            'overflow-wrap': 'break-word',
+                                            'white-space': 'normal',
+                                            'max-width': '100%',
+                                            'text-align': 'inherit'
+                                        });
+
+                                    textButtonContainer.append(previewText);
+                                }
+
+                                if (bg.buttonText != "error") {
+                                    let previewButton = $('<button></button>')
+                                        .addClass('previewButton1')
+                                        .text(bg.buttonText)
+                                        .css({
+                                            'background-color': bg.buttonColor || '#000',
+                                            'color': bg.buttonTextColor || '#fff',
+                                            'border': 'none',
+                                            'padding': '5px 10px',
+                                            'cursor': 'pointer',
+                                            'font-size': '10px',
+                                            'margin-top': '5px'
+                                        });
+
+                                    textButtonContainer.append(previewButton);
+                                }
+
+                                bgDiv.append(textButtonContainer);
+                                backgroundList.append(bgDiv);
+                            });
+                            if (selectedBackgroundId) {
+                                showPreview(selectedBackgroundId);
+                            }
+
+                        },
+                        error: function () {
+                            console.error('Ошибка загрузки фонов.');
+                        }
+                    });
+                }           
+
+                function getTextAlignment(position) {
+                    switch (position) {
+                        case "left": return "flex-start";
+                        case "right": return "flex-end";
+                        default: return "center";
+                    }
+                }
+
+                $(document).on('click', '.background-item', function () {
+                    selectedBackgroundId = $(this).data('id');
+                    let photo = $(this).data('photo');
+                    let backgroundText = $(this).data('backgroundtext');
+                    let backgroundTextColor = $(this).data('backgroundtextcolor');
+                    let buttonText = $(this).data('buttontext');
+                    let buttonColor = $(this).data('buttoncolor');
+                    let buttonTextColor = $(this).data('buttontextcolor');
+                    let position = $(this).data('position');
+
+                    // Установка фонового изображения
+                    $("#previewContainerSelect").css({
+                        'background-image': `url('data:image/jpeg;base64,${photo}')`,
+                        'background-size': 'cover',
+                        'background-position': 'center'
+                    });
+
+                    // Установка текста и цвета
+                    $("#previewTextSelect").text(backgroundText || ""); // Устанавливаем пустую строку, если backgroundText пуст
+                    $("#previewTextSelect").css("color", backgroundTextColor || "");// Устанавливаем цвет по умолчанию, если не задан
+
+                    // Установка свойств кнопки
+                    let previewButtonSelect = $("#previewButtonSelect");
+                    previewButtonSelect.text(buttonText || ""); // Устанавливаем пустую строку, если buttonText пуст
+                    previewButtonSelect.css("background-color", buttonColor || ""); // Устанавливаем цвет по умолчанию, если не задан
+                    previewButtonSelect.css("color", buttonTextColor || ""); // Устанавливаем цвет по умолчанию, если не задан
+
+                    // Показать/скрыть кнопку
+                    if (buttonText != "error") {
+                        previewButtonSelect.show();
+                    } else {
+                        previewButtonSelect.hide();
+                    }
+
+                    // Выравнивание текста
+                    let textButtonContainerSelect = $(".textButtonContainerSelect");
+                    textButtonContainerSelect.removeClass("left right center");
+
+                    if (position === "left") {
+                        textButtonContainerSelect.addClass("left");
+                    } else if (position === "right") {
+                        textButtonContainerSelect.addClass("right");
+                    } else {
+                        textButtonContainerSelect.addClass("center");
+                    }
+                    if (@(selectedBackground.BackgroundId) == selectedBackgroundId) {
+                        $("#setBackgroundButton").hide();
+                    }
+                    else {
+                        $("#setBackgroundButton").show();
+                    }
+                });
+
+
+
+                $("#setBackgroundButton").click(function () {
+                    if (!selectedBackgroundId) return;
+
+                    $.ajax({
+                        url: '/Home/SetBackgroundUsed',
+                        type: 'POST',
+                        data: { backgroundId: selectedBackgroundId },
+                        success: function (response) {
+                            if (response.success) {
+                                showModalMessage("Фон успешно установлен.");
+                                $("#setBackgroundButton").hide(); // Скрываем кнопку
+                                loadBackgrounds(); // При необходимости перезагружаем список фонов
+                            } else {
+                                showModalMessage("Ошибка при установке фона.");
+                            }
+                        },
+                        error: function () {
+                            showModalMessage("Ошибка при отправке запроса.");
+                        }
+                    });
+                });
+
+                // Загрузка фонов при загрузке страницы
+                loadBackgrounds();
+
+
+
+
+
+                $("form").submit(function (event) {
+                    event.preventDefault(); // Остановка стандартной отправки формы
+                    if (!validateForm()) return;
+                    let formData = new FormData(this); 
+
+                    $.ajax({
+                        url: "/Home/AddBackground",
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            if (response.success) {
+                                showModalMessageFon("Фон успешно добавлен.", function () {
+                                    clearForm();
+                                    loadBackgrounds();
+                                });
+                            } else {
+                                showModalMessage("Ошибка при изменении фона.");
+                            }
+                        },
+                        error: function () {
+                            showModalMessage("Ошибка при отправке данных.");
+                        }
+
+                    });
+                });
+
+               
+
+
+                $("#btnExisting").click(function () {
+                    $("#selectBackgroundDiv").show();
+                    $("#addBackgroundDiv").hide();
+                });
+
+                $("#btnNew").click(function () {
+                    $("#selectBackgroundDiv").hide();
+                    $("#addBackgroundDiv").show();
+                });
+
+                $(".background-item").click(function () {
+                    let photo = $(this).data("photo");
+                    $("#previewContainerSelect").css("background-image", 'url("data:image/jpeg;base64,' + photo + '")');
+                });
+
+                // Открытие проводника вместо AJAX-запроса
+                $(".imageAdd, #fileLabel").click(function (e) {
+                    e.preventDefault();
+                    $("#fileInput").click();
+                });
+
+                $("#fileInput").change(function (event) {
+                    let file = event.target.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#previewContainerNew").css("background-image", 'url("' + e.target.result + '")');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                document.getElementById("fileInput").addEventListener("change", function (event) {
+                    let file = event.target.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            document.getElementById("previewContainerNew").style.backgroundImage = 'url("' + e.target.result + '")';
+                        };
+                        reader.readAsDataURL(file);
+                        document.getElementById("fileLabel").innerText = file.name;
+                    }
+                });
+
+                document.getElementById("showButton").addEventListener("change", function () {
+                    document.getElementById("buttonSettings").style.display = this.checked ? "block" : "none";
+                    document.getElementById("previewButton").style.display = this.checked ? "inline-block" : "none";
+                });
+
+
+                $("#backgroundTextInput").on("input", function () {
+                    let text = $(this).val().substring(0, 150);
+                    $(this).val(text);
+                    $("#previewText").text(text);
+                });
+
+                $("#buttonTextInput").on("input", function () {
+                    let text = $(this).val().substring(0, 45);
+                    $(this).val(text);
+                    $("#previewButton").text(text);
+                });
+
+                $("select[name='Position']").change(function () {
+                    let position = $(this).val();
+                    let container = $(".textButtonContainer");
+
+                    let cssProperties = {
+                        justifyContent: position === "left" ? "flex-start" : position === "right" ? "flex-end" : "center",
+                        textAlign: position,
+                        top: "50%", // Устанавливаем верхний отступ
+                    };
+
+                    // Добавляем или убираем left и transform в зависимости от позиции
+                    if (position === "center") {
+                        cssProperties.left = "50%";
+                        cssProperties.transform = "translate(-50%, -50%)";
+                    } else {
+                        delete cssProperties.left;
+                        delete cssProperties.transform;
+                    }
+
+                    container.css(cssProperties);
+                });
+
+
+
+                $("#showButton").change(function () {
+                    $("#buttonSettings").toggle(this.checked);
+                    $("#previewButton").toggle(this.checked);
+                });
+
+
+                    // Обновление текста фона
+                    $("input[name='BackgroundText']").on("input", function () {
+                        $("#previewText").text($(this).val());
+                    });
+
+                    // Обновление цвета текста
+                    $("input[name='BackgroundTextColor']").on("input", function () {
+                        $("#previewText").css("color", $(this).val());
+                    });
+
+
+                    // Показ/скрытие кнопки
+                    $("#showButton").change(function () {
+                        $("#buttonSettings").toggle(this.checked);
+                        $("#previewButton").toggle(this.checked);
+                    });
+
+                    // Обновление текста кнопки
+                    $("input[name='ButtonText']").on("input", function () {
+                        $("#previewButton").text($(this).val());
+                    });
+
+                    // Обновление цвета кнопки
+                    $("input[name='ButtonColor']").on("input", function () {
+                        $("#previewButton").css("background-color", $(this).val());
+                    });
+
+                    // Обновление цвета текста кнопки
+                    $("input[name='ButtonTextColor']").on("input", function () {
+                        $("#previewButton").css("color", $(this).val());
+                    });
+                });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const positionSelect = document.querySelector('select[name="Position"]');
+                const textButtonContainer = document.querySelector(".textButtonContainer");
+
+                positionSelect.addEventListener("change", function () {
+                    if (this.value === "right") {
+                        textButtonContainer.classList.add("right");
+                    } else {
+                        textButtonContainer.classList.remove("right");
+                    }
+                });
+            });
+            
+        function validateForm() {
+            let showButton = document.getElementById("showButton").checked;
+            let buttonText = document.getElementById("buttonTextInput").value.trim();
+                // let photoLabel = document.getElementById("fileLabel").value;
+                    let photo = document.getElementById("fileInput").value.trim();
+
+                let fileInput = document.getElementById("fileInput");
+
+                if (!fileInput.files.length) {
+                    showModalMessage("Выберите изображение перед добавлением!");
+                    return false;
+                }
+                    if (photo === "") {
+                        showModalMessage("Выберите изображение");
+                        return false;
+                    }
+                    if (showButton && buttonText === "") {
+                        showModalMessage("Введите текст кнопки");
+                        return false;
+                    }
+                    return true;
+               
+        }
+    </script>
+</body>
+</html>
+
+

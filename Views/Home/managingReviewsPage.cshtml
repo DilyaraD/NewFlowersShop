@@ -1,5 +1,166 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    var reviewsList = ViewBag.reviewsList as List<NewFlowersShop.Reviews>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css"  rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap" rel="stylesheet" />
+    <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="productManagement">
+        <h1>Управление отзывами</h1>
+        <div class="infoProductManagement">
+            <div class="columns">
+                <div class="column" id="reviewsList">
+                    <div id="productContainer">
+                        @if (reviewsList != null && reviewsList.Any())
+                        {
+                            <table class="ordersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Оценка</th>
+                                        <th>Текст отзыва</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var review in reviewsList)
+                                    {
+                                        <tr class="item-row" data-id="@review.ReviewID">
+                                            <td>@review.Rating</td>
+                                            <td>@review.ReviewText</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Нет отзывов в обработке</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="column action-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $('#deleteModal').on('shown.bs.modal', function () {
+            setTimeout(function () {
+                location.reload();
+            }, 500); // Добавляем небольшую задержку
+        });
+
+        function showMessage(message) {
+            $('#deleteModal .modal-body').text(message);
+            $('#deleteModal').modal('show');
+            $('#deleteModal').css('z-index', '2000');
+        }
+
+        $(document).ready(function () {
+            $('#deleteModal').on('shown.bs.modal', function () {
+                setTimeout(function () {
+                    location.reload();
+                }, 1500); // Добавляем небольшую задержку
+            });
+
+
+            function loadActionPanel(reviewId) {
+                var actionPanel = $('.action-panel');
+                actionPanel.empty(); // Очищаем предыдущее содержимое
+
+                var content = `
+                            <p>Хотите опубликовать отзыв или удалить?</p>
+                            <button class="btn btn-success publish-review" data-id="${reviewId}">Опубликовать</button>
+                            <button class="btn btn-danger delete-review" data-id="${reviewId}">Удалить</button>
+                        `;
+                actionPanel.append(content);
+
+                // Обработчики для кнопок "Опубликовать" и "Удалить"
+                $('.publish-review').click(function () {
+                    var reviewId = $(this).data('id');
+                    $.ajax({
+                        url: '/Home/PostReview',
+                        type: 'POST',
+                        data: { reviewId: reviewId },
+                        success: function (response) {
+                            if (response.success) {
+                                showMessage(response.message);
+                                $('#notificationModal').on('hidden.bs.modal', function () {
+                                    location.reload();
+                                });
+
+                            } else {
+                                showMessage(response.message);
+                            }
+                        },
+                        error: function () {
+                            showMessage('Ошибка при публикации отзыва.');
+                        }
+                    });
+                });
+
+                $('.delete-review').click(function () {
+                    var reviewId = $(this).data('id');
+                    $.ajax({
+                        url: '/Home/DeleteReview',
+                        type: 'POST',
+                        data: { reviewId: reviewId },
+                        success: function (response) {
+                            if (response.success) {
+                                showMessage(response.message);
+                                $('#notificationModal').on('hidden.bs.modal', function () {
+                                    location.reload();
+                                });
+                            } else {
+                                showMessage(response.message);
+                            }
+                        },
+                        error: function () {
+                            showMessage('Ошибка при удалении отзыва.');
+                        }
+                    });
+                });
+            }
+
+
+            // Обработчик клика на строку отзыва
+            $('.item-row').click(function () {
+                var reviewId = $(this).data('id');
+                loadActionPanel(reviewId);
+            });
+        });
+    </script>
+</body>
+</html>

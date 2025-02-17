@@ -10,6 +10,7 @@ namespace NewFlowersShop.Models
         }
 
         public virtual DbSet<CashBook> CashBook { get; set; }
+        public virtual DbSet<MainPage> MainPage { get; set; }
         public virtual DbSet<Customers> Customers { get; set; }
         public virtual DbSet<Deliveries> Deliveries { get; set; }
         public virtual DbSet<Discounts> Discounts { get; set; }
@@ -36,6 +37,7 @@ namespace NewFlowersShop.Models
             base.OnModelCreating(builder);
 
             builder.Entity<Customers>().HasKey(c => c.CustomerID);
+            builder.Entity<MainPage>().HasKey(b => b.BackgroundId);
             builder.Entity<Deliveries>().HasKey(d => d.DeliveryID);
             builder.Entity<Discounts>().HasKey(d => d.DiscountID);
             builder.Entity<Documents>().HasKey(d => d.DocumentID);
@@ -54,7 +56,6 @@ namespace NewFlowersShop.Models
             builder.Entity<StoreFlowerStocks>().HasKey(e => e.StoreFlowerStockID);
             builder.Entity<Stores>().HasKey(e => e.StoreID);
             builder.Entity<WorkSchedules>().HasKey(e => e.ScheduleID);
-            //builder.Entity<FlowerCategories>().HasKey(e => e.CategoryID);
             //builder.Entity<FlowerCategories>().HasKey(e => e.CategoryID);
             //builder.Entity<FlowerCategories>().HasKey(e => e.CategoryID);
 
