@@ -1827,4 +1827,152 @@ table th, td {
     }
 /*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CourierOrderPage\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ C*/
 
+/*/////////////////////////////////////////DocumentManagementPage///////////////////////////*/
+.addDocumentButton {
+    right: 0;
+}
 
+.validation-error {
+    color: red;
+    font-size: 0.8em;
+}
+
+.input-error {
+    border-color: red;
+}
+
+.imageAdd {
+    background-color: #e2e6ea;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.imageAdd:hover {
+    background-color: lightslategray;
+}
+
+#uploadForm .modal-dialog {
+    max-width: 600px; 
+    margin: 1.75rem auto;
+}
+
+.document-list {
+    margin-top: 20px;
+}
+
+.document-list table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.document-list th, .document-list td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.document-list th {
+    background-color: #f2f2f2;
+}
+
+.document-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+
+
+.document-list h2 {
+    font-family: "Marmelad", serif;
+}
+
+
+.document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Align items to the baseline */
+    margin-bottom: 5px;
+}
+
+.document-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+    flex-grow: 1; /* Allow title to take available space */
+}
+
+.upload-date {
+    font-size: 0.8em;
+    color: #777;
+    margin-left: 10px;
+    white-space: nowrap; /* Prevent date from wrapping */
+}
+
+.document-description {
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Show only 2 lines initially */
+    -webkit-box-orient: vertical;
+    cursor: pointer;
+    overflow-wrap: break-word; /* Добавляем здесь */
+}
+
+
+
+
+    .document-description.expanded {
+        display: block; /* Show all text when expanded */
+        -webkit-line-clamp: unset;
+    }
+
+.file-link {
+    font-size: 0.85em;
+    color: #007bff;
+    text-decoration: none;
+}
+
+    .file-link:hover {
+        text-decoration: underline;
+    }
+
+.imageAdd {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+    .imageAdd img {
+        width: 24px;
+        height: 24px;
+    }
+
+#fileAddImage, #doneImage {
+    width: 30px;
+    height: 30px;
+}
+
+#uploadForm .modal-footer button {
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}

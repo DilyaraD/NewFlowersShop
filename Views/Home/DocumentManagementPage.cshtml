@@ -1,0 +1,257 @@
+﻿@{
+    var documents = ViewBag.documents as List<NewFlowersShop.Documents>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap" rel="stylesheet" />
+    <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="productManagement">
+        <h1>Управление документами</h1>
+        <div class="infoProductManagement">
+            <button id="addDocumentButton" class="btn btn-primary">Добавить документ</button>
+            <div class="document-list">
+                <h2>Список документов</h2>
+                @if (documents != null && documents.Any())
+                {
+                    @foreach (var document in documents)
+                    {
+                        <div class="document-item">
+                            <button type="button" class="imageAdd" onclick="location.href='@Url.Action("ViewDocument", "Home", new { id = document.DocumentID })'" style="background-color:#e2e6ea;">
+                                <img id="doneImage" src="~/img_s/done.svg" alt="Выбран файл" style="display:none;" />
+                                <img id="fileAddImage" src="~/img_s/file.svg" alt="Скачать файл" />
+                            </button>
+                            <div class="document-header">
+                                <h3 class="document-title">@document.DocumentName</h3>
+                                <span class="upload-date">@document.UploadDate.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            <div class="document-description" data-full-text="@document.Description" style="overflow-wrap: break-word;">
+                                @{
+                                    string shortDescription = document.Description.Length > 200 ? document.Description.Substring(0, 200) + "..." : document.Description;
+                                }
+                                @shortDescription
+                            </div>
+                            <div> 
+                                <p>Файл: 
+                                    <a href="@Url.Action("ViewDocument", "Home", new { id = document.DocumentID })" class="file-link">
+                                        @document.DocumentName
+                                    </a>
+                                </p>
+                            </div>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p>Нет документов для отображения.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="uploadForm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="uploadFormLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadFormLabel">Загрузить документ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:none;"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="documentForm">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="documentName" name="documentName" placeholder="Название документа" maxlength="50">
+                            <div id="documentNameError" class="validation-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <textarea class="form-control" id="description" name="description" placeholder="Описание" maxlength="1000"></textarea>
+                            <div id="descriptionError" class="validation-error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <div style="display: flex; align-items: center;">
+                                <button type="button" class="imageAdd" style="background-color:#e2e6ea;">
+                                    <img id ="doneImage" src="~/img_s/done.svg" alt="Выбран файл" style="display:none;" />
+                                    <img id="fileAddImage" src="~/img_s/fileAdd.svg" alt="Выберите файл" />
+                                </button>
+                                <label for="fileInput" id="fileLabel" style="margin-left:5px;">Выберите файл</label>
+                            </div>
+                            <input type="file" name="file" id="fileInput" accept=".pdf,.docx,.doc,.txt" style="display: none" />
+                            <div id="fileError" class="validation-error"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="saveButton">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:#e2e6ea;"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        let selectedFile = null;
+
+
+        $("#addDocumentButton").click(function () {
+            $("#uploadForm").modal("show");
+        });
+
+        $(".imageAdd").click(function (e) {
+            e.preventDefault();
+            $("#fileInput").click();
+        });
+
+        $("#fileInput").change(function () {
+            selectedFile = this.files[0];
+            if (selectedFile) {
+                $("#fileAddImage").hide();
+                $("#doneImage").show();
+                $("#fileLabel").text(selectedFile.name);
+            } else {
+                $("#fileLabel").text("Выберите файл");
+                $("#doneImage").hide();
+                $("#fileAddImage").show();
+            }
+        });
+
+
+        $("#saveButton").click(function () {
+            event.preventDefault();
+            // Сброс стилей и сообщений об ошибках
+            $("#documentName").removeClass("input-error");
+            $("#description").removeClass("input-error");
+            $("#fileInput").removeClass("input-error");
+            $(".validation-error").text("");
+
+            var documentName = $("#documentName").val();
+            var description = $("#description").val();
+            var file = selectedFile;
+
+            if (!documentName) {
+                $("#documentName").addClass("input-error");
+                $("#documentNameError").text("Название документа обязательно");
+            }
+            if (!description) {
+                $("#description").addClass("input-error");
+                $("#descriptionError").text("Описание обязательно");
+            }
+            if (!file) {
+                $("#fileInput").addClass("input-error");
+                $("#fileError").text("Файл обязателен");
+            }
+
+            if (!documentName || !description || !file) {
+                return; // Прекращаем выполнение, если есть ошибки
+            }
+
+            var formData = new FormData();
+            formData.append("documentName", documentName);
+            formData.append("description", description);
+            formData.append("file", file);
+
+            $.ajax({
+                url: "@Url.Action("UploadDocument", "Home")",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.success) {
+                        // Показываем модальное окно с сообщением об успехе
+                        $("#notificationModalBody").text(response.message);
+                        $("#notificationModal").modal("show");
+
+                        // Закрываем форму загрузки
+                        $("#uploadForm").modal("hide");
+
+                        // Очищаем форму
+                        $("#documentForm")[0].reset();
+                        $("#fileLabel").text("Выберите файл");
+                        $("#fileImage").attr("src", "~/img_s/fileAdd.svg").attr("alt", "Выберите файл");
+                        selectedFile = null;
+                    } else {
+                        // Вывод ошибок валидации
+                        if (response.errors) {
+                            for (var key in response.errors) {
+                                if (response.errors.hasOwnProperty(key)) {
+                                    var errorMessage = response.errors[key];
+                                    $("#" + key).addClass("input-error");
+                                    $("#" + key + "Error").text(errorMessage);
+                                }
+                            }
+                        } else {
+                            $("#notificationModalBody").text(response.message || "Произошла ошибка.");
+                            $("#notificationModal").modal("show");
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Ошибка при отправке запроса:", error);
+                    // Показываем модальное окно с сообщением об ошибке
+                    $("#notificationModalBody").text("Произошла ошибка при отправке запроса.");
+                    $("#notificationModal").modal("show");
+                }
+            });
+        });
+
+        $('#notificationModal').on('hidden.bs.modal', function () {
+            location.reload();
+        });
+
+        $('#uploadForm').on('hidden.bs.modal', function () {
+            // Сброс значений и стилей при закрытии модального окна
+            $("#documentForm")[0].reset();
+            $("#documentName").removeClass("input-error");
+            $("#description").removeClass("input-error");
+            $("#fileInput").removeClass("input-error");
+            $(".validation-error").text("");
+            $("#fileLabel").text("Выберите файл");
+            $("#fileImage").attr("src", "~/img_s/fileAdd.svg").attr("alt", "Выберите файл");
+            selectedFile = null;
+        });
+
+        $('.document-description').click(function () {
+            $(this).toggleClass('expanded');
+            if ($(this).hasClass('expanded')) {
+                $(this).text($(this).data('full-text'));
+            } else {
+                let fullText = $(this).data('full-text');
+                let shortDescription = fullText.length > 200 ? fullText.substring(0, 200) + "..." : fullText;
+                $(this).text(shortDescription);
+            }
+        });
+    });
+</script>

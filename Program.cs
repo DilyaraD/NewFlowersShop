@@ -26,6 +26,8 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
 app.UseSession();
 
 app.UseRouting();

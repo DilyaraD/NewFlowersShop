@@ -1506,6 +1506,8 @@ namespace NewFlowersShop.Controllers
                 .ToList();
 
             ViewBag.Orders = orders;
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
 
             return View();
         }
@@ -1568,11 +1570,96 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = true, message = "Заказ доставлен!" });
         }
 
+        public IActionResult DocumentManagementPage()
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
+            var documents = _context.Documents.ToList();
+            ViewBag.documents = documents;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadDocument(string documentName, string description, IFormFile file)
+        {
+            if (string.IsNullOrEmpty(documentName) || string.IsNullOrEmpty(description) || file == null || file.Length == 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    errors = new
+                    {
+                        documentName = string.IsNullOrEmpty(documentName) ? "Название документа обязательно" : null,
+                        description = string.IsNullOrEmpty(description) ? "Описание обязательно" : null,
+                        file = (file == null || file.Length == 0) ? "Файл обязателен" : null
+                    }
+                });
+            }
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
+            try
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await file.CopyToAsync(memoryStream);
+                    var fileContent = memoryStream.ToArray(); 
+                    string fileContentString = Convert.ToBase64String(fileContent); 
+
+                    var document = new Documents
+                    {
+                        DocumentName = documentName,
+                        UploadDate = DateTime.Now,
+                        Description = description,
+                        FilePath = fileContentString,
+                        EmployeeID = user.EmployeeID
+                    };
+
+                    _context.Documents.Add(document);
+                    await _context.SaveChangesAsync();
+
+                    return Json(new { success = true, message = "Документ успешно добавлен!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка сохранения документа: {ex.Message}");
+                return Json(new { success = false, message = "Ошибка при сохранении документа: " + ex.Message });
+            }
+        }
 
 
+        // Действие для отображения содержимого файла
+        public IActionResult ViewDocument(int id)
+        {
+            var document = _context.Documents.Find(id);
 
+            if (document == null)
+            {
+                return NotFound();
+            }
 
+            // Преобразование строки Base64 обратно в массив байтов
+            byte[] fileBytes = Convert.FromBase64String(document.FilePath);
 
+            // Определение типа контента (можно улучшить, используя расширение файла)
+            string contentType = "application/octet-stream"; // По умолчанию
+            if (document.DocumentName.ToLower().EndsWith(".pdf"))
+            {
+                contentType = "application/pdf";
+            }
+            else if (document.DocumentName.ToLower().EndsWith(".docx") || document.DocumentName.ToLower().EndsWith(".doc"))
+            {
+                contentType = "application/msword";
+            }
+            else if (document.DocumentName.ToLower().EndsWith(".txt"))
+            {
+                contentType = "text/plain";
+            }
+
+            // Возвращаем файл для просмотра/скачивания
+            return File(fileBytes, contentType, document.DocumentName);
+        }
+    
 
 
 
