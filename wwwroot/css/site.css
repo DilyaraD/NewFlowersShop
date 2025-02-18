@@ -1892,7 +1892,7 @@ table th, td {
 
 
 
-.document-list h2 {
+.document-list h2, .employee-list h2 {
     font-family: "Marmelad", serif;
 }
 
@@ -1976,3 +1976,41 @@ table th, td {
     border-radius: 10px;
     cursor: pointer;
 }
+
+
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\EmployeeManagementPage\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+
+.employee-list {
+    margin-top: 20px;
+}
+
+.employee-item {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    font-family: "Marmelad", serif;
+    width: 70%;
+}
+
+.employee-item:hover {
+    background-color: #f5f5f5;
+}
+
+.employee-login {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.employee-name {
+    font-size: 1em;
+    color: #555;
+}
+
+.employee-role {
+    font-size: 1em;
+    color: green;
+}
+
+/*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CashRegisterPage\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
+

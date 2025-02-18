@@ -1,0 +1,461 @@
+﻿@{
+    var employees = ViewBag.employee as List<Employees>;
+    var roles = ViewBag.roles as List<Roles>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap" rel="stylesheet" />
+    <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="productManagement">
+        <h1>Управление персоналом</h1>
+        <div class="infoProductManagement">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                Добавить сотрудника
+            </button>
+
+            <div class="employee-list">
+                <h2>Список сотрудников</h2>
+                @if (employees != null)
+                {
+                    foreach (var employee in employees.OrderByDescending(e => e.EmployeeID))
+                    {
+                        <div class="employee-item" data-employee-id="@employee.EmployeeID">
+                            <div class="employee-info">
+                                <div class="employee-login">@employee.LoginEmployee</div>
+                                <div class="employee-name">@employee.FirstName @employee.LastName</div>
+                            </div>
+                            <div class="employee-role">@roles.FirstOrDefault(r => r.RoleID == employee.RoleID)?.RoleName</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p> Сотрудники не найдены.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEmployeeModalLabel">Добавить сотрудника</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="loginEmployee" placeholder="Логин" maxlength="50">
+                        <div id="loginError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="firstName" placeholder="Имя" maxlength="50">
+                        <div id="firstNameError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="lastName" placeholder="Фамилия" maxlength="50">
+                        <div id="lastNameError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="phoneNumber" pattern="^\+?\d{10,15}$" maxlength="11" placeholder="Номер телефона">
+                        <div id="phoneNumberError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" id="passwordEmployee" placeholder="Пароль" maxlength="50">
+                        <div id="passwordError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" id="roleID">
+                            <option selected disabled>Выберите роль</option>
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.RoleID">@role.RoleName</option>
+                            }
+                        </select>
+                        <div id="roleError" class="validation-error"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="addEmployeeButton">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEmployeeModalLabel">Редактировать сотрудника</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editEmployeeID" />
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="editLoginEmployee" placeholder="Логин" maxlength="50">
+                        <div id="editLoginError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="editFirstName" placeholder="Имя" maxlength="50">
+                        <div id="editFirstNameError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="editLastName" placeholder="Фамилия" maxlength="50">
+                        <div id="editLastNameError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="editphoneNumber" pattern="^\+?\d{10,15}$" maxlength="11" placeholder="Номер телефона">
+                        <div id="editPhoneNumberError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" id="editRoleID">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.RoleID">@role.RoleName</option>
+                            }
+                        </select>
+                        <div id="editRoleError" class="validation-error"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">Удалить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveEmployeeButton">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите удалить сотрудника?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:#e2e6ea;"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+        $(document).ready(function () {
+            function showError(elementId, message) {
+                $(elementId).text(message);
+                $(elementId).show();
+                $(elementId.replace('Error', '')).addClass('input-error');
+            }
+
+
+            function validateEditForm() {
+                let isValid = true;
+
+                function showError(elementId, message) {
+                    $(elementId).text(message);
+                    $(elementId).show();
+                    $(elementId.replace('Error', '')).addClass('input-error');
+                }
+
+                function hideError(elementId) {
+                    $(elementId).text('');
+                    $(elementId).hide();
+                    $(elementId.replace('Error', '')).removeClass('input-error');
+                }
+
+                // Валидация логина
+                if ($('#editLoginEmployee').val().trim() === '') {
+                    showError('#editLoginError', 'Введите логин');
+                    isValid = false;
+                } else {
+                    hideError('#editLoginError');
+                }
+
+                // Валидация имени
+                if ($('#editFirstName').val().trim() === '') {
+                    showError('#editFirstNameError', 'Введите имя');
+                    isValid = false;
+                } else {
+                    hideError('#editFirstNameError');
+                }
+
+                // Валидация фамилии
+                if ($('#editLastName').val().trim() === '') {
+                    showError('#editLastNameError', 'Введите фамилию');
+                    isValid = false;
+                } else {
+                    hideError('#editLastNameError');
+                }
+
+                // Валидация номера телефона
+                let phoneNumber = $('#editphoneNumber').val().trim();
+                let phonePattern = /^(\+7|8)9\d{9}$/;
+                if (!phonePattern.test(phoneNumber)) {
+                    showError('#editPhoneNumberError', 'Введите номер телефона в формате 89XXXXXXXXX');
+                    isValid = false;
+                } else {
+                    hideError('#editPhoneNumberError');
+                }
+
+                // Валидация роли
+                if ($('#editRoleID').val() === null) {
+                    showError('#editRoleError', 'Выберите роль');
+                    isValid = false;
+                } else {
+                    hideError('#editRoleError');
+                }
+
+                return isValid;
+            }
+
+            // Функция для скрытия сообщения об ошибке
+            function hideError(elementId) {
+                $(elementId).text('');
+                $(elementId).hide();
+                $(elementId.replace('Error', '')).removeClass('input-error'); // Удаляем класс input-error
+            }
+
+            // Функция для валидации формы
+            function validateForm() {
+                let isValid = true;
+
+                // Валидация логина
+                if ($('#loginEmployee').val().trim() === '') {
+                    showError('#loginError', 'Введите логин');
+                    isValid = false;
+                } else {
+                    hideError('#loginError');
+                }
+
+                // Валидация имени
+                if ($('#firstName').val().trim() === '') {
+                    showError('#firstNameError', 'Введите имя');
+                    isValid = false;
+                } else {
+                    hideError('#firstNameError');
+                }
+
+                if ($('#lastName').val().trim() === '') {
+                    showError('#lastNameError', 'Введите фамилию');
+                    isValid = false;
+                } else {
+                    hideError('#lastNameError');
+                }
+                // Валидация пароля
+                if ($('#passwordEmployee').val().trim() === '') {
+                    showError('#passwordError', 'Введите пароль');
+                    isValid = false;
+                } else {
+                    hideError('#passwordError');
+                }
+
+                if ($('#passwordEmployee').val().length < 6) {
+                    showError('#passwordError', 'Пароль должен содержать минимум 6 символов!');
+                    isValid = false;
+                } else {
+                    hideError('#passwordError');
+                }
+
+                let phoneNumber = document.getElementById("phoneNumber").value.trim();
+                let phonePattern = /^(\+7|8)9\d{9}$/;
+                if (!phonePattern.test(phoneNumber)) {
+                    showError('#phoneNumberError', 'Введите номер телефона в формате 89XXXXXXXXX');
+                    isValid = false;
+                } else {
+                    hideError('#phoneNumberError');
+                }
+
+                // Валидация роли
+                if ($('#roleID').val() === null) {
+                    showError('#roleError', 'Выберите роль');
+                    isValid = false;
+                } else {
+                    hideError('#roleError');
+                }
+
+                return isValid;
+            }
+
+            // Добавление сотрудника
+            $('#addEmployeeButton').click(function () {
+                if (!validateForm()) {
+                    return; // Прекращаем выполнение, если форма не валидна
+                }
+                var loginEmployee = $('#loginEmployee').val();
+                var firstName = $('#firstName').val();
+                var lastName = $('#lastName').val();
+                var passwordEmployee = $('#passwordEmployee').val();
+                var roleID = $('#roleID').val();
+                var phoneNumber = $('#phoneNumber').val();
+
+                $.ajax({
+                    url: '/Home/AddEmployee',
+                    type: 'POST',
+                    data: {
+                        loginEmployee: loginEmployee,
+                        firstName: firstName,
+                        lastName: lastName,
+                        passwordEmployee: passwordEmployee,
+                        roleID: roleID,
+                        phoneNumber: phoneNumber
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            console.log('Сотрудник добавлен');
+                            $('#notificationModalBody').text('Сотрудник добавлен');
+                            $('#notificationModal').modal('show');
+                            setTimeout(() => location.reload(), 5000);
+
+                        } else {
+                            console.log('Ошибка:', data.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+
+            // Обработчик клика на сотрудника в списке
+            $('.employee-item').click(function () {
+                var employeeId = $(this).data('employee-id');
+
+                // Получаем данные сотрудника по ID (нужно реализовать на сервере)
+                $.ajax({
+                    url: '/Home/GetEmployee/' + employeeId,
+                    type: 'GET',
+                    success: function (employee) {
+                        // Заполняем форму редактирования данными сотрудника
+                        $('#editEmployeeID').val(employee.employeeID);
+                        $('#editLoginEmployee').val(employee.loginEmployee);
+                        $('#editFirstName').val(employee.firstName);
+                        $('#editLastName').val(employee.lastName);
+                        $('#editRoleID').val(employee.roleID);
+                        $('#editphoneNumber').val(employee.phoneNumber);
+
+                        // Открываем модальное окно редактирования
+                        $('#editEmployeeModal').modal('show');
+                    },
+                    error: function () {
+                        $('#notificationModalBody').text('Ошибка при получении данных сотрудника.');
+                        $('#notificationModal').modal('show');
+                    }
+                });
+            });
+
+            // Сохранение изменений сотрудника
+            $('#saveEmployeeButton').click(function () {
+                if (!validateEditForm()) {
+                    return; // Если форма не прошла валидацию, прерываем выполнение
+                }
+
+                var employeeData = {
+                    EmployeeID: $('#editEmployeeID').val(),
+                    LoginEmployee: $('#editLoginEmployee').val(),
+                    FirstName: $('#editFirstName').val(),
+                    LastName: $('#editLastName').val(),
+                    RoleID: $('#editRoleID').val()
+                };
+
+                $.ajax({
+                    url: '/Home/UpdateEmployee', // Укажите правильный URL
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(employeeData),
+                    success: function (data) {
+                        if (data.success) {
+                            $('#notificationModalBody').text('Данные сотрудника успешно обновлены!');
+                            setTimeout(() => location.reload(), 10000);
+
+                            $('#notificationModal').modal('show');
+                            $('#editEmployeeModal').modal('hide');
+                            location.reload();
+                        } else {
+                            $('#notificationModalBody').text('Ошибка при обновлении данных сотрудника: ' + data.message);
+                            $('#notificationModal').modal('show');
+                        }
+                    },
+                    error: function () {
+                        $('#notificationModalBody').text('Ошибка при отправке данных на сервер.');
+                        $('#notificationModal').modal('show');
+                    }
+                });
+            });
+
+            // Подтверждение удаления сотрудника
+            $('#confirmDeleteButton').click(function () {
+                var employeeId = $('#editEmployeeID').val();
+
+                $.ajax({
+                    url: '/Home/DeleteEmployee/' + employeeId, // Укажите правильный URL
+                    type: 'POST',
+                    success: function (data) {
+                        if (data.success) {
+                            $('#notificationModalBody').text('Сотрудник успешно удален!');
+                            setTimeout(() => location.reload(), 10000);
+                            $('#notificationModal').modal('show');
+                            $('#deleteConfirmationModal').modal('hide');
+                            $('#editEmployeeModal').modal('hide');
+                            location.reload();
+                        } else {
+                            $('#notificationModalBody').text('Ошибка при удалении сотрудника: ' + data.message);
+                            $('#notificationModal').modal('show');
+                        }
+                    },
+                    error: function () {
+                        $('#notificationModalBody').text('Ошибка при отправке запроса на сервер.');
+                        $('#notificationModal').modal('show');
+                    }
+                });
+            });
+
+            // Скрытие ошибки при изменении значения input
+            $('#addEmployeeModal input, #addEmployeeModal select').on('input change', function () {
+                hideError('#' + this.id + 'Error');
+            });
+        });
+    </script>
+</body>
+</html>

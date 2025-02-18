@@ -1447,7 +1447,7 @@ namespace NewFlowersShop.Controllers
             var review = _context.Reviews.Find(reviewId);
             if (review != null)
             {
-                review.StatusID = 13; 
+                review.StatusID = 13;
                 _context.SaveChanges();
                 return Json(new { success = true, message = "Отзыв успешно удален" });
             }
@@ -1467,7 +1467,7 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = false, message = "Отзыв не найден" });
         }
 
-        public IActionResult CourierOrderPage() 
+        public IActionResult CourierOrderPage()
         {
             var ordersQuery = _context.Orders
                 .Where(o => o.StatusID == 16 && _context.Deliveries.Any(d => d.DeliveryID == o.DeliveryID && (d.DeliveryMethod == "Курьер" || d.DeliveryMethod == "Курьером")))
@@ -1602,8 +1602,8 @@ namespace NewFlowersShop.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     await file.CopyToAsync(memoryStream);
-                    var fileContent = memoryStream.ToArray(); 
-                    string fileContentString = Convert.ToBase64String(fileContent); 
+                    var fileContent = memoryStream.ToArray();
+                    string fileContentString = Convert.ToBase64String(fileContent);
 
                     var document = new Documents
                     {
@@ -1659,9 +1659,98 @@ namespace NewFlowersShop.Controllers
             // Возвращаем файл для просмотра/скачивания
             return File(fileBytes, contentType, document.DocumentName);
         }
-    
 
 
+
+
+
+
+
+        public IActionResult EmployeeManagementPage() {
+
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
+            var employee = _context.Employees.ToList();
+            ViewBag.employee = employee;
+            ViewBag.roles = _context.Roles.ToList();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddEmployee(string loginEmployee, string firstName, string lastName, string passwordEmployee, int roleID, string phoneNumber)
+        {
+            var employee = new Employees
+            {
+                LoginEmployee = loginEmployee,
+                FirstName = firstName,
+                LastName = lastName,
+                PasswordEmployee = HashPassword2(passwordEmployee),
+                RoleID = roleID,
+                PhoneNumber = phoneNumber
+            };
+
+            _context.Employees.Add(employee);
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+        private byte[] HashPassword2(byte[] passwordBytes)
+        {
+            using var sha256 = SHA256.Create();
+            return sha256.ComputeHash(passwordBytes);
+        }
+        private byte[] HashPassword2(string password)
+        {
+            using var sha256 = SHA256.Create();
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+        }
+
+
+        [HttpGet]
+        public IActionResult GetEmployee(int id)
+        {
+            var employee = _context.Employees.Find(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return Json(employee);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateEmployee([FromBody] Employees updatedEmployee)
+        {
+
+            var employee = _context.Employees.Find(updatedEmployee.EmployeeID);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            // Обновите только те поля, которые нужно изменить
+            employee.LoginEmployee = updatedEmployee.LoginEmployee;
+            employee.FirstName = updatedEmployee.FirstName;
+            employee.LastName = updatedEmployee.LastName;
+            employee.RoleID = updatedEmployee.RoleID;
+
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var employee = _context.Employees.Find(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            _context.Employees.Remove(employee);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
 
 
 
