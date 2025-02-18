@@ -1,0 +1,202 @@
+﻿@{
+    var Orders = ViewBag.Orders as List<NewFlowersShop.Models.OrderViewModel3>;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap" rel="stylesheet" />
+    <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="productManagement">
+        <h1>Управление заказами для доставки</h1>
+        <div class="infoProductManagement">    
+            <div class="columns">
+                <div class="column" id="orderList">   
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Общая стоимость</th>
+                                <th>Количество товаров</th>
+                                <th>Дата доставки</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Orders != null && Orders.Any())
+                            {
+                                @foreach (var order in Orders)
+                                {
+                                    <tr class="item-row" data-id="@order.OrderID"
+                                        data-delivery-method="@order.Delivery?.DeliveryMethod"
+                                        data-delivery-address="@order.Delivery?.DeliveryAddress">
+                                        <td>@order.TotalAmount</td>
+                                        <td>@order.Products.Count</td>
+                                        <td>@order.Delivery?.DeliveryDate.ToShortDateString()</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3">Нет заказов для отображения</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="column">
+                    <div class="column action-panel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        $('#deleteModal').on('shown.bs.modal', function () {
+            setTimeout(function () {
+                location.reload();
+            }, 500); // Добавляем небольшую задержку
+        });
+
+        function showMessage(message) {
+            $('#deleteModal .modal-body').text(message);
+            $('#deleteModal').modal('show');
+            $('#deleteModal').css('z-index', '2000');
+        }
+
+        $(document).ready(function () {
+            $('#deleteModal').on('shown.bs.modal', function () {
+                setTimeout(function () {
+                    location.reload();
+                }, 1500); // Добавляем небольшую задержку
+            });
+
+
+            $('.orders-table').on('click', '.item-row', function () {
+                var orderId = $(this).data('id');
+
+                $('.action-panel').empty().show();
+
+                if ($('#orders').val() == 15) {
+                    loadOrderDetails(orderId);
+                    location.reload();
+                } else {
+                    loadOrderActions(orderId);
+                }
+            });
+
+            // Фильтрация заказов при выборе адреса магазина
+            
+
+            // Обработчик клика по строке с заказом
+            $(document).on('click', '.item-row', function () {
+                var orderId = $(this).data('id');
+                // loadOrderActions(orderId);
+                $('.action-panel').empty().show();
+                loadOrderDetails(orderId);                
+            });
+
+
+           
+            function loadOrderDetails(orderId) {
+                var actionPanel = $('.action-panel');
+                actionPanel.empty();
+
+                $.get('/Home/GetOrderDetails2', { orderId: orderId }, function (data) {
+                    console.log(data);
+                    if (data.success && data.order) {
+                        var detailsDiv = $('<div class="order-details">');
+                        if (data.order.delivery) {
+                            var deliveryDate = new Date(data.order.delivery.deliveryDate);
+
+                            if (!isNaN(deliveryDate)) {
+                                detailsDiv
+                                    .append('<p> Товар в пути!</p>')
+                                    .append('<p><b>Дата доставки:</b> ' + deliveryDate.toLocaleDateString() + '</p>')
+                                    .append('<p><b>Время:</b> ' + data.order.delivery.deliveryTime + '</p>')
+                                    .append('<p><b>Цена:</b> ' + data.order.totalAmount + '</p>')
+                                    .append('<p><b>Адрес:</b> ' + data.order.delivery.deliveryAddress + '</p>')
+                                    .append('<p><b>Имя получателя:</b> ' + data.order.delivery.deliveryName + '</p>')
+                                    .append('<p><b>Номер телефона:</b> ' + data.order.delivery.deliveryPhone + '</p>');
+                            } else {
+                                detailsDiv.append('<p>Некорректная дата доставки.</p>');
+                            }
+                        } else {
+                            detailsDiv.append('<p>Информация о доставке недоступна.</p>');
+                        }
+
+                        detailsDiv.append('<h4>Товары:</h4>');
+
+                        var productsTable = $('<table>').addClass('table');
+                        productsTable.append('<thead><tr><th>Фото</th><th>Название</th><th>Кол-во</th><th>Цена</th></tr></thead>');
+                        var productsBody = $('<tbody>');
+
+                        $.each(data.order.products, function (i, product) {
+                            productsBody.append('<tr>' +
+                                '<td><img src="' + product.productImage + '" width="50"></td>' +
+                                '<td>' + product.productName + '</td>' +
+                                '<td>' + product.quantity + '</td>' +
+                                '<td>' + product.price + '</td>' +
+                                '</tr>');
+                        });
+
+                        productsTable.append(productsBody);
+                        detailsDiv.append(productsTable);
+
+                        detailsDiv.append($('<button class="btn btn-primary transfer">Отметить как "доставлен"?</button>').click(function () {
+                            updateOrderStatus(orderId, 17);
+                        }));
+
+                        actionPanel.append(detailsDiv);
+                    } else {
+                        showMessage("Информация о заказе недоступна.");
+                    }
+                })
+                    .fail(function () {
+                        showMessage("Ошибка при загрузке данных.");
+                    });
+            }
+
+            function updateOrderStatus(orderId, statusId) {
+                $.post('/Home/UpdateOrderStatusC', { orderId: orderId, status: statusId }, function (response) {
+                    if (response.success) {
+                        $('.action-panel').empty();
+                        showMessage(response.message);
+                    } else {
+                        showMessage('Ошибка: ' + response.message);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

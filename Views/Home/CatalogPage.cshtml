@@ -70,10 +70,16 @@
                 <div id="packages">
                     @if (packages != null)
                     {
-                        foreach (var package in packages)
+                        @foreach (var package in packages)
                         {
-                            <label><input type="checkbox" name="selectedPackages" value="@package" /> @package</label>
+                            if (package != "-")
+                            {
+                                string displayValue = string.IsNullOrEmpty(package) ? "-" : package;
+                                <label><input type="checkbox" name="selectedPackages" value="@package" /> @displayValue</label>
+                            }
                         }
+
+
                     }
                 </div>
 

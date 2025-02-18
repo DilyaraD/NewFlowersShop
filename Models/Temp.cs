@@ -9,6 +9,18 @@
 
     }
 
+
+    public class OrderDelivery3
+    {
+        public DateTime DeliveryDate { get; set; }
+        public string DeliveryTime { get; set; }
+        public string DeliveryAddress { get; set; }
+        public string DeliveryName { get; set; }
+        public string DeliveryPhone { get; set; }
+        public string DeliveryMethod { get; set; }
+
+    }
+
     public class Product2
     {
         public int Quantity { get; set; }
@@ -24,8 +36,20 @@
         public DateTime OrderDate { get; set; }
         public int StatusID { get; set; }
         public int DeliveryID { get; set; }
-    public OrderDelivery2 Delivery { get; set; }
+        public OrderDelivery2 Delivery { get; set; }
         public List<Product2> Products { get; set; }
     }
+
+    public class OrderViewModel3
+    {
+        public int OrderID { get; set; }
+        public decimal TotalAmount { get; set; }
+        public DateTime OrderDate { get; set; }
+        public int StatusID { get; set; }
+        public int DeliveryID { get; set; }
+        public OrderDelivery3 Delivery { get; set; }
+        public List<Product2> Products { get; set; }
+    }
+
 
 }
