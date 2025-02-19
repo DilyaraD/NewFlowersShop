@@ -1,5 +1,298 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    var userRole = ViewBag.UserRole as string;
+    var cashbookEntries = ViewBag.CashBookEntries as List<NewFlowersShop.CashBook>;
+    decimal balance = ViewBag.Balance;
+    var isAuthenticated = Context.User.Identity.IsAuthenticated;
 }
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="./img_s/logo.svg" type="image/icon-x" />
+    <link rel="stylesheet" href="~/site.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Irish+Grover&family=Marmelad&family=Rufina:wght@200;700&display=swap" rel="stylesheet" />
+    <title>Новые цветы</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="cashbook-container">
+        <h1>Баланс: <span class="balance">@balance.ToString("C")</span></h1>
+
+       
+           
+       
+        <div class="cashbook-history" >
+            @* @if (userRole == "Accountant")
+            { *@
+                <div style ="margin:5px;">
+                    <button id="addTransactionButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTransactionModal">Добавить операцию</button>
+                    <button id="showSupplyRequestsButton" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#supplyRequestsModal">Запросы на поставку</button>
+                </div>
+            @* } *@
+
+            @if (cashbookEntries != null && cashbookEntries.Any())
+            {
+                var groupedEntries = cashbookEntries.GroupBy(e => e.OperationDate.Date);
+
+                @foreach (var group in groupedEntries)
+                {
+                    @foreach (var entry in group)
+                    {
+                        <div class="cashbook-entry @(entry.OperationType == "Приход" ? "Приход" : "Расход")">
+                            <div class="operation-info">
+                                <div class="operation-details">
+                                    <span class="operation-description">@entry.Description</span>
+                                    <span class="operation-amount">@entry.Amount.ToString("C")</span>
+                                </div>
+                                <div class="operation-date">@entry.OperationDate.ToString("dd.MM.yyyy")</div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            else
+            {
+                <p>История операций отсутствует.</p>
+            }
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="addTransactionModal" tabindex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTransactionModalLabel">Добавить операцию</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:white;"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="transactionDescription" placeholder="Описание операции">
+                        <div id="descriptionError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <input type="number" class="form-control" id="transactionAmount" placeholder="Сумма операции">
+                        <div id="amountError" class="validation-error"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch text-start">
+                            <input class="form-check-input" type="checkbox" id="transactionTypeToggle">
+                            <label class="form-check-label" for="transactionTypeToggle">Расход</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" id="saveTransactionButton">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="supplyRequestsModal" tabindex="-1" aria-labelledby="supplyRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supplyRequestsModalLabel">Запросы на поставку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:white;"></button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel">Сообщение!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть" style="background-color:white;"></button>
+                </div>
+                <div class="modal-body" id="notificationModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function validateTransactionForm() {
+                let isValid = true;
+                let description = $('#transactionDescription').val().trim();
+                let amount = $('#transactionAmount').val().trim();
+
+                if (description === '') {
+                    showError('#descriptionError', 'Введите описание операции');
+                    isValid = false;
+                } else {
+                    hideError('#descriptionError');
+                }
+
+                if (amount === '' || isNaN(amount) || amount <= 0 || amount > 999999999) {
+                    showError('#amountError', 'Введите корректную сумму (от 1 до 999 999 999)');
+                    isValid = false;
+                } else {
+                    hideError('#amountError');
+                }
+
+                return isValid;
+            }
+
+            $('#transactionTypeToggle').change(function () {
+                let label = $(this).is(':checked') ? 'Приход' : 'Расход';
+                $(this).next('.form-check-label').text(label);
+            });
+
+            $('#saveTransactionButton').click(function () {
+                if (!validateTransactionForm()) {
+                    return;
+                }
+
+                let description = $('#transactionDescription').val();
+                let amount = parseFloat($('#transactionAmount').val());
+                let isExpense = !$('#transactionTypeToggle').is(':checked');
+                let operationType = isExpense ? 'Расход' : 'Приход';
+
+                if (isExpense) {
+                    amount = -amount;
+                }
+
+                let transactionData = {
+                    Description: description,
+                    Amount: amount,
+                    OperationType: operationType,
+                    OperationDate: new Date().toISOString()
+                };
+
+                $.ajax({
+                    url: '/Home/AddCashBookEntry',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(transactionData),
+                    success: function (data) {
+                        if (data.success) {
+                            $('#notificationModalBody').text('Операция успешно добавлена!');
+                            $('#notificationModal').modal('show');
+                            setTimeout(() => location.reload(), 5000);
+                            $('#addTransactionModal').modal('hide');
+                            location.reload();
+                        } else {
+                            $('#notificationModalBody').text('Ошибка при добавлении операции: ' + data.message);
+                            $('#notificationModal').modal('show');
+                        }
+                    },
+                    error: function () {
+                        $('#notificationModalBody').text('Ошибка при отправке запроса на сервер.');
+                        $('#notificationModal').modal('show');
+                    }
+                });
+            });
+
+            function showError(elementId, message) {
+                $(elementId).text(message).css('color', 'red').show();
+                $(elementId.replace('Error', '')).addClass('input-error');
+            }
+
+            function hideError(elementId) {
+                $(elementId).text('').hide();
+                $(elementId.replace('Error', '')).removeClass('input-error');
+            }
+
+            $('#addTransactionModal input').on('input', function () {
+                hideError('#' + this.id + 'Error');
+            });
+            
+                function loadRestockRequests() {
+                    $.get('/Home/GetRestockRequests', function (data) {
+                        if (data.length === 0) {
+                            $('#supplyRequestsModal .modal-body').html('<p>Нет запросов на поставку.</p>');
+                            return;
+                        }
+                                       
+                        let requestList = '<div class="restock-requests">';
+                        data.forEach(request => {
+                        let flowerTypesLine = "";
+                        
+                        let displayProduct = request.flowerTypeNames && request.flowerTypeNames.trim() !== ""
+                            ? request.flowerTypeNames
+                            : request.productName;
+
+
+                            requestList += `
+                                 <div class="restock-request" data-id="${request.restockRequestID}" data-flower-types="${displayProduct}" data-quantity="${ request.quantity }" data-store-name="${ request.storeName }">
+                                    <p class="store-name">${request.storeName}</p>
+                                    <p>Товары: ${displayProduct}</p>
+                                    <p>Количество: ${request.quantity}</p>
+                                    <div class="request-buttons">
+                                        <button class="btn btn-success accept-request">Принять</button>
+                                        <button class="btn btn-danger decline-request">Отклонить</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        requestList += '</div>';
+                        $('#supplyRequestsModal .modal-body').html(requestList);
+                    });
+                }
+
+                $('#showSupplyRequestsButton').click(loadRestockRequests);
+
+                $(document).on('click', '.accept-request', function () {
+                    let requestDiv = $(this).closest('.restock-request');
+                    let requestId = requestDiv.data('id');
+                    let flowerTypes = requestDiv.data('flower-types');
+                    let quantity = requestDiv.data('quantity');
+
+                    $.post('/Home/AcceptRestockRequest', { requestId: requestId }, function (response) {
+                        if (response.success) {
+                            $('#supplyRequestsModal').modal('hide');
+
+                            $('#transactionDescription').val(`Закупка: ${flowerTypes} (${quantity} шт.)`).prop('disabled', true);
+                            $('#transactionTypeToggle').prop('checked', false).prop('disabled', true);
+                            $('#transactionAmount').val('').prop('disabled', false);
+
+                            $('#addTransactionModal').modal('show');
+                        } else {
+                            alert("Ошибка принятия запроса на поставку!");
+                        }
+                    });
+                });
+
+                $(document).on('click', '.decline-request', function () {
+                    let requestDiv = $(this).closest('.restock-request');
+                    let requestId = requestDiv.data('id');
+
+                    $.post('/Home/DeclineRestockRequest', { requestId: requestId }, function (response) {
+                        if (response.success) {
+                            requestDiv.fadeOut();
+                        }
+                    });
+                });
+
+            $('#addTransactionButton').click(function () {
+                $('#transactionDescription').val('').prop('disabled', false);
+                $('#transactionTypeToggle').prop('disabled', false);
+                $('#transactionAmount').val('').prop('disabled', false);
+            });
+        });
+    </script>
+</body>
+</html>

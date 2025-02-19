@@ -2014,3 +2014,112 @@ table th, td {
 
 /*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\CashRegisterPage\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*/
 
+.cashbook-container h1 {
+    font-family: "Marmelad", serif;
+    font-size: 56px;
+    text-align:center;
+}
+
+.cashbook-container {
+    padding: 20px;
+}
+
+.balance {
+    font-weight: bold;
+}
+
+.cashbook-history {
+    margin-top: 20px;
+}
+
+.cashbook-entry {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+}
+
+    .cashbook-entry.Приход {
+        background-color: #f0fff0;
+    }
+
+    .cashbook-entry.Расход {
+        background-color: #fff0f0;
+    }
+
+.operation-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/*.operation-details {
+    flex-grow: 1;
+}*/
+
+.operation-description {
+    font-size: 1.2em;
+    font-weight: bold;
+    display: block;
+}
+
+.operation-amount {
+    font-size: 1.2em;
+    display: block;
+}
+
+.operation-date {
+    font-size: 0.8em;
+    color: #777;
+    text-align: right;
+}
+
+
+#addTransactionButton, #showSupplyRequestsButton {
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+
+
+#addTransactionModal button, #supplyRequestsModal button, #deleteConfirmationModal button, #editEmployeeModal button, #addEmployeeModal button {
+    background-color: #5C234D;
+    color: white;
+    font-family: "Marmelad", serif;
+    font-size: 16px;
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+
+
+
+.restock-request {
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    text-align:left;
+}
+
+    .restock-request .store-name {
+        font-size: 0.8em;
+        color: #555;
+    }
+
+.request-buttons {
+    margin-top: 5px;
+}
+
+    .request-buttons button {
+        margin-right: 5px;
+    }
+

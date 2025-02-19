@@ -18,7 +18,7 @@ namespace NewFlowersShop.Models
         public virtual DbSet<Employees> Employees { get; set; }
         public virtual DbSet<FlowerCategories> FlowerCategories { get; set; }
         public virtual DbSet<FlowerType> FlowerType { get; set; }
-        public virtual DbSet<Invoices> Invoices { get; set; }
+        //public virtual DbSet<Invoices> Invoices { get; set; }
         public virtual DbSet<OrderContents> OrderContents { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<ProductContents> ProductContents { get; set; }
@@ -43,7 +43,7 @@ namespace NewFlowersShop.Models
             builder.Entity<Documents>().HasKey(d => d.DocumentID);
             builder.Entity<Employees>().HasKey(e => e.EmployeeID);
             builder.Entity<FlowerCategories>().HasKey(e => e.CategoryID);
-            builder.Entity<Invoices>().HasKey(e => e.InvoiceID);
+            //builder.Entity<Invoices>().HasKey(e => e.InvoiceID);
             builder.Entity<OrderContents>().HasKey(e => e.OrderContentID);
             builder.Entity<Orders>().HasKey(e => e.OrderID);
             builder.Entity<ProductContents>().HasKey(e => e.ProductContentID);

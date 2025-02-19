@@ -1660,12 +1660,6 @@ namespace NewFlowersShop.Controllers
             return File(fileBytes, contentType, document.DocumentName);
         }
 
-
-
-
-
-
-
         public IActionResult EmployeeManagementPage() {
 
             var userRole = HttpContext.Session.GetString("UserRole");
@@ -1752,7 +1746,120 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = true });
         }
 
+        public IActionResult CashRegisterPage()
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
 
+            var cashBookEntries = _context.CashBook.OrderByDescending(entry => entry.OperationDate).ToList();
+            ViewBag.CashBookEntries = cashBookEntries;
+
+            decimal balance = cashBookEntries.Where(e => e.OperationType == "Приход").Sum(e => e.Amount) +(
+                          cashBookEntries.Where(e => e.OperationType == "Расход").Sum(e => e.Amount));
+            ViewBag.Balance = balance;
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddCashBookEntry([FromBody] CashBook entry)
+        {
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
+            if (ModelState.IsValid)
+            {
+                entry.EmployeeID = user.EmployeeID;
+                _context.CashBook.Add(entry);
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Ошибка валидации данных." });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetRestockRequests()
+        {
+            var restockRequests = _context.RestockRequests
+                .Where(r => r.StatusID == 18)
+                .Select(r => new
+                {
+                    r.RestockRequestID,
+                    StoreName = _context.Stores
+                        .Where(s => s.StoreID == r.StoreID)
+                        .Select(s => s.Address)
+                        .FirstOrDefault(), 
+
+                    FlowerTypeNames = string.Join(", ", _context.FlowerType
+                        .Where(ft => _context.ProductContents
+                        .Any(pc => pc.ProductID == r.ProductID && pc.FlowerTypeID == ft.FlowerTypeID))
+                        .Select(ft => ft.FlowerTypeName)),
+
+                    ProductName = _context.Products
+                        .Where(p => p.ProductID == r.ProductID)
+                        .Select(p => p.ProductName)
+                        .FirstOrDefault(),
+
+                    r.Quantity
+                }).Select(r => new
+                {
+                    r.RestockRequestID,
+                    r.StoreName,
+                    FlowerTypeNames = r.FlowerTypeNames.Any() ? string.Join(", ", r.FlowerTypeNames) : null,
+                    ProductName = r.ProductName,
+                    r.Quantity
+                })
+        .ToList();
+
+            return Json(restockRequests);
+        }
+
+        [HttpPost]
+        public IActionResult DeclineRestockRequest(int requestId)
+        {
+            var request = _context.RestockRequests.FirstOrDefault(r => r.RestockRequestID == requestId);
+            if (request != null)
+            {
+                request.StatusID = 1018;
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            return Json(new { success = false });
+        }
+         
+        [HttpPost]
+        public IActionResult AcceptRestockRequest(int requestId)
+        {
+            var request = _context.RestockRequests.FirstOrDefault(r => r.RestockRequestID == requestId);
+            if (request != null)
+            {
+                var storeStock = _context.StoreFlowerStocks.FirstOrDefault(s => s.StoreID == request.StoreID && s.FlowerTypeID == request.ProductID);
+                if (storeStock != null)
+                {
+                    request.StatusID = 19;
+                    storeStock.Quantity += request.Quantity;
+                }
+                else
+                {
+                    request.StatusID = 19;
+                    _context.StoreFlowerStocks.Add(new StoreFlowerStocks
+                    {
+                        StoreID = request.StoreID,
+                        FlowerTypeID = request.ProductID,
+                        Quantity = request.Quantity
+                    });
+                }
+
+                _context.SaveChanges();
+
+                return Json(new  { success = true  });
+            }
+            return Json(new { success = false });
+        }
+
+        
 
 
 
