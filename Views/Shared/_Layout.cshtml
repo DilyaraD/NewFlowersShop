@@ -118,6 +118,7 @@
                 <button type="button" class="custom-btn" data-href="@Url.Action("DocumentManagementPage", "Home")">управление документами</button>
                 <button type="button" class="custom-btn" data-href="@Url.Action("EmployeeManagementPage", "Home")">управление персоналом</button>
                 <button type="button" class="custom-btn" data-href="@Url.Action("CashRegisterPage", "Home")">кассовая книга</button>
+                <button type="button" class="custom-btn" data-href="@Url.Action("ShopOrderPage", "Home")">выдача заказов</button>
                 <button type="button" class="custom-btn" data-href="/Home/Logout">выйти</button>
             </div>
         </div>
@@ -140,25 +141,23 @@
             </div>
         </div>
     </div>
-
-
-    
-            <div class="bottom">
-                <div class="bA">
-                    <a>Cвадебная флористика</a>
-                    <a>Букеты на любые мероприятия</a>
-                    <a>Букеты невесты</a>
-                    <a>Композиции</a>
-                </div>
-                <div class="bLink">
-                    <a href="https://www.instagram.com/">
-                        <img src="~/img_s/inst.svg" alt="Instagram" />
-                    </a>
-                    <a href="https://web.telegram.org/">
-                        <img src="~/img_s/tg.svg" alt="Telegram" />
-                    </a>
-                </div>
+        
+    <div class="bottom">
+        <div class="bA">
+            <a>Cвадебная флористика</a>
+            <a>Букеты на любые мероприятия</a>
+            <a>Букеты невесты</a>
+            <a>Композиции</a>
         </div>
+        <div class="bLink">
+            <a href="https://www.instagram.com/">
+                <img src="~/img_s/inst.svg" alt="Instagram" />
+            </a>
+            <a href="https://web.telegram.org/">
+                <img src="~/img_s/tg.svg" alt="Telegram" />
+            </a>
+        </div>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -167,33 +166,26 @@
 
         document.addEventListener("DOMContentLoaded", function () {
 
-            const userRole = '@ViewData["UserRole"]';  // Получаем роль из ViewData
-
-            // Скрываем или показываем кнопки в зависимости от роли
+            const userRole = '@ViewData["UserRole"]'; 
 
             const productButton = document.querySelector('button[data-href="@Url.Action("productManagementPage", "Home")"]');
             const orderButton = document.querySelector('button[data-href="@Url.Action("orderManagementPage", "Home")"]');
             const historyButton = document.querySelector('button[data-href="@Url.Action("OrderHistoryPage", "Home")"]');
             const homePageManagementPage = document.querySelector('button[data-href="@Url.Action("homePageManagementPage", "Home")"]');
 
-            // Для роли "Customer" скрываем кнопки "товары" и "заказы"
             if (userRole === "Customer") {
                 if (productButton) productButton.style.display = "none";
                 if (orderButton) orderButton.style.display = "none";
                 if (homePageManagementPage) homePageManagementPage.style.display = "none";
             }
 
-            // Для роли "Florist" скрываем кнопки "история заказов"
             if (userRole === "Florist") {
                 if (historyButton) historyButton.style.display = "none";
             }
 
-
-
             let authModal = document.getElementById("authModal");
             let registerModal = document.getElementById("registerModal");
             let menuModal = document.getElementById("menuModal");
-
             let profileButton = document.getElementById("profileButton");
             let menuButton = document.getElementById("menuButton");
             let closeModal = document.getElementById("closeModal");

@@ -27,13 +27,13 @@
            
        
         <div class="cashbook-history" >
-            @* @if (userRole == "Accountant")
-            { *@
-                <div style ="margin:5px;">
+            @if (userRole == "Accountant")
+            { 
+                <div style ="margin:10px;">
                     <button id="addTransactionButton" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addTransactionModal">Добавить операцию</button>
                     <button id="showSupplyRequestsButton" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#supplyRequestsModal">Запросы на поставку</button>
                 </div>
-            @* } *@
+            }
 
             @if (cashbookEntries != null && cashbookEntries.Any())
             {

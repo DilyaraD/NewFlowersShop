@@ -1627,8 +1627,6 @@ namespace NewFlowersShop.Controllers
             }
         }
 
-
-        // Действие для отображения содержимого файла
         public IActionResult ViewDocument(int id)
         {
             var document = _context.Documents.Find(id);
@@ -1638,11 +1636,9 @@ namespace NewFlowersShop.Controllers
                 return NotFound();
             }
 
-            // Преобразование строки Base64 обратно в массив байтов
             byte[] fileBytes = Convert.FromBase64String(document.FilePath);
 
-            // Определение типа контента (можно улучшить, используя расширение файла)
-            string contentType = "application/octet-stream"; // По умолчанию
+            string contentType = "application/octet-stream";
             if (document.DocumentName.ToLower().EndsWith(".pdf"))
             {
                 contentType = "application/pdf";
@@ -1656,7 +1652,6 @@ namespace NewFlowersShop.Controllers
                 contentType = "text/plain";
             }
 
-            // Возвращаем файл для просмотра/скачивания
             return File(fileBytes, contentType, document.DocumentName);
         }
 
@@ -1859,11 +1854,129 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = false });
         }
 
-        
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public IActionResult ShopOrderPage()
+        {
+            var ordersQuery = _context.Orders
+                .Where(o => o.StatusID == 16 && _context.Deliveries.Any(d => d.DeliveryID == o.DeliveryID && !(d.DeliveryMethod == "Курьер" || d.DeliveryMethod == "Курьером")))
+        .OrderBy(o => o.OrderDate);
+
+            var orders = ordersQuery
+                .OrderBy(o => o.OrderDate)
+                .Select(o => new OrderViewModel3
+                {
+                    OrderID = o.OrderID,
+                    TotalAmount = o.TotalAmount,
+                    OrderDate = o.OrderDate,
+                    StatusID = o.StatusID,
+                    DeliveryID = o.DeliveryID,
+                    Delivery = _context.Deliveries
+                        .Where(d => d.DeliveryID == o.DeliveryID)
+                        .Select(d => new OrderDelivery3
+                        {
+                            DeliveryDate = d.DeliveryDate,
+                            DeliveryTime = d.DeliveryTime,
+                            DeliveryAddress = d.DeliveryAddress,
+                            DeliveryName = d.DeliveryName,
+                            DeliveryPhone = d.DeliveryPhone,
+                            DeliveryMethod = d.DeliveryMethod
+                        }).FirstOrDefault(),
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Select(oc => new Product2
+                        {
+                            Quantity = oc.Quantity,
+                            Price = oc.Product.Price,
+                            ProductName = oc.Product.ProductName,
+                            ProductImage = oc.Product.Photo
+                        }).ToList()
+                })
+                .ToList();
+            ViewBag.Stores = _context.Stores.ToList();
+            ViewBag.Orders = orders;
+            var userRole = HttpContext.Session.GetString("UserRole");
+            ViewBag.UserRole = userRole;
+
+            return View();
+        }
+
+        public IActionResult GetOrderDetails3(int orderId)
+        {
+            var order = _context.Orders
+                .Where(o => o.OrderID == orderId)
+                .Select(o => new OrderViewModel3
+                {
+                    OrderID = o.OrderID,
+                    TotalAmount = o.TotalAmount,
+                    OrderDate = o.OrderDate,
+                    StatusID = o.StatusID,
+                    DeliveryID = o.DeliveryID,
+                    Delivery = _context.Deliveries
+                        .Where(d => d.DeliveryID == o.DeliveryID)
+                        .Select(d => new OrderDelivery3
+                        {
+                            DeliveryDate = d.DeliveryDate,
+                            DeliveryTime = d.DeliveryTime,
+                            DeliveryAddress = d.DeliveryAddress,
+                            DeliveryName = d.DeliveryName,
+                            DeliveryPhone = d.DeliveryPhone,
+                            DeliveryMethod = d.DeliveryMethod
+                        }).FirstOrDefault(),
+                    Products = _context.OrderContents
+                        .Where(oc => oc.OrderID == o.OrderID)
+                        .Select(oc => new Product2
+                        {
+                            Quantity = oc.Quantity,
+                            Price = oc.Product.Price,
+                            ProductName = oc.Product.ProductName,
+                            ProductImage = oc.Product.Photo
+                        }).ToList()
+                })
+                .FirstOrDefault();
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Заказ не найден!" });
+            }
+
+            return Json(new { success = true, order });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateOrderStatusNot(int orderId, int status)
+        {
+            var order = _context.Orders.FirstOrDefault(o => o.OrderID == orderId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Заказ не выдан!" });
+            }
+
+            order.StatusID = status;
+
+            _context.SaveChanges();
+            return Json(new { success = true, message = "Заказ выдан!" });
+        }
 
 
 
