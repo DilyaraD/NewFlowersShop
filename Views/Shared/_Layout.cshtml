@@ -124,8 +124,6 @@
         </div>
     </div>
 
-
-
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -168,20 +166,126 @@
 
             const userRole = '@ViewData["UserRole"]'; 
 
-            const productButton = document.querySelector('button[data-href="@Url.Action("productManagementPage", "Home")"]');
-            const orderButton = document.querySelector('button[data-href="@Url.Action("orderManagementPage", "Home")"]');
-            const historyButton = document.querySelector('button[data-href="@Url.Action("OrderHistoryPage", "Home")"]');
-            const homePageManagementPage = document.querySelector('button[data-href="@Url.Action("homePageManagementPage", "Home")"]');
+            const buttons = {
+                productButton: document.querySelector('button[data-href="@Url.Action("productManagementPage", "Home")"]'),
+                orderButton: document.querySelector('button[data-href="@Url.Action("orderManagementPage", "Home")"]'),
+                historyButton: document.querySelector('button[data-href="@Url.Action("OrderHistoryPage", "Home")"]'),
+                homePageManagement: document.querySelector('button[data-href="@Url.Action("homePageManagementPage", "Home")"]'),
+                reviewManagement: document.querySelector('button[data-href="@Url.Action("managingReviewsPage", "Home")"]'),
+                courierOrders: document.querySelector('button[data-href="@Url.Action("CourierOrderPage", "Home")"]'),
+                documentManagement: document.querySelector('button[data-href="@Url.Action("DocumentManagementPage", "Home")"]'),
+                employeeManagement: document.querySelector('button[data-href="@Url.Action("EmployeeManagementPage", "Home")"]'),
+                cashRegister: document.querySelector('button[data-href="@Url.Action("CashRegisterPage", "Home")"]'),
+                shopOrders: document.querySelector('button[data-href="@Url.Action("ShopOrderPage", "Home")"]')
+            };
 
-            if (userRole === "Customer") {
-                if (productButton) productButton.style.display = "none";
-                if (orderButton) orderButton.style.display = "none";
-                if (homePageManagementPage) homePageManagementPage.style.display = "none";
+            function hideButton(button) {
+                if (button) button.style.display = "none";
             }
 
-            if (userRole === "Florist") {
-                if (historyButton) historyButton.style.display = "none";
+            // Логика отображения кнопок по ролям
+            switch (userRole) {
+                case "Customer":
+                    hideButton(buttons.productButton);
+                    hideButton(buttons.orderButton);
+                    hideButton(buttons.homePageManagement);
+                    hideButton(buttons.reviewManagement);
+                    hideButton(buttons.documentManagement);
+                    hideButton(buttons.employeeManagement);
+                    hideButton(buttons.cashRegister);
+                    hideButton(buttons.courierOrders);
+                    hideButton(buttons.shopOrders);
+                    break;
+
+                case "Florist":
+                    hideButton(buttons.historyButton);
+                    hideButton(buttons.homePageManagement);
+                    hideButton(buttons.reviewManagement);
+                    hideButton(buttons.documentManagement);
+                    hideButton(buttons.employeeManagement);
+                    hideButton(buttons.cashRegister);
+                    hideButton(buttons.courierOrders);
+                    hideButton(buttons.shopOrders);
+                    break;
+
+                case "Courier":
+                    hideButton(buttons.productButton);
+                    hideButton(buttons.orderButton);
+                    hideButton(buttons.historyButton);
+                    hideButton(buttons.homePageManagement);
+                    hideButton(buttons.reviewManagement);
+                    hideButton(buttons.documentManagement);
+                    hideButton(buttons.employeeManagement);
+                    hideButton(buttons.cashRegister);
+                    hideButton(buttons.shopOrders);
+                    break;
+
+                case "Administrator":
+                    hideButton(buttons.productButton);
+                    hideButton(buttons.orderButton);
+                    hideButton(buttons.courierOrders);
+                    hideButton(buttons.historyButton);
+                    hideButton(buttons.shopOrders);
+                    break;
+
+                case "Accountant":
+                    hideButton(buttons.productButton);
+                    hideButton(buttons.orderButton);
+                    hideButton(buttons.historyButton);
+                    hideButton(buttons.homePageManagement);
+                    hideButton(buttons.reviewManagement);
+                    hideButton(buttons.courierOrders);
+                    hideButton(buttons.employeeManagement);
+                    hideButton(buttons.shopOrders);
+                    break;
             }
+
+            const footerCenter = document.getElementById("footer_center");
+            const footerButtons = document.querySelectorAll(".footerBtn");
+            const profileButton1 = document.getElementById("profileButton");
+            const basketButton1 = document.getElementById("basketButton");
+            const menuButton1 = document.getElementById("menuButton");
+            const logoLink = document.querySelector(".logoA a");
+
+           
+            const rolesToHideFooter = ["Accountant", "Administrator", "Florist", "Courier"];
+
+            if (rolesToHideFooter.includes(userRole)) {
+                if (footerCenter) {
+                    footerCenter.style.pointerEvents = "none"; // Отключает клики
+                    footerCenter.style.opacity = "0"; // Делает менее заметным
+                    footerCenter.style.backgroundColor = "white"; // Закрашивает белым
+                }
+
+                footerButtons.forEach(button => {
+                    button.style.pointerEvents = "none";
+                    button.style.opacity = "0";
+                    button.style.backgroundColor = "white";
+                });
+
+                if (profileButton1) {
+                    profileButton1.style.pointerEvents = "none";
+                    profileButton1.style.opacity = "0";
+                    profileButton1.style.backgroundColor = "white";
+                }
+
+                if (basketButton1) {
+                    basketButton1.style.pointerEvents = "none";
+                    basketButton1.style.opacity = "0";
+                    basketButton1.style.backgroundColor = "white";
+                }
+
+                if (menuButton1) {
+                    menuButton1.style.pointerEvents = "auto";
+                    menuButton1.style.opacity = "1";
+                    menuButton1.style.backgroundColor = "none";
+                }
+
+                if (logoLink) {
+                    logoLink.style.pointerEvents = "none"; 
+                }
+            }
+
 
             let authModal = document.getElementById("authModal");
             let registerModal = document.getElementById("registerModal");

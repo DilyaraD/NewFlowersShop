@@ -1,5 +1,47 @@
 ﻿namespace NewFlowersShop.Models
 {
+    public class ReviewViewModel
+    {
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
+        public string Photo { get; set; }
+    }
+
+    public class ReviewInputModel
+    {
+        public int ProductId { get; set; }
+        public string ReviewText { get; set; }
+        public int Rating { get; set; }
+    }
+
+    public class ProductViewModel
+    {
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
+        public string Photo { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
+    }
+
+    public class OrderViewModel
+    {
+        public int OrderID { get; set; }
+        public DateTime OrderDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public int StatusID { get; set; }
+        public List<ProductViewModel> Products { get; set; }
+        public Deliveries Delivery { get; set; }
+    }
+
+    public class CartItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Photo { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public decimal TotalPrice => Price * Quantity;
+    }
     public class OrderDelivery2
     {
         public DateTime DeliveryDate { get; set; }

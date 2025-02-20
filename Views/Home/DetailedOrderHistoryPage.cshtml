@@ -142,7 +142,12 @@
                     } else {
                         data.forEach(product => {
                             let button = `<button class="product-btn" onclick="window.location.href='/Home/ReviewsPage/${product.productID}'">
-                                    <img src="${product.photo}" class="imageProductBasket2" />
+                                <img src="data:image/${product.photo.startsWith("/9j/") ? "jpeg" :
+                                    product.photo.startsWith("iVBORw0KGgo=") ? "png" :
+                                        product.photo.startsWith("R0lGOD") ? "gif" :
+                                            product.photo.startsWith("UklGR") ? "webp" : "jpeg"
+                                };base64,${product.photo}" class="imageProductBasket2" />
+
                                     ${product.productName}
                                 </button>`;
                             buttonsContainer.append(button);

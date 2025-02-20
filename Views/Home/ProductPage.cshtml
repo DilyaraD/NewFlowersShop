@@ -47,8 +47,10 @@
                     <span>Состав:</span>
                     <span class="value">@ViewData["FlowerTypes"]</span>
                 </div>
-                @if (ViewData["Stores"] != null && ((List<string>)ViewData["Stores"]).Any())
+                @if (ViewData["Stores"] != null && ((List<string>)ViewData["Stores"]).Any() && (ViewData["MaxQuantity"] != null && (int)ViewData["MaxQuantity"] > 0))
                 {
+                @* @if (ViewData["Stores"] != null && ((List<string>)ViewData["Stores"]).Any())
+                { *@
                     <div class="info-row-Product2">
                         <span>В наличии:</span>
                     </div>

@@ -31,14 +31,8 @@ namespace NewFlowersShop.Controllers
                 .Take(6)
                 .ToList();
 
-            var discountProducts = _context.Products
-                .Where(p => _context.ProductDiscounts.Any(pd => pd.ProductID == p.ProductID) &&
-                            _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
-                .Take(12)
-                .ToList();
-
             var giftProducts = _context.Products
-                .Where(p => p.CategoryID == 10 && !newProducts.Contains(p) && !discountProducts.Contains(p) &&
+                .Where(p => p.CategoryID == 10 && !newProducts.Contains(p) &&
                             _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
                 .Take(6)
                 .ToList();
@@ -62,7 +56,6 @@ namespace NewFlowersShop.Controllers
             ViewBag.Position = SelectedBackground?.Position;
 
             ViewBag.NewProducts = newProducts;
-            ViewBag.DiscountProducts = discountProducts;
             ViewBag.GiftProducts = giftProducts;
             return View();
         }
@@ -761,7 +754,7 @@ namespace NewFlowersShop.Controllers
                 ProductID = model.ProductId,
                 ReviewText = model.ReviewText,
                 Rating = model.Rating,
-                StatusID = 10,
+                StatusID = 11,
                 ReviewDate = DateTime.Now
             };
 
@@ -1553,22 +1546,52 @@ namespace NewFlowersShop.Controllers
 
             return Json(new { success = true, order });
         }
-
         [HttpPost]
         public IActionResult UpdateOrderStatusC(int orderId, int status)
         {
-            var order = _context.Orders.FirstOrDefault(o => o.OrderID == orderId);
+            var order = _context.Orders
+                .FirstOrDefault(o => o.OrderID == orderId);
 
             if (order == null)
             {
-                return Json(new { success = false, message = "Заказ не доставлен!" });
+                return Json(new { success = false, message = "Заказ не найден!" });
             }
 
+            // Загружаем товары из OrderContents с продуктами
+            var orderContents = _context.OrderContents
+                .Where(oc => oc.OrderID == orderId)
+                .Include(oc => oc.Product)
+                .ToList();
+
+            if (!orderContents.Any())
+            {
+                return Json(new { success = false, message = "В заказе нет товаров!" });
+            }
+
+            // Обновляем статус заказа
             order.StatusID = status;
+
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
+            // Добавляем товары в кассовую книгу
+            foreach (var item in orderContents)
+            {
+                var cashBookEntry = new CashBook
+                {
+                    OperationDate = DateTime.Now,
+                    Description = $"Продажа {item.Product.ProductName} ({item.Quantity} шт.)", 
+                    Amount = item.Price * item.Quantity,
+                    OperationType = "Приход",
+                    EmployeeID = user.EmployeeID
+                };
+
+                _context.CashBook.Add(cashBookEntry);
+            }
 
             _context.SaveChanges();
             return Json(new { success = true, message = "Заказ доставлен!" });
         }
+
 
         public IActionResult DocumentManagementPage()
         {
@@ -1854,27 +1877,6 @@ namespace NewFlowersShop.Controllers
             return Json(new { success = false });
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         public IActionResult ShopOrderPage()
         {
             var ordersQuery = _context.Orders
@@ -1965,27 +1967,45 @@ namespace NewFlowersShop.Controllers
         [HttpPost]
         public IActionResult UpdateOrderStatusNot(int orderId, int status)
         {
-            var order = _context.Orders.FirstOrDefault(o => o.OrderID == orderId);
+            var order = _context.Orders
+                .FirstOrDefault(o => o.OrderID == orderId);
 
             if (order == null)
             {
-                return Json(new { success = false, message = "Заказ не выдан!" });
+                return Json(new { success = false, message = "Заказ не найден!" });
+            }
+
+            var login = HttpContext.Session.GetString("Login");
+            var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);            
+            var orderContents = _context.OrderContents
+                .Where(oc => oc.OrderID == orderId)
+                .Include(oc => oc.Product)
+                .ToList();
+
+            if (!orderContents.Any())
+            {
+                return Json(new { success = false, message = "В заказе нет товаров!" });
             }
 
             order.StatusID = status;
 
+            foreach (var item in orderContents)
+            {
+                var cashBookEntry = new CashBook
+                {
+                    OperationDate = DateTime.Now,
+                    Description = $"Продажа {item.Product.ProductName} ({item.Quantity} шт.)", 
+                    Amount = item.Price * item.Quantity, 
+                    OperationType = "Приход", 
+                    EmployeeID = user.EmployeeID 
+                };
+
+                _context.CashBook.Add(cashBookEntry);
+            }
+
             _context.SaveChanges();
             return Json(new { success = true, message = "Заказ выдан!" });
         }
-
-
-
-
-
-
-
-
-
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

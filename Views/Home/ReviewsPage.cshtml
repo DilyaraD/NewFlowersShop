@@ -38,8 +38,52 @@
         </div>
     </div>
 
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Ошибка</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="messageBox" class="message" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ОК</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+        function showMessage(message, type) {
+            const messageBox = document.getElementById("messageBox");
+            const deleteModalElement = document.getElementById("deleteModal");
+            const deleteModal = new bootstrap.Modal(deleteModalElement);
+
+            if (messageBox) {
+                messageBox.textContent = message;
+                messageBox.style.display = "block";
+
+                if (type === "error") {
+                    messageBox.classList.add("error-message");
+                    messageBox.classList.remove("success-message");
+                } else if (type === "success") {
+                    messageBox.classList.add("success-message");
+                    messageBox.classList.remove("error-message");
+                }
+
+                deleteModal.show();
+
+                // Обработчик закрытия модального окна
+                deleteModalElement.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open'); // Убираем класс, который оставляет затемнение
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); // Удаляем все затемняющие слои
+                });
+            }
+        }
         let selectedRating = 0;
 
         $(".star").on("mouseenter", function () {
@@ -68,7 +112,7 @@
         function submitReview(productId) {
             let reviewText = $("#reviewText").val();
             if (!reviewText.trim() || selectedRating === 0) {
-                alert("Введите текст отзыва и выберите оценку.");
+                showMessage("Введите текст отзыва и выберите оценку.", "error");
                 return;
             }
 
@@ -82,11 +126,12 @@
                     rating: selectedRating
                 }),
                 success: function () {
-                    alert("Отзыв сохранен!");
+                    showMessage("Отзыв сохранен!", "success");
+                    setTimeout(() => location.reload(), 5000);
                     window.location.href = "/Home/OrderHistoryPage";
                 },
                 error: function () {
-                    alert("Ошибка сохранения.");
+                    showMessage("Ошибка сохранения.", "error");
                 }
             });
         }

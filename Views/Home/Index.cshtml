@@ -1,6 +1,6 @@
 ﻿@{
     List<Products> newProducts = ViewBag.NewProducts;
-    List<Products> discountProducts = ViewBag.DiscountProducts;
+    // List<Products> discountProducts = ViewBag.DiscountProducts;
     List<Products> giftProducts = ViewBag.GiftProducts;
     var selectedBackground = ViewBag.SelectedBackground as MainPage;
     var isAuthenticated = Context.User.Identity.IsAuthenticated;
@@ -74,34 +74,6 @@
             else
             {
                 <p>Нет новинок</p>
-            }
-        </div>
-    </div>
-    <div class="block3">
-        <h1>Товары со скидкой</h1>
-        <div class="box2">
-            @if (discountProducts != null)
-            {
-                foreach (var product in discountProducts)
-                {
-                    <div class="product" data-id="@product.ProductID">
-                        <a href="Home/ProductPage/@product.ProductID">
-                            <img src="@("data:image/" +
-(product.Photo.StartsWith("/9j/") ? "jpeg" :
-(product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
-(product.Photo.StartsWith("R0lGOD") ? "gif" :
-(product.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
-";base64," +product.Photo)" class="imageProduct" alt="@product.ProductName" />
-                        @* <img src="@product.Photo" class="imageProduct" alt="@product.ProductName" /> *@
-                        <h4 class="nameProduct">@product.ProductName</h4></a>
-                        <h5 class="priceProduct">@product.Price</h5>
-                        <button class="add-to-cart" data-id="@product.ProductID" data-name="@product.ProductName" data-price="@product.Price" data-photo="@product.Photo">в корзину</button>
-                    </div>
-                }
-            }
-            else
-            {
-                <p>Нет товаров со скидкой</p>
             }
         </div>
     </div>

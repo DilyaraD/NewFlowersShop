@@ -162,7 +162,12 @@
 
                         $.each(data.order.products, function (i, product) {
                             productsBody.append('<tr>' +
-                                '<td><img src="' + product.productImage + '" width="50"></td>' +
+                                '<td><img src="data:image/' +
+                                (product.productImage.startsWith("/9j/") ? "jpeg" :
+                                    product.productImage.startsWith("iVBORw0KGgo=") ? "png" :
+                                        product.productImage.startsWith("R0lGOD") ? "gif" :
+                                            product.productImage.startsWith("UklGR") ? "webp" : "jpeg") +
+                                ';base64,' + product.productImage + '" width="50" class="imageProduct"></td>' +
                                 '<td>' + product.productName + '</td>' +
                                 '<td>' + product.quantity + '</td>' +
                                 '<td>' + product.price + '</td>' +
