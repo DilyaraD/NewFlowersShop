@@ -112,11 +112,11 @@
                         <div id="editLoginError" class="validation-error"></div>
                     </div>
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="editFirstName" placeholder="Имя" maxlength="50">
+                        <input type="text" class="form-control" id="editFirstName" placeholder="Имя" maxlength="40">
                         <div id="editFirstNameError" class="validation-error"></div>
                     </div>
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="editLastName" placeholder="Фамилия" maxlength="50">
+                        <input type="text" class="form-control" id="editLastName" placeholder="Фамилия" maxlength="40">
                         <div id="editLastNameError" class="validation-error"></div>
                     </div>
                     <div class="mb-3">
@@ -346,7 +346,7 @@
                             console.log('Сотрудник добавлен');
                             $('#notificationModalBody').text('Сотрудник добавлен');
                             $('#notificationModal').modal('show');
-                            setTimeout(() => location.reload(), 5000);
+                            setTimeout(() => location.reload(), 2000);
 
                         } else {
                             console.log('Ошибка:', data.message);
@@ -407,7 +407,7 @@
                     success: function (data) {
                         if (data.success) {
                             $('#notificationModalBody').text('Данные сотрудника успешно обновлены!');
-                            setTimeout(() => location.reload(), 10000);
+                            setTimeout(() => location.reload(), 8000);
 
                             $('#notificationModal').modal('show');
                             $('#editEmployeeModal').modal('hide');
@@ -434,7 +434,7 @@
                     success: function (data) {
                         if (data.success) {
                             $('#notificationModalBody').text('Сотрудник успешно удален!');
-                            setTimeout(() => location.reload(), 10000);
+                            setTimeout(() => location.reload(), 8000);
                             $('#notificationModal').modal('show');
                             $('#deleteConfirmationModal').modal('hide');
                             $('#editEmployeeModal').modal('hide');

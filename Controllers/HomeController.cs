@@ -25,18 +25,18 @@ namespace NewFlowersShop.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             ViewBag.UserRole = userRole;
+            
+
+            var giftProducts = _context.Products
+                .Where(p => p.CategoryID == 10 && _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
+                .Take(6)
+                .ToList();
+
             var newProducts = _context.Products
-                .Where(p => _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
+                .Where(p => _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && !giftProducts.Contains(p) && pc.Quantity > 0))
                 .OrderByDescending(p => p.ProductID)
                 .Take(6)
                 .ToList();
-
-            var giftProducts = _context.Products
-                .Where(p => p.CategoryID == 10 && !newProducts.Contains(p) &&
-                            _context.StoreFlowerStocks.Any(pc => pc.FlowerTypeID == p.ProductID && pc.Quantity > 0))
-                .Take(6)
-                .ToList();
-
             var SelectedBackground = _context.MainPage.FirstOrDefault(b => b.Used == "Да");
             ViewBag.SelectedBackground = SelectedBackground;
 
