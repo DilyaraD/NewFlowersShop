@@ -150,7 +150,6 @@
 
         $("#saveButton").click(function () {
             event.preventDefault();
-            // Сброс стилей и сообщений об ошибках
             $("#documentName").removeClass("input-error");
             $("#description").removeClass("input-error");
             $("#fileInput").removeClass("input-error");
@@ -174,7 +173,7 @@
             }
 
             if (!documentName || !description || !file) {
-                return; // Прекращаем выполнение, если есть ошибки
+                return; 
             }
 
             var formData = new FormData();
@@ -190,20 +189,16 @@
                 contentType: false,
                 success: function (response) {
                     if (response.success) {
-                        // Показываем модальное окно с сообщением об успехе
                         $("#notificationModalBody").text(response.message);
                         $("#notificationModal").modal("show");
 
-                        // Закрываем форму загрузки
                         $("#uploadForm").modal("hide");
 
-                        // Очищаем форму
                         $("#documentForm")[0].reset();
                         $("#fileLabel").text("Выберите файл");
                         $("#fileImage").attr("src", "~/img_s/fileAdd.svg").attr("alt", "Выберите файл");
                         selectedFile = null;
                     } else {
-                        // Вывод ошибок валидации
                         if (response.errors) {
                             for (var key in response.errors) {
                                 if (response.errors.hasOwnProperty(key)) {
@@ -220,7 +215,6 @@
                 },
                 error: function (xhr, status, error) {
                     console.error("Ошибка при отправке запроса:", error);
-                    // Показываем модальное окно с сообщением об ошибке
                     $("#notificationModalBody").text("Произошла ошибка при отправке запроса.");
                     $("#notificationModal").modal("show");
                 }
@@ -232,7 +226,6 @@
         });
 
         $('#uploadForm').on('hidden.bs.modal', function () {
-            // Сброс значений и стилей при закрытии модального окна
             $("#documentForm")[0].reset();
             $("#documentName").removeClass("input-error");
             $("#description").removeClass("input-error");

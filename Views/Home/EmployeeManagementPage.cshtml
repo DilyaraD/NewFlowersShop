@@ -429,7 +429,7 @@
                 var employeeId = $('#editEmployeeID').val();
 
                 $.ajax({
-                    url: '/Home/DeleteEmployee/' + employeeId, // Укажите правильный URL
+                    url: '/Home/DeleteEmployee/' + employeeId,
                     type: 'POST',
                     success: function (data) {
                         if (data.success) {

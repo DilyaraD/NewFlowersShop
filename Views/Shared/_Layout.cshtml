@@ -142,10 +142,10 @@
         
     <div class="bottom">
         <div class="bA">
-            <a>Cвадебная флористика</a>
-            <a>Букеты на любые мероприятия</a>
-            <a>Букеты невесты</a>
-            <a>Композиции</a>
+            <a href="@Url.Action("CatalogPage", "Home")" id="catalogLink1">Свадебная флористика</a>
+            <a href="@Url.Action("CatalogPage", "Home")" id="catalogLink2">Букеты на любые мероприятия</a>
+            <a href="@Url.Action("CatalogPage", "Home")" id="catalogLink3">Букеты невесты</a>
+            <a href="@Url.Action("CatalogPage", "Home")" id="catalogLink4">Композиции</a>
         </div>
         <div class="bLink">
             <a href="https://www.instagram.com/">
@@ -284,6 +284,40 @@
                 if (logoLink) {
                     logoLink.style.pointerEvents = "none"; 
                 }
+            }
+
+            const catalogLinks = [
+                document.getElementById('catalogLink1'),
+                document.getElementById('catalogLink2'),
+                document.getElementById('catalogLink3'),
+                document.getElementById('catalogLink4')
+            ];
+
+            function disableLinks(links) {
+                links.forEach(link => {
+                    if (link) {
+                        link.style.pointerEvents = 'none';
+                    }
+                });
+            }
+            function Links(links) {
+                links.forEach(link => {
+                    if (link) {
+                        link.style.color = 'black';
+                    }
+                });
+            }
+
+            switch (userRole) {
+                case "Customer":
+                    Links(catalogLinks);
+                    break;
+                case "":
+                    Links(catalogLinks);
+                    break;
+                default:
+                    disableLinks(catalogLinks);
+                    break;
             }
 
 
