@@ -25,15 +25,15 @@
                     <p>от</p>
                     <input id="minPrice" placeholder="1"
                            type="number"
-                           min="0"
-                           max="100000"
-                           oninput="validateInput(this)" />
+                           min="1"
+                           max="99999"
+                           oninput="validateInput(this, 'min')" />
                     <p>до</p>
                     <input id="maxPrice" placeholder="100000"
                            type="number"
                            min="0"
                            max="100000"
-                           oninput="validateInput(this)" />
+                           oninput="validateInput(this, 'max')" />
                 </div>
 
                 <h5>Категория</h5>
@@ -128,15 +128,59 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function validateInput(inputElement) {
+        function validateInput(inputElement, type) {
+            // Удаляем все символы, кроме цифр
             inputElement.value = inputElement.value.replace(/[^0-9]/g, '');
+
+            // Преобразуем значение в число
             let value = parseInt(inputElement.value, 10);
+
+            // Если поле пустое, оставляем его пустым
+            if (inputElement.value === '') {
+                return;
+            }
+
+            // Если значение NaN (например, пустая строка), устанавливаем его в минимальное или максимальное значение
             if (isNaN(value)) {
-                value = 0
+                value = type === 'min' ? 1 : 100000;
             }
-            if (value > 100000) {
-                inputElement.value = 100000;
+
+            // Ограничение для поля "от"
+            if (type === 'min') {
+                if (value < 1) {
+                    value = 1;
+                }
+                if (value > 100000) {
+                    value = 100000;
+                }
+
+                // Обновляем значение поля "до", если оно меньше нового значения "от"
+                let maxPrice = document.getElementById('maxPrice');
+                let maxValue = parseInt(maxPrice.value, 10);
+                if (!isNaN(maxValue) && maxValue < value) {
+                    maxPrice.value = value;
+                }
             }
+
+            // Ограничение для поля "до"
+            if (type === 'max') {
+                if (value < 1) {
+                    value = 1;
+                }
+                if (value > 100000) {
+                    value = 100000;
+                }
+
+                // Обновляем значение поля "от", если оно больше нового значения "до"
+                let minPrice = document.getElementById('minPrice');
+                let minValue = parseInt(minPrice.value, 10);
+                if (!isNaN(minValue) && minValue > value) {
+                    minPrice.value = value;
+                }
+            }
+
+            // Обновляем значение в поле ввода
+            inputElement.value = value;
         }
 
         function loadProducts() {

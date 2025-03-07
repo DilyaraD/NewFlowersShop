@@ -142,7 +142,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно подтверждения удаления -->
     <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true" >
         <div class="modal-dialog">
             <div class="modal-content">
@@ -188,11 +187,45 @@
                 $(elementId).show();
                 $(elementId.replace('Error', '')).addClass('input-error');
             }
+            $('#phoneNumber').on('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, ''); 
+            });
+
+            $('#editphoneNumber').on('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, ''); 
+            });
+           
+            $('#editLoginEmployee').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я0-9_]/, '');
+            });
+
+            $('#loginEmployee').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я0-9_]/, '');
+            });
+
+
+
+            $('#firstName').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+            });
+
+            $('#lastName').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+            });
+
+            $('#editLastName').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+            });
+
+            $('#editFirstName').on('input', function () {
+                this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+            });
 
 
             function validateEditForm() {
                 let isValid = true;
 
+               
                 function showError(elementId, message) {
                     $(elementId).text(message);
                     $(elementId).show();
@@ -205,7 +238,6 @@
                     $(elementId.replace('Error', '')).removeClass('input-error');
                 }
 
-                // Валидация логина
                 if ($('#editLoginEmployee').val().trim() === '') {
                     showError('#editLoginError', 'Введите логин');
                     isValid = false;
@@ -213,7 +245,6 @@
                     hideError('#editLoginError');
                 }
 
-                // Валидация имени
                 if ($('#editFirstName').val().trim() === '') {
                     showError('#editFirstNameError', 'Введите имя');
                     isValid = false;
@@ -221,7 +252,6 @@
                     hideError('#editFirstNameError');
                 }
 
-                // Валидация фамилии
                 if ($('#editLastName').val().trim() === '') {
                     showError('#editLastNameError', 'Введите фамилию');
                     isValid = false;
@@ -229,7 +259,6 @@
                     hideError('#editLastNameError');
                 }
 
-                // Валидация номера телефона
                 let phoneNumber = $('#editphoneNumber').val().trim();
                 let phonePattern = /^(\+7|8)9\d{9}$/;
                 if (!phonePattern.test(phoneNumber)) {
@@ -239,7 +268,6 @@
                     hideError('#editPhoneNumberError');
                 }
 
-                // Валидация роли
                 if ($('#editRoleID').val() === null) {
                     showError('#editRoleError', 'Выберите роль');
                     isValid = false;
@@ -250,18 +278,15 @@
                 return isValid;
             }
 
-            // Функция для скрытия сообщения об ошибке
             function hideError(elementId) {
                 $(elementId).text('');
                 $(elementId).hide();
-                $(elementId.replace('Error', '')).removeClass('input-error'); // Удаляем класс input-error
+                $(elementId.replace('Error', '')).removeClass('input-error');
             }
 
-            // Функция для валидации формы
             function validateForm() {
                 let isValid = true;
 
-                // Валидация логина
                 if ($('#loginEmployee').val().trim() === '') {
                     showError('#loginError', 'Введите логин');
                     isValid = false;
@@ -269,7 +294,6 @@
                     hideError('#loginError');
                 }
 
-                // Валидация имени
                 if ($('#firstName').val().trim() === '') {
                     showError('#firstNameError', 'Введите имя');
                     isValid = false;
@@ -283,7 +307,7 @@
                 } else {
                     hideError('#lastNameError');
                 }
-                // Валидация пароля
+                
                 if ($('#passwordEmployee').val().trim() === '') {
                     showError('#passwordError', 'Введите пароль');
                     isValid = false;
@@ -307,7 +331,6 @@
                     hideError('#phoneNumberError');
                 }
 
-                // Валидация роли
                 if ($('#roleID').val() === null) {
                     showError('#roleError', 'Выберите роль');
                     isValid = false;
@@ -318,10 +341,9 @@
                 return isValid;
             }
 
-            // Добавление сотрудника
             $('#addEmployeeButton').click(function () {
                 if (!validateForm()) {
-                    return; // Прекращаем выполнение, если форма не валидна
+                    return; 
                 }
                 var loginEmployee = $('#loginEmployee').val();
                 var firstName = $('#firstName').val();
@@ -349,7 +371,8 @@
                             setTimeout(() => location.reload(), 2000);
 
                         } else {
-                            console.log('Ошибка:', data.message);
+                            $('#notificationModalBody').text(data.message);
+                            $('#notificationModal').modal('show');
                         }
                     },
                     error: function (xhr) {
@@ -358,16 +381,13 @@
                 });
             });
 
-            // Обработчик клика на сотрудника в списке
             $('.employee-item').click(function () {
                 var employeeId = $(this).data('employee-id');
 
-                // Получаем данные сотрудника по ID (нужно реализовать на сервере)
                 $.ajax({
                     url: '/Home/GetEmployee/' + employeeId,
                     type: 'GET',
                     success: function (employee) {
-                        // Заполняем форму редактирования данными сотрудника
                         $('#editEmployeeID').val(employee.employeeID);
                         $('#editLoginEmployee').val(employee.loginEmployee);
                         $('#editFirstName').val(employee.firstName);
@@ -375,7 +395,6 @@
                         $('#editRoleID').val(employee.roleID);
                         $('#editphoneNumber').val(employee.phoneNumber);
 
-                        // Открываем модальное окно редактирования
                         $('#editEmployeeModal').modal('show');
                     },
                     error: function () {
@@ -385,10 +404,9 @@
                 });
             });
 
-            // Сохранение изменений сотрудника
             $('#saveEmployeeButton').click(function () {
                 if (!validateEditForm()) {
-                    return; // Если форма не прошла валидацию, прерываем выполнение
+                    return; 
                 }
 
                 var employeeData = {
@@ -400,14 +418,14 @@
                 };
 
                 $.ajax({
-                    url: '/Home/UpdateEmployee', // Укажите правильный URL
+                    url: '/Home/UpdateEmployee', 
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(employeeData),
                     success: function (data) {
                         if (data.success) {
                             $('#notificationModalBody').text('Данные сотрудника успешно обновлены!');
-                            setTimeout(() => location.reload(), 8000);
+                            setTimeout(() => location.reload(), 2000);
 
                             $('#notificationModal').modal('show');
                             $('#editEmployeeModal').modal('hide');
@@ -424,7 +442,6 @@
                 });
             });
 
-            // Подтверждение удаления сотрудника
             $('#confirmDeleteButton').click(function () {
                 var employeeId = $('#editEmployeeID').val();
 
@@ -434,7 +451,7 @@
                     success: function (data) {
                         if (data.success) {
                             $('#notificationModalBody').text('Сотрудник успешно удален!');
-                            setTimeout(() => location.reload(), 8000);
+                            setTimeout(() => location.reload(), 2000);
                             $('#notificationModal').modal('show');
                             $('#deleteConfirmationModal').modal('hide');
                             $('#editEmployeeModal').modal('hide');
@@ -451,7 +468,6 @@
                 });
             });
 
-            // Скрытие ошибки при изменении значения input
             $('#addEmployeeModal input, #addEmployeeModal select').on('input change', function () {
                 hideError('#' + this.id + 'Error');
             });

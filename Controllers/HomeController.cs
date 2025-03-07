@@ -302,6 +302,13 @@ namespace NewFlowersShop.Controllers
 
             if (customer != null)
             {
+                if (login != customer.LoginCustomer &&
+           (_context.Customers.Any(c => c.LoginCustomer == login) ||
+           _context.Employees.Any(e => e.LoginEmployee == login)))
+        {
+                    return Json(new { success = false, message = "Логин уже занят" });
+                }
+
                 customer.LoginCustomer = login;
                 customer.FirstName = firstName;
                 customer.LastName = lastName;
@@ -328,6 +335,13 @@ namespace NewFlowersShop.Controllers
             }
             else if (employee != null)
             {
+                if (login != employee.LoginEmployee &&
+           (_context.Customers.Any(c => c.LoginCustomer == login) ||
+           _context.Employees.Any(e => e.LoginEmployee == login)))
+        {
+                    return Json(new { success = false, message = "Логин уже занят" });
+                }
+
                 employee.LoginEmployee = login;
                 employee.FirstName = firstName;
                 employee.LastName = lastName;
@@ -981,7 +995,7 @@ namespace NewFlowersShop.Controllers
       string careDescription, decimal price, string size, string package,
       List<int> selectedFlowerTypes, List<int> selectedStores, int quantity)
         {
-            if (selectedStores == null || selectedFlowerTypes == null)
+            if (selectedStores == null || selectedStores.Count == 0 || selectedFlowerTypes == null)
             {
                 TempData["ErrorMessage"] = "Не выбраны магазины или типы цветов";
                 return RedirectToAction("productManagementPage");
@@ -1557,7 +1571,6 @@ namespace NewFlowersShop.Controllers
                 return Json(new { success = false, message = "Заказ не найден!" });
             }
 
-            // Загружаем товары из OrderContents с продуктами
             var orderContents = _context.OrderContents
                 .Where(oc => oc.OrderID == orderId)
                 .Include(oc => oc.Product)
@@ -1568,12 +1581,10 @@ namespace NewFlowersShop.Controllers
                 return Json(new { success = false, message = "В заказе нет товаров!" });
             }
 
-            // Обновляем статус заказа
             order.StatusID = status;
 
             var login = HttpContext.Session.GetString("Login");
             var user = _context.Employees.FirstOrDefault(u => u.LoginEmployee == login);
-            // Добавляем товары в кассовую книгу
             foreach (var item in orderContents)
             {
                 var cashBookEntry = new CashBook
@@ -1691,6 +1702,12 @@ namespace NewFlowersShop.Controllers
         [HttpPost]
         public IActionResult AddEmployee(string loginEmployee, string firstName, string lastName, string passwordEmployee, int roleID, string phoneNumber)
         {
+            var existingEmployee = _context.Employees.FirstOrDefault(e => e.LoginEmployee == loginEmployee);
+            if (existingEmployee != null)
+            {
+                return Json(new { success = false, message = "Логин уже занят." });
+            }
+
             var employee = new Employees
             {
                 LoginEmployee = loginEmployee,
@@ -1733,14 +1750,21 @@ namespace NewFlowersShop.Controllers
         [HttpPost]
         public IActionResult UpdateEmployee([FromBody] Employees updatedEmployee)
         {
-
             var employee = _context.Employees.Find(updatedEmployee.EmployeeID);
             if (employee == null)
             {
                 return NotFound();
             }
 
-            // Обновите только те поля, которые нужно изменить
+            if (employee.LoginEmployee != updatedEmployee.LoginEmployee)
+            {
+                var existingEmployee = _context.Employees.FirstOrDefault(e => e.LoginEmployee == updatedEmployee.LoginEmployee);
+                if (existingEmployee != null)
+                {
+                    return Json(new { success = false, message = "Логин уже занят." });
+                }
+            }
+
             employee.LoginEmployee = updatedEmployee.LoginEmployee;
             employee.FirstName = updatedEmployee.FirstName;
             employee.LastName = updatedEmployee.LastName;

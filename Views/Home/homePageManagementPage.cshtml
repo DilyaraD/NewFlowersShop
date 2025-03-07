@@ -569,10 +569,9 @@
                     let cssProperties = {
                         justifyContent: position === "left" ? "flex-start" : position === "right" ? "flex-end" : "center",
                         textAlign: position,
-                        top: "50%", // Устанавливаем верхний отступ
+                        top: "50%", 
                     };
 
-                    // Добавляем или убираем left и transform в зависимости от позиции
                     if (position === "center") {
                         cssProperties.left = "50%";
                         cssProperties.transform = "translate(-50%, -50%)";
@@ -641,10 +640,18 @@
         function validateForm() {
             let showButton = document.getElementById("showButton").checked;
             let buttonText = document.getElementById("buttonTextInput").value.trim();
+                let backgroundText = document.getElementById("backgroundTextInput").value.trim();
+
                 // let photoLabel = document.getElementById("fileLabel").value;
                     let photo = document.getElementById("fileInput").value.trim();
 
                 let fileInput = document.getElementById("fileInput");
+
+                
+                if (backgroundText === "") {
+                    showModalMessage("Пожалуйста, введите текст фона.");
+                    return false;
+                }
 
                 if (!fileInput.files.length) {
                     showModalMessage("Выберите изображение перед добавлением!");

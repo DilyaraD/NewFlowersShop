@@ -95,7 +95,7 @@
         $('#deleteModal').on('shown.bs.modal', function () {
             setTimeout(function () {
                 location.reload();
-            }, 500); // Добавляем небольшую задержку
+            }, 500); 
         });
 
         function showMessage(message) {
@@ -108,7 +108,7 @@
             $('#deleteModal').on('shown.bs.modal', function () {
                 setTimeout(function () {
                     location.reload();
-                }, 1500); // Добавляем небольшую задержку
+                }, 10000);
             });
 
 
@@ -127,26 +127,23 @@
 
 
             $("#ordersTable tbody tr").hide();
-            // Фильтрация заказов при выборе адреса магазина
             $('#store').on('change', function () {
-                var selectedStoreAddress = $("#store option:selected").text().trim(); // Выбранный адрес магазина
+                var selectedStoreAddress = $("#store option:selected").text().trim();
 
                 $("#ordersTable tbody tr").each(function () {
-                    var orderAddress = $(this).data("delivery-address")?.trim() || ""; // Адрес заказа, если нет — пустая строка
+                    var orderAddress = $(this).data("delivery-address")?.trim() || "";
 
                     if (selectedStoreAddress === orderAddress) {
-                        $(this).show();  // Показываем заказ, если адрес совпадает
+                        $(this).show();
                     } else {
-                        $(this).hide();  // Скрываем заказ, если адрес не совпадает
+                        $(this).hide();
                     }
                 });
             });
 
 
-            // Обработчик клика по строке с заказом
             $(document).on('click', '.item-row', function () {
                 var orderId = $(this).data('id');
-                // loadOrderActions(orderId);
                 $('.action-panel').empty().show();
                 loadOrderDetails(orderId);
             });

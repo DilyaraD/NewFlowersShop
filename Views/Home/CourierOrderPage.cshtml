@@ -84,7 +84,7 @@
         $('#deleteModal').on('shown.bs.modal', function () {
             setTimeout(function () {
                 location.reload();
-            }, 500); // Добавляем небольшую задержку
+            }, 500); 
         });
 
         function showMessage(message) {
@@ -97,7 +97,7 @@
             $('#deleteModal').on('shown.bs.modal', function () {
                 setTimeout(function () {
                     location.reload();
-                }, 1500); // Добавляем небольшую задержку
+                }, 100);
             });
 
 
@@ -114,13 +114,8 @@
                 }
             });
 
-            // Фильтрация заказов при выборе адреса магазина
-            
-
-            // Обработчик клика по строке с заказом
             $(document).on('click', '.item-row', function () {
                 var orderId = $(this).data('id');
-                // loadOrderActions(orderId);
                 $('.action-panel').empty().show();
                 loadOrderDetails(orderId);                
             });
@@ -167,7 +162,7 @@
                                     product.productImage.startsWith("iVBORw0KGgo=") ? "png" :
                                         product.productImage.startsWith("R0lGOD") ? "gif" :
                                             product.productImage.startsWith("UklGR") ? "webp" : "jpeg") +
-                                ';base64,' + product.productImage + '" width="50" class="imageProduct"></td>' +
+                                ';base64,' + product.productImage + '" width="20" class="imageProduct"></td>' +
                                 '<td>' + product.productName + '</td>' +
                                 '<td>' + product.quantity + '</td>' +
                                 '<td>' + product.price + '</td>' +

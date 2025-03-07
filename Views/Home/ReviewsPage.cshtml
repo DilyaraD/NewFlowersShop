@@ -9,7 +9,7 @@
 </head>
 <body>
     <div class="infoProfil">
-        <h1>Мои данные</h1>
+        <h1>Отправка отзыва</h1>
         <div class="infoReviews">
             <div class="review-header">
                 <div class="product-info">
@@ -20,8 +20,6 @@
 (Model.Photo.StartsWith("UklGR") ? "webp" : "jpeg")))) +
 ";base64," +Model.Photo)" class="imageProductBasket2" alt="@Model.ProductName" />
 
-
-                    @* <img src="@Model.Photo" class="imageProductBasket2" /> *@
                     <h3>@Model.ProductName</h3>
                 </div>
                 <div class="starsReviews">
@@ -77,10 +75,9 @@
 
                 deleteModal.show();
 
-                // Обработчик закрытия модального окна
                 deleteModalElement.addEventListener('hidden.bs.modal', function () {
-                    document.body.classList.remove('modal-open'); // Убираем класс, который оставляет затемнение
-                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); // Удаляем все затемняющие слои
+                    document.body.classList.remove('modal-open'); 
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove()); 
                 });
             }
         }
@@ -125,9 +122,7 @@
                     reviewText: reviewText,
                     rating: selectedRating
                 }),
-                success: function () {
-                    showMessage("Отзыв сохранен!", "success");
-                    setTimeout(() => location.reload(), 5000);
+                 success: function () {
                     window.location.href = "/Home/OrderHistoryPage";
                 },
                 error: function () {

@@ -79,7 +79,7 @@
         $('#deleteModal').on('shown.bs.modal', function () {
             setTimeout(function () {
                 location.reload();
-            }, 500); // Добавляем небольшую задержку
+            }, 500);
         });
 
         function showMessage(message) {
@@ -92,13 +92,13 @@
             $('#deleteModal').on('shown.bs.modal', function () {
                 setTimeout(function () {
                     location.reload();
-                }, 1500); // Добавляем небольшую задержку
+                }, 3000);
             });
 
 
             function loadActionPanel(reviewId) {
                 var actionPanel = $('.action-panel');
-                actionPanel.empty(); // Очищаем предыдущее содержимое
+                actionPanel.empty();
 
                 var content = `
                             <p>Хотите опубликовать отзыв или удалить?</p>
@@ -107,7 +107,6 @@
                         `;
                 actionPanel.append(content);
 
-                // Обработчики для кнопок "Опубликовать" и "Удалить"
                 $('.publish-review').click(function () {
                     var reviewId = $(this).data('id');
                     $.ajax({
@@ -154,8 +153,6 @@
                 });
             }
 
-
-            // Обработчик клика на строку отзыва
             $('.item-row').click(function () {
                 var reviewId = $(this).data('id');
                 loadActionPanel(reviewId);

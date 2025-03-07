@@ -172,25 +172,7 @@ var stores =ViewBag.Stores as List<NewFlowersShop.Stores>; }
                       name="recipientPhone"
                       placeholder="Номер телефона"
                       id="recipientPhone"
-                      class="w-full border border-gray-300 rounded-lg p-2 mb-2"
-                    />
-
-                    <label>
-                      <input
-                        type="checkbox"
-                        name="selectedTypes"
-                        id="addNoteCheckbox"
-                        class="mr-2"
-                      />записка
-                    </label>
-
-                    <textarea
-                      id="noteTextarea"
-                      name="noteTextarea"
-                      class="flex items-center mb-2"
-                      placeholder="Введите текст вашей записки (max 20-100 символов) "
-                      style="display: none"
-                    ></textarea>
+                                       class="w-full border border-gray-300 rounded-lg p-2 mb-2" maxlength="11" />                 
                   </div>
                 </div>
 
@@ -247,7 +229,9 @@ var stores =ViewBag.Stores as List<NewFlowersShop.Stores>; }
       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
       <script>
-        
+        document.getElementById("recipientPhone").addEventListener("input", function (event) {
+            this.value = this.value.replace(/[^0-9]/, '');
+        });
 
         document.getElementById("storePickup").onclick = function () {
           toggleDeliveryMethod(true);
@@ -277,17 +261,7 @@ var stores =ViewBag.Stores as List<NewFlowersShop.Stores>; }
             .getElementById("courierDetails")
             .classList.toggle("hidden", isStore);
         }
-
-        document
-          .getElementById("addNoteCheckbox")
-          .addEventListener("change", function () {
-            const noteTextarea = document.getElementById("noteTextarea");
-            if (this.checked) {
-              noteTextarea.style.display = "flex";
-            } else {
-              noteTextarea.style.display = "none";
-            }
-          });
+                                                  
 
         function toggleRecipientMethod(isSelf) {
           document
@@ -317,10 +291,10 @@ var stores =ViewBag.Stores as List<NewFlowersShop.Stores>; }
             $("#order").click(function (e) {
                 e.preventDefault();
                 console.log("Кнопка оформления заказа нажата");
-function showMessage(message) {
-            $('#deleteModal .modal-body').text(message);
-            $('#deleteModal').modal('show');
-        }
+                function showMessage(message) {
+                    $('#deleteModal .modal-body').text(message);
+                    $('#deleteModal').modal('show');
+                }
                 let selectedDelivery = $(".delivery-button.active").attr("id");
                 let isStorePickup = selectedDelivery === "storePickup";
                 let isValid = true;
@@ -366,13 +340,33 @@ function showMessage(message) {
                     return;
                 }
 
-                if (!isValid) return;
+                @* if (!isValid) return; *@
 
                 let phoneNumber = $("#recipientPhone").val().trim();
                 if (phoneNumber && !/^\d{11}$/.test(phoneNumber)) {
                     showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX");
                     return;
                 }
+                let isGift = $("#giftRecipient").hasClass("active");
+                if (isGift) {
+                    let recipientName = $("input[name='NameCust']").val().trim();
+                    let recipientPhone = $("input[name='recipientPhone']").val().trim();
+
+                    if (!recipientName) {
+                        showMessage("Введите имя получателя.");
+                        isValid = false;
+                    }
+                    if (!recipientPhone) {
+                        showMessage("Введите номер телефона получателя.");
+                        isValid = false;
+                    }
+                    if (recipientPhone.length !== 11 || !/^\d+$/.test(recipientPhone)) {
+                        showMessage("Введите корректный номер телефона в формате 89XXXXXXXXX.");
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid) return;
 
                 let selectedAddress = $(".store option:selected").attr("data-address");
 
@@ -386,10 +380,12 @@ function showMessage(message) {
                         ? $(".hour").val() + ":" + $(".minute").val()
                         : $(".courierTime").val(),
                     NameCust:
-                        $("#recipientPhone").val() && $("#NameCust").val()
+                        isGift ? $("input[name='NameCust']").val().trim() : "",
+                    recipientPhone: isGift ? $("input[name='recipientPhone']").val().trim() : "",
+@*                         $("#recipientPhone").val() && $("#NameCust").val()
                             ? $("#NameCust").val().trim()
                             : "",
-                    recipientPhone: $("#recipientPhone").val().trim(),
+                    recipientPhone: $("#recipientPhone").val().trim(), *@
                     paymentMethod: $("input[name='paymentMethod']:checked").val(),
                 };
 
@@ -402,7 +398,7 @@ function showMessage(message) {
                     success: function (response) {
                         console.log("Ответ сервера:", response);
                         if (response.success) {
-                            showMessage(response.message);
+                           @*  showMessage(response.message); *@
                             window.location.href =
                                 `/Home/DetailedOrderHistoryPage?orderId=` + response.orderId;
                         } else {

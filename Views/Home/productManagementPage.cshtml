@@ -38,7 +38,7 @@
                         foreach (var product in products)
                         {
                             <div class="product" data-id="@product.ProductID">
-                                <a href="/Home/ProductPage/@product.ProductID">
+                                <a>
                                     <img src="@("data:image/" +
     (product.Photo.StartsWith("/9j/") ? "jpeg" :
     (product.Photo.StartsWith("iVBORw0KGgo=") ? "png" :
@@ -71,7 +71,7 @@
                     <h3>Добавление товара</h3>
                     <div class="columns">
                         <div class="column">
-                            <input type="text" name="productName" placeholder="Название" />
+                            <input type="text" name="productName" placeholder="Название" maxlength="20" />
                             <input type="text" name="price" placeholder="Цена" />
                             <select name="size">
                                 <option value="" disabled selected hidden>Размер</option>
@@ -108,7 +108,7 @@
                             <button class="imageAdd">
                                 <img src="~/img_s/image-plus.svg" />
                             </button>
-                            <input type="file" name="photo" id="fileInput" accept="image/*" style="display: none" required />
+                            <input type="file" name="photo" id="fileInput" accept="image/*" style="display: none"/>
                             <label for="fileInput" id="fileLabel">Выберите изображение</label>
 
                         </div>
@@ -246,14 +246,13 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
         $(document).ready(function () {
+            // Удаление лишних опций
             $("select[name='package'] option[value='-']").remove();
 
+            // Обработка изменения категории
             $("select[name='categoryID']").change(function () {
                 const selectedCategory = $(this).val();
-                console.log("Выбрана категория:", selectedCategory);
-
                 if (selectedCategory == 10) {
                     $("select[name='package']").hide();
                     $("textarea[name='careDescription']").hide();
@@ -267,10 +266,9 @@
                 }
             });
 
-            $("#productTable").hide();
-               $("#store").change(function () {
+            // Отображение таблицы товаров при выборе магазина
+            $("#store").change(function () {
                 let selectedStore = $(this).val();
-
                 if (selectedStore !== "") {
                     $("#productTable").show();
                     $(".item-row").each(function () {
@@ -285,151 +283,200 @@
                 }
             });
 
-
+            // Открытие popup для добавления товара или инвентаризации
             $(".button-product button").click(function () {
                 let targetId = $(this).attr("id") === "addProductBtn" ? "#addProduct" : "#inventory";
-
                 $(".popup").addClass("hidden");
                 $(".divProducts").addClass("hidden");
-
                 $(targetId).removeClass("hidden");
             });
 
-            $("#requestStockBtn").click(function () {
-                $("#requestStock").toggleClass("hidden");
-            });
-
-            $(".item-row").click(function () {
-                $("#writeOff").removeClass("hidden");
-            });
-
+            // Закрытие popup
             $(".close").click(function () {
                 $(this).closest(".popup").addClass("hidden");
                 $("#products").removeClass("hidden");
             });
 
-        });
-
-        document
-            .querySelector(".imageAdd")
-            .addEventListener("click", function () {
+            // Обработка клика по кнопке добавления изображения
+            document.querySelector(".imageAdd").addEventListener("click", function (event) {
                 event.preventDefault();
                 document.getElementById("fileInput").click();
             });
 
-
-        document.getElementById("fileInput").addEventListener("change", function (event) {
-            let file = event.target.files[0];
-            if (file) {
-                document.getElementById("fileLabel").textContent = file.name;
-            }
-        });
-
-        $("input[type='file']").change(function () {
-            console.log("Выбран файл:", this.files[0]?.name);
-        });
-
-        $("input[type='text'][placeholder='Цена'], input[type='text'][placeholder='Количество']").on("input", function () {
-            let value = $(this).val().replace(/[^0-9]/g, "");
-            if (value !== "") {
-                value = Math.min(parseInt(value, 10), $(this).attr("placeholder") === "Цена" ? 150000 : 1000);
-            }
-            $(this).val(value);
-        });
-
-        $(".add").click(function () {
-            let valid = true;
-            $("input[type='text']").each(function () {
-                if ($(this).val().trim() === "" || $(this).hasClass("error")) {
-                    $(this).addClass("error");
-                    valid = false;
-                } else {
-                    $(this).removeClass("error");
+            // Отображение имени выбранного файла
+            document.getElementById("fileInput").addEventListener("change", function (event) {
+                let file = event.target.files[0];
+                if (file) {
+                    document.getElementById("fileLabel").textContent = file.name;
                 }
             });
 
-            if (!valid) {
-                showMessage("Заполните все поля правильно!");
-            } else {
-                showMessage("Товар добавлен!");
-            }
-        });
-
-        function showMessage(message) {
-            $('#deleteModal .modal-body').text(message);
-            $('#deleteModal').modal('show');
-            $('#deleteModal').css('z-index', '2000');
-        }
-
-        $("#saveFlowerSelection").click(function () {
-            let selectedFlowers = [];
-            $(".flowerCheckbox:checked").each(function () {
-                selectedFlowers.push($(this).val());
+            // Валидация числовых полей (цена и количество)
+            $("input[type='text'][placeholder='Цена'], input[type='text'][placeholder='Количество']").on("input", function () {
+                let value = $(this).val().replace(/[^0-9]/g, "");
+                if (value !== "") {
+                    value = Math.min(parseInt(value, 10), $(this).attr("placeholder") === "Цена" ? 150000 : 1000);
+                }
+                $(this).val(value);
             });
 
-            $("#selectedFlowers").text(selectedFlowers.join(", "));
-
-            $("#selectedFlowerTypesInput").empty();
-
-            selectedFlowers.forEach(flower => {
-                $("#selectedFlowerTypesInput").append(`<input type="hidden" name="selectedFlowerTypes" value="${flower}" />`);
+            // Сохранение выбранных цветов
+            $("#saveFlowerSelection").click(function () {
+                let selectedFlowers = [];
+                $(".flowerCheckbox:checked").each(function () {
+                    selectedFlowers.push($(this).val());
+                });
+                $("#selectedFlowers").text(selectedFlowers.join(", "));
+                $("#selectedFlowerTypesInput").empty();
+                selectedFlowers.forEach(flower => {
+                    $("#selectedFlowerTypesInput").append(`<input type="hidden" name="selectedFlowerTypes" value="${flower}" />`);
+                });
+                $("#flowerModal").modal("hide");
             });
 
-            $("#flowerModal").modal("hide");
-        });
+            // Сохранение выбранных магазинов
+            $("#saveStoreSelection").click(function () {
+                let selectedStores = [];
+                $(".storeCheckbox:checked").each(function () {
+                    selectedStores.push($(this).val());
+                });
+                $("#selectedStores").text(selectedStores.join(", "));
+                $("#selectedStoreIdsInput").empty();
+                if (selectedStores.length > 0) {
+                    selectedStores.forEach(store => {
+                        $("#selectedStoreIdsInput").append(`<input type="hidden" name="selectedStores" value="${store}" />`);
+                    });
+                } else {
+                    $("#selectedStoreIdsInput").append(`<input type="hidden" name="selectedStores" value="" />`);
+                }
+                $("#storeModal").modal("hide");
+            });
 
-        $(document).ready(function () {
-            $("#store").change(function () {
-                let selectedStore = $(this).val();
-                $(".item-row").each(function () {
-                    if (selectedStore === "" || $(this).data("store") == selectedStore) {
-                        $(this).show();
+            // Обработка отправки формы
+            $("form").submit(function (event) {
+                event.preventDefault();
+
+                let valid = true;
+                let errorMessage = "";
+
+                // Проверка текстовых полей
+                $("input[type='text']:visible").each(function () {
+                    if ($(this).val().trim() === "") {
+                        $(this).addClass("error").css("border", "1px solid red");
+                        valid = false;
+                        errorMessage = "Заполните все видимые текстовые поля!";
                     } else {
-                        $(this).hide();
+                        $(this).removeClass("error").css("border", "");
                     }
                 });
+
+                // Проверка текстовых областей
+                $("textarea:visible").each(function () {
+                    if ($(this).val().trim() === "") {
+                        $(this).addClass("error").css("border", "1px solid red");
+                        valid = false;
+                        errorMessage = "Заполните все видимые текстовые области!";
+                    } else {
+                        $(this).removeClass("error").css("border", "");
+                    }
+                });
+
+                // Проверка выпадающих списков
+                $("select:visible").each(function () {
+                    let selectedOption = $(this).find("option:selected");
+                    if (selectedOption.val() === "" && selectedOption.prop("disabled")) {
+                        $(this).addClass("error").css("border", "1px solid red");
+                        valid = false;
+                        errorMessage = "Выберите значение для всех выпадающих списков!";
+                    } else {
+                        $(this).removeClass("error").css("border", "");
+                    }
+                });
+
+                let fileInput = $("input[type='file']");
+                if (fileInput.length > 0) {
+                    if (fileInput[0].files.length === 0) {
+                        fileInput.addClass("error").css("border", "1px solid red");
+                        valid = false;
+                        errorMessage = "Выберите изображение!";
+                    } else {
+                        let file = fileInput[0].files[0];
+                        let allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+                        if (!allowedTypes.includes(file.type)) {
+                            fileInput.addClass("error").css("border", "1px solid red");
+                            valid = false;
+                            errorMessage = "Недопустимый тип файла. Разрешены только изображения (JPEG, PNG, GIF).";
+                        } else {
+                            fileInput.removeClass("error").css("border", "");
+                        }
+                    }
+                }
+
+                // Проверка выбранных магазинов
+                let selectedStores = $("#selectedStoreIdsInput").find("input[type='hidden'][name='selectedStores']").length;
+                if (selectedStores === 0) {
+                    errorMessage = "Выберите хотя бы один магазин!";
+                    valid = false;
+                }
+
+                // Проверка содержимого товара (если категория не "10")
+                let categoryId = $("select[name='categoryID']").val();
+                if (categoryId != 10) {
+                    let selectedFlowerTypes = $("#selectedFlowerTypesInput").find("input[type='hidden'][name='selectedFlowerTypes']").length;
+                    if (selectedFlowerTypes === 0) {
+                        errorMessage = "Отсутствует содержимое товара!";
+                        valid = false;
+                    }
+                }
+
+                if (categoryId == 10) {
+                    $("textarea[name='careDescription']").val("-");
+                    $("select[name='package']").append('<option value="-" selected>-</option>');
+                }
+
+                if (!valid) {
+                    showMessage(errorMessage);
+                    return;
+                }
+
+                // Отправка формы
+                let formData = new FormData(this);
+                $.ajax({
+                    url: "/Home/productAdd",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function () {
+                        showMessage("Товар добавлен!");
+                        location.reload();
+                    },
+                    error: function () {
+                        showMessage("Ошибка при добавлении товара!");
+                    }
+                });
+
+                this.reset();
+                $("#addProduct").addClass("hidden");
+                $("#products").removeClass("hidden");
             });
 
-            
-
-            $(".item-row").click(function () {
-                $(".item-row").click(function () {
-                    let productName = $(this).find("td:first").text();
-                    let productId = $(this).closest("tr").attr("name");
-                    console.log("Product ID:", productId);
-                    let quantity = $(this).data("quantity");
-                    let storeId = $("#store").val();
+            // Функция для отображения сообщений
+            function showMessage(message) {
+                $('#deleteModal .modal-body').text(message);
+                $('#deleteModal').modal('show');
+                $('#deleteModal').css('z-index', '2000');
+            }
 
 
 
-                    let actionPanel = $(".column.action-panel");
-                    actionPanel.html(`
-                                    <h4>Действия с товаром: ${productName}</h4>
-                                    <button class="request-btn" value="${productId}">Запрос на пополнение</button>
-                                    ${quantity > 0 ? '<button class="write-off-btn" value="${productId}">Списание</button>' : ''}
-                                    <div id="action-form"></div>
-                                `);
-                });
 
-                $(document).on("click", ".write-off-btn", function () {
-                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
 
-                    $("#action-form").html(`
-                          <p>Списания товара “${itemName}”</p>
-                          <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
-                          <button id="confirmWriteOff">Списать</button>
-                      `);
-                });
 
-                $(document).on("click", ".request-btn", function () {
-                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-                    $("#action-form").html(`
-                          <p>Запрос на пополнение товара “${itemName}”</p>
-                          <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
-                          <button class="submit-request">Отправить</button>
-                      `);
-                });
 
+
+
+                // Обработка клика по строке таблицы
                 $(document).on("click", ".item-row", function () {
                     let productName = $(this).find("td:first").text();
                     let productId = $(this).attr("name");
@@ -438,58 +485,48 @@
 
                     let actionPanel = $(".column.action-panel");
                     actionPanel.html(`
-                      <h4>Действия с товаром: ${productName}</h4>
-                      <button class="request-btn" name="${productId}" data-store-id="${storeId}">Запрос на пополнение</button>
-                      ${quantity > 0 ? `<button class="write-off-btn" name="${productId}" data-store-id="${storeId}">Списание</button>` : ""}
-                      <div id="action-form"></div>
-                  `);
-
+                    <h4>Действия с товаром: ${productName}</h4>
+                    <button class="request-btn" name="${productId}" data-store-id="${storeId}">Запрос на пополнение</button>
+                    ${quantity > 0 ? `<button class="write-off-btn" name="${productId}" data-store-id="${storeId}">Списание</button>` : ""}
+                    <div id="action-form"></div>
+                `);
                 });
 
+                // Обработка списания товара
                 $(document).on("click", ".write-off-btn", function () {
                     let productId = $(this).attr("name");
                     let storeID = $(this).data("store-id");
                     let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
 
                     $("#action-form").html(`
-                          <p>Списания товара “${itemName}”</p>
-                          <input type="number" id="writeOffQuantity" min="1"  placeholder="Количество" max="300">
-                          <button id="confirmWriteOff" name="${productId}" data-store-id="${storeID}">Списать</button>
-                      `);
+                    <p>Списание товара “${itemName}”</p>
+                    <input type="number" id="writeOffQuantity" min="1" placeholder="Количество" max="100">
+                    <button id="confirmWriteOff" name="${productId}" data-store-id="${storeID}">Списать</button>
+                `);
                 });
 
-                $(document).on("click", ".request-btn", function () {
-                    let productId = $(this).attr("name");
-                    let storeID = $(this).data("store-id");
-                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
-                    $("#action-form").html(`
-                          <p>Запрос на пополнение товара “${itemName}”</p>
-                          <input type="number" class="stock-input" min="1" placeholder="Количество"  max="300">
-                          <button id="submit-request" name="${productId}" data-store-id="${storeID}">Отправить</button>
-                      `);
-                });
-
+                // Обработка подтверждения списания
                 $(document).on("click", "#confirmWriteOff", function () {
                     let $this = $(this);
 
                     if ($this.data("sending")) return;
                     $this.data("sending", true);
+
                     let quantity = $("#writeOffQuantity").val();
                     let productId = $(this).attr("name");
                     let storeID = $(this).data("store-id");
 
                     if (!quantity || quantity <= 0) {
                         showMessage("Укажите корректное количество для списания.");
-                         $this.data("sending", false);
+                        $this.data("sending", false);
                         return;
                     }
 
-                    if (quantity < 1 || quantity > 300) {
-        showMessage("Количество для запроса должно быть до 300.");
-        $this.data("sending", false);
-        return;
-    }
-
+                    if (quantity < 1 || quantity > 100) {
+                        showMessage("Количество для списания должно быть от 1 до 100.");
+                        $this.data("sending", false);
+                        return;
+                    }
 
                     $.post("/Home/WriteOff", {
                         productId: productId,
@@ -500,40 +537,51 @@
                             showMessage(response);
                             setTimeout(function () {
                                 location.reload();
-                            }, 2000);
-                            console.log(response);
+                            }, 100);
                         })
                         .fail(function (error) {
                             showMessage("Ошибка при списании: " + error.responseText);
-                        }).always(function () {
-                            $this.data("sending", false); 
+                        })
+                        .always(function () {
+                            $this.data("sending", false);
                         });
                 });
 
+                // Обработка запроса на пополнение
+                $(document).on("click", ".request-btn", function () {
+                    let productId = $(this).attr("name");
+                    let storeID = $(this).data("store-id");
+                    let itemName = $(this).closest(".column.action-panel").find("h4").text().replace("Действия с товаром: ", "");
+
+                    $("#action-form").html(`
+                    <p>Запрос на пополнение товара “${itemName}”</p>
+                    <input type="number" class="stock-input" min="1" placeholder="Количество" max="100">
+                    <button id="submit-request" name="${productId}" data-store-id="${storeID}">Отправить</button>
+                `);
+                });
+
+                // Обработка подтверждения запроса на пополнение
                 $(document).on("click", "#submit-request", function () {
                     let $this = $(this);
 
                     if ($this.data("sending")) return;
                     $this.data("sending", true);
 
-
                     let productId = $(this).attr("name");
                     let quantity = $(".stock-input").val();
                     let storeID = $(this).data("store-id");
 
-
                     if (!quantity || quantity <= 0) {
-                        showMessage("Укажите корректное количество для списания.");
-                         $this.data("sending", false);
+                        showMessage("Укажите корректное количество для запроса.");
+                        $this.data("sending", false);
                         return;
                     }
 
-                    if (quantity < 1 || quantity > 300) {
-        showMessage("Количество для запроса должно быть до 300.");
-        $this.data("sending", false);
-        return;
-    }
-
+                    if (quantity < 1 || quantity > 100) {
+                        showMessage("Количество для запроса должно быть от 1 до 100.");
+                        $this.data("sending", false);
+                        return;
+                    }
 
                     $.post("/Home/RequestRestock", {
                         productId: productId,
@@ -544,9 +592,7 @@
                             showMessage(response);
                             setTimeout(function () {
                                 location.reload();
-                            }, 2000);
-                            console.log(response);
-
+                            }, 100);
                         })
                         .fail(function (error) {
                             showMessage("Ошибка при отправке запроса: " + error.responseText);
@@ -555,129 +601,6 @@
                             $this.data("sending", false);
                         });
                 });
-            });
-
-            $(document).ready(function () {
-                $("form").submit(function (event) {
-                    event.preventDefault();
-
-                    let valid = true;
-
-                    // Проверка текстовых полей (input type='text'), только если они видимы
-                    $("input[type='text']:visible").each(function () {
-                        if ($(this).val().trim() === "") {
-                            $(this).addClass("error").css("border", "1px solid red");
-                            valid = false;
-                        } else {
-                            $(this).removeClass("error").css("border", "");
-                        }
-                    });
-
-                    // Проверка textarea, только если оно видимо
-                    $("textarea:visible").each(function () {
-                        if ($(this).val().trim() === "") {
-                            $(this).addClass("error").css("border", "1px solid red");
-                            valid = false;
-                        } else {
-                            $(this).removeClass("error").css("border", "");
-                        }
-                    });
-
-                    // Проверка select, только если они видимы
-                    $("select:visible").each(function () {
-                        if ($(this).val() == null || $(this).val().trim() === "") {
-                            $(this).addClass("error").css("border", "1px solid red");
-                            valid = false;
-                        } else {
-                            $(this).removeClass("error").css("border", "");
-                        }
-                    });
-
-                    // Проверка файла изображения (если input[type="file"] видим)
-                    let fileInput = $("input[type='file']:visible");
-                    if (fileInput.length > 0 && fileInput[0].files.length === 0) {
-                        fileInput.addClass("error").css("border", "1px solid red");
-                        valid = false;
-                    } else {
-                        fileInput.removeClass("error").css("border", "");
-                    }
-
-                    // Если есть ошибки, показываем сообщение и не отправляем форму
-                    if (!valid) {
-                        showMessage("Заполните все поля!");
-                        return;
-                    }
-
-                    let categoryId = $("select[name='category']").val();
-
-                    // Если категория товара = 10, применяем специальные настройки
-                    if (categoryId == 10) {
-                        formData.delete("selectedFlowerTypes");  // Удаляем поле
-                        formData.set("package", "-");            
-                        formData.set("careDescription", "-"); 
-                        $("#selectedFlowers").closest("p").hide();
-                    }
-                    // Проверяем, скрыты ли поля перед отправкой
-                    if ($("select[name='package']").is(":hidden")) {
-                        $("select[name='package']").append('<option value="-" selected>-</option>');
-                    } else {
-                        $("select[name='package'] option[value='-']").remove(); // Убираем "-", если поле видно
-                    }
-
-                    if ($("textarea[name='careDescription']").is(":hidden")) {
-                        $("textarea[name='careDescription']").val("-");
-                    }
-
-
-                    // Если проверка пройдена, отправляем данные
-                    let formData = new FormData(this);
-                    $.ajax({
-                        url: "/Home/productAdd",
-                        type: "POST",
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function () {
-                            showMessage("Товар добавлен!");
-                            location.reload();
-                        },
-                        error: function () {
-                            showMessage("Ошибка при добавлении товара!");
-                        }
-                    });
-
-                    this.reset();
-                    $("#addProduct").addClass("hidden");
-                    $("#products").removeClass("hidden");
-                });
-
-                function showMessage(message) {
-                    $('#deleteModal .modal-body').text(message);
-                    $('#deleteModal').modal('show');
-                    $('#deleteModal').css('z-index', '2000');
-                }
-            });
-
-
-
-
-
-            $("#saveStoreSelection").click(function () {
-                let selectedStores = [];
-                $(".storeCheckbox:checked").each(function () {
-                    selectedStores.push($(this).val());
-                });
-
-                $("#selectedStores").text(selectedStores.join(", "));
-
-                $("#selectedStoreIdsInput").empty();
-
-                selectedStores.forEach(store => {
-                    $("#selectedStoreIdsInput").append(`<input type="hidden" name="selectedStores" value="${store}" />`);
-                });
-
-                $("#storeModal").modal("hide");
-            });
         });
     </script>
 </body>

@@ -147,7 +147,7 @@
         $('#deleteModal').on('shown.bs.modal', function () {
     setTimeout(function () {
         location.reload();
-    }, 500); // Добавляем небольшую задержку
+    }, 500); 
 });
 
         function showMessage(message) {
@@ -160,13 +160,13 @@
              $('#deleteModal').on('shown.bs.modal', function () {
     setTimeout(function () {
         location.reload();
-    }, 1500); // Добавляем небольшую задержку
-});
+                }, 100);
+            });
 
 
             $('#orders').change(function () {
-                var selectedStatus = $(this).val(); // Определяем значение статуса
-                console.log(selectedStatus); // Проверяем в консоли
+                var selectedStatus = $(this).val();
+                console.log(selectedStatus); 
 
                 if (selectedStatus == 14) {
                     $('#orderList').show();
@@ -255,7 +255,6 @@
                 }
             });
 
-            // Фильтрация заказов при выборе адреса магазина
             $('#store').change(function () {
                 var selectedStoreId = $(this).val();
 
@@ -336,7 +335,7 @@
 
             function loadOrderActions(orderId) {
                 var actionPanel = $('.action-panel');
-                actionPanel.empty(); // Очищаем панель действий
+                actionPanel.empty(); 
 
                 // Создаем div для подтверждения сборки
                 var confirmDiv = $('<div class="confirm-assembly">')
@@ -393,7 +392,12 @@
 
                         $.each(data.order.products, function (i, product) {
                             productsBody.append('<tr>' +
-                                '<td><img src="' + product.productImage + '" width="50"></td>' +
+                                '<td><img src="data:image/' +
+                                (product.productImage.startsWith("/9j/") ? "jpeg" :
+                                    product.productImage.startsWith("iVBORw0KGgo=") ? "png" :
+                                        product.productImage.startsWith("R0lGOD") ? "gif" :
+                                            product.productImage.startsWith("UklGR") ? "webp" : "jpeg") +
+                                ';base64,' + product.productImage + '" width="20" class="imageProduct"></td>' +
                                 '<td>' + product.productName + '</td>' +
                                 '<td>' + product.quantity + '</td>' +
                                 '<td>' + product.price + '</td>' +
@@ -422,7 +426,6 @@
                 $.post('/Home/UpdateOrderStatus', { orderId: orderId, status: statusId }, function (response) {
                     if (response.success) {
                         $('.action-panel').empty();
-                                                 // location.reload();
                         showMessage(response.message);
                     } else {
                         showMessage('Ошибка: ' + response.message);

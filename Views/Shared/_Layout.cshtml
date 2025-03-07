@@ -183,7 +183,6 @@
                 if (button) button.style.display = "none";
             }
 
-            // Логика отображения кнопок по ролям
             switch (userRole) {
                 case "Customer":
                     hideButton(buttons.productButton);
@@ -252,9 +251,9 @@
 
             if (rolesToHideFooter.includes(userRole)) {
                 if (footerCenter) {
-                    footerCenter.style.pointerEvents = "none"; // Отключает клики
-                    footerCenter.style.opacity = "0"; // Делает менее заметным
-                    footerCenter.style.backgroundColor = "white"; // Закрашивает белым
+                    footerCenter.style.pointerEvents = "none";
+                    footerCenter.style.opacity = "0";
+                    footerCenter.style.backgroundColor = "white";
                 }
 
                 footerButtons.forEach(button => {
@@ -297,6 +296,7 @@
                 links.forEach(link => {
                     if (link) {
                         link.style.pointerEvents = 'none';
+                        link.style.color = 'black';
                     }
                 });
             }
@@ -397,18 +397,24 @@
             });
 
             document.querySelectorAll("#menuModal .custom-btn").forEach(button => {
-    button.addEventListener("click", function (event) {
-        event.stopPropagation(); 
-        window.location.href = this.getAttribute("data-href");
-    });
-});
+            button.addEventListener("click", function (event) {
+                event.stopPropagation(); 
+                window.location.href = this.getAttribute("data-href");
+            });
+        });
 
 
             document.querySelectorAll("#authModal .custom-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     let login = document.getElementById("loginUser").value;
                     let password = document.getElementById("passwordUser").value;
+                    let login1 = document.getElementById("loginUser").value.trim(); 
+                    let password1 = document.getElementById("passwordUser").value.trim();
 
+                    if (login1 === "" || password1 === "") {
+                        showMessage("Логин и пароль не могут быть пустыми.");
+                        return;
+                    }
                     fetch("/Home/Login", {
                         method: "POST",
                         headers: {
@@ -448,6 +454,27 @@
             const registerForm = document.getElementById("registerForm");
 
             if (registerForm) {
+                const loginInput = registerForm.querySelector('input[name="login"]');
+                const lastNameInput = registerForm.querySelector('input[name="lastName"]');
+                const firstNameInput = registerForm.querySelector('input[name="firstName"]');
+                const phoneNumber = registerForm.querySelector('input[name="phoneNumber"]');
+
+                phoneNumber.addEventListener("input", function (event) {
+                    this.value = this.value.replace(/[^0-9]/, '');
+                });
+
+                loginInput.addEventListener("input", function (event) {
+                    this.value = this.value.replace(/[^a-zA-Zа-яА-Я0-9_]/, '');
+                });
+
+                lastNameInput.addEventListener("input", function (event) {
+                    this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+                });
+
+                firstNameInput.addEventListener("input", function (event) {
+                    this.value = this.value.replace(/[^a-zA-Zа-яА-Я]/, '');
+                });
+
                 registerForm.addEventListener("submit", function (event) {
                     event.preventDefault();
 
